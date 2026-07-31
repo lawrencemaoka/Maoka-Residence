@@ -6,13 +6,17 @@
 <title>Maoka Residence · 7207 Isazi Street</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14171C">
-<meta name="description" content="Maoka Residence smart residential app — sign your lease, report faults, give notice, and stay connected with the Landlord.">
+<meta name="description" content="Maoka Residence smart residential app — sign in as a Tenant or Owner to manage your lease, faults, payments, and more.">
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Maoka">
+<!-- Firebase (compat SDK — simplest for a plain-script app, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script>/** @license
  *
  * jsPDF - PDF Document creation from JavaScript
@@ -546,18 +550,51 @@ button.btn{flex:1;border:none;border-radius:14px;padding:17px 10px;font-size:16.
 .paysum div.tot{border-top:1px solid var(--line);padding-top:8px;font-weight:700;color:var(--gold);font-size:16px;}
 footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-height:1.6;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<div class="wrap" id="viewAuth">
+  <header>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Welcome</h1>
+    <div class="sub">Sign in to continue, or create your profile if this is your first time.</div>
+  </header>
 
-<!-- HOME -->
-<div class="wrap" id="viewHome">
+  <div class="card formcard" id="signInCard">
+    <h2>Sign in</h2>
+    <label class="f"><em>Email <b>*</b></em><input type="email" id="authEmail" autocomplete="email"></label>
+    <label class="f"><em>Password <b>*</b></em><input type="password" id="authPassword" autocomplete="current-password"></label>
+    <button class="btn primary" style="width:100%;margin-top:6px" onclick="signIn()">Sign In</button>
+    <p class="hint" id="authError" style="color:#D9534F;display:none;margin-top:10px"></p>
+    <p class="hint" style="margin-top:14px">New here? <a class="backlink" style="margin:0" onclick="showCreateProfile()">Create your profile →</a></p>
+  </div>
+
+  <div class="card formcard hidden" id="createProfileCard">
+    <h2>Create your profile</h2>
+    <label class="f"><em>Full name <b>*</b></em><input type="text" id="cpName" autocomplete="name"></label>
+    <label class="f"><em>Email <b>*</b></em><input type="email" id="cpEmail" autocomplete="email"></label>
+    <label class="f"><em>Password <b>*</b></em><input type="password" id="cpPassword" autocomplete="new-password" placeholder="At least 6 characters"></label>
+    <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="cpPhone" inputmode="tel" placeholder="e.g. 073 000 0000"></label>
+    <label class="f"><em>I am a... <b>*</b></em>
+      <select id="cpRole" onchange="S('cpRoomWrap').classList.toggle('hidden', this.value!=='tenant'); S('cpOwnerCodeWrap').classList.toggle('hidden', this.value!=='owner')">
+        <option value="tenant">Tenant</option>
+        <option value="owner">Owner / Landlord</option>
+      </select>
+    </label>
+    <label class="f" id="cpRoomWrap"><em>Room number <b>*</b></em><input type="text" id="cpRoom" placeholder="e.g. 3"></label>
+    <label class="f hidden" id="cpOwnerCodeWrap"><em>Owner access code <b>*</b></em><input type="password" id="cpOwnerCode" placeholder="Ask the Landlord for this"></label>
+    <button class="btn primary" style="width:100%;margin-top:6px" onclick="createProfile()">Create Profile</button>
+    <p class="hint" id="createProfileError" style="color:#D9534F;display:none;margin-top:10px"></p>
+    <p class="hint" style="margin-top:14px">Already have a profile? <a class="backlink" style="margin:0" onclick="showSignIn()">Sign in →</a></p>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewHome">
   <header>
     <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
     <h1>Smart Residential</h1>
     <div class="sub">7207 Isazi Street, Olivenhoutbosch Ext 36 · Your home, handled digitally</div>
-    <div class="rolebar"><span id="roleLabel">Tenant view</span> · <a class="backlink" style="margin:0" id="roleSwitchLink" onclick="promptRoleSwitch()">Switch to Owner view</a></div>
   </header>
 
   <div class="card navcard hidden" id="installCard" onclick="promptInstall()">
@@ -571,82 +608,9 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     </div>
   </div>
 
-  <div class="card hidden" id="ownerDashboardCard" style="text-align:left">
-    <h2 style="margin-bottom:12px">📊 This month at a glance</h2>
-    <div id="dashGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <p class="hint">Loading…</p>
-    </div>
-  </div>
-
   <div class="card hidden" id="noticesCard" style="text-align:left">
     <h2 style="margin-bottom:10px">📌 Notices from the Landlord</h2>
     <div id="noticesBody"></div>
-  </div>
-
-  <div class="card navcard hidden" id="ownerAnnounceCard" onclick="setView('announce')">
-    <div class="navcard-row">
-      <span class="navcard-ic">📢</span>
-      <div class="navcard-txt">
-        <h3>Send Info to Tenants</h3>
-        <p>Post to everyone, or message a single room — WiFi details, bank details, reminders, or any notice.</p>
-      </div>
-      <span class="navcard-arrow">›</span>
-    </div>
-  </div>
-
-  <div class="card navcard hidden" id="ownerFaultsCard" onclick="setView('ownerfaults')">
-    <div class="navcard-row">
-      <span class="navcard-ic">📋</span>
-      <div class="navcard-txt">
-        <h3>Fault Reports</h3>
-        <p>View maintenance issues tenants have reported, by room, category and urgency.</p>
-      </div>
-      <span class="navcard-arrow">›</span>
-    </div>
-  </div>
-
-  <div class="card navcard hidden" id="ownerPaymentsCard" onclick="setView('payments')">
-    <div class="navcard-row">
-      <span class="navcard-ic">💰</span>
-      <div class="navcard-txt">
-        <h3>Rent Payments</h3>
-        <p>See who's paid this month, who's not, and who's late — per room.</p>
-      </div>
-      <span class="navcard-arrow">›</span>
-    </div>
-  </div>
-
-  <div class="card navcard hidden" id="ownerExpensesCard" onclick="setView('expenses')">
-    <div class="navcard-row">
-      <span class="navcard-ic">🧾</span>
-      <div class="navcard-txt">
-        <h3>Expenses</h3>
-        <p>Log repairs, maintenance and running costs, scan receipts, and export a report for your bookkeeper.</p>
-      </div>
-      <span class="navcard-arrow">›</span>
-    </div>
-  </div>
-
-  <div class="card navcard hidden" id="ownerComplaintsCard" onclick="setView('ownercomplaints')">
-    <div class="navcard-row">
-      <span class="navcard-ic">😕</span>
-      <div class="navcard-txt">
-        <h3>Complaints</h3>
-        <p>Noise, other tenants, security or common-area concerns tenants have raised.</p>
-      </div>
-      <span class="navcard-arrow">›</span>
-    </div>
-  </div>
-
-  <div class="card navcard hidden" id="ownerServicesCard" onclick="setView('ownerservices')">
-    <div class="navcard-row">
-      <span class="navcard-ic">🛎️</span>
-      <div class="navcard-txt">
-        <h3>Service Requests</h3>
-        <p>Access stickers, document copies, cleaning requests and other tenant asks.</p>
-      </div>
-      <span class="navcard-arrow">›</span>
-    </div>
   </div>
 
   <div class="card hidden" id="alreadyOnboardedCard" style="text-align:left">
@@ -720,22 +684,125 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     </div>
   </div>
 
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); signOutUser()">Sign out</a></footer>
 </div>
 
-<!-- PIN MODAL (owner access) -->
-<div class="modal-overlay hidden" id="pinModal">
-  <div class="modal-card">
-    <h3>Owner access</h3>
-    <p class="hint" style="margin-bottom:4px">Enter the owner PIN to switch to Owner view.</p>
-    <label class="f"><input type="password" id="pinInput" placeholder="PIN" inputmode="numeric"></label>
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closePinModal()">Cancel</button>
-      <button class="btn primary" onclick="checkPin()">Confirm</button>
+<div class="wrap hidden" id="viewOwnerHome">
+  <header>
+    <span class="badge">MAOKA RESIDENCE · OWNER</span>
+    <h1>Owner Console</h1>
+    <div class="sub">7207 Isazi Street, Olivenhoutbosch Ext 36 · Run the property from here</div>
+    <div class="rolebar"><span id="ownerWelcome">Owner</span> · <a class="backlink" style="margin:0" onclick="signOutUser()">Sign out</a></div>
+  </header>
+
+  <div class="card" id="ownerDashboardCard" style="text-align:left">
+    <h2 style="margin-bottom:12px">📊 This month at a glance</h2>
+    <div id="dashGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <p class="hint">Loading…</p>
     </div>
   </div>
-</div>
 
+  <div class="card navcard" id="ownerReportsCard" onclick="setView('reports')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📈</span>
+      <div class="navcard-txt">
+        <h3>Reports</h3>
+        <p>Rent collected vs. expenses, occupancy, and open items — one summary, exportable.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerAnnounceCard" onclick="setView('announce')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📢</span>
+      <div class="navcard-txt">
+        <h3>Send Info to Tenants</h3>
+        <p>Post to everyone, or message a single room — WiFi details, bank details, reminders, or any notice.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerContractsCard" onclick="setView('contracts')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📄</span>
+      <div class="navcard-txt">
+        <h3>Tenant Contracts</h3>
+        <p>Every signed lease on file, by room — tenant details, move-in date, and full contract terms.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerFaultsCard" onclick="setView('ownerfaults')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📋</span>
+      <div class="navcard-txt">
+        <h3>Fault Reports</h3>
+        <p>View maintenance issues tenants have reported, by room, category and urgency.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerPaymentsCard" onclick="setView('payments')">
+    <div class="navcard-row">
+      <span class="navcard-ic">💰</span>
+      <div class="navcard-txt">
+        <h3>Rent Payments</h3>
+        <p>See who's paid this month, who's not, and who's late — per room.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerExpensesCard" onclick="setView('expenses')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🧾</span>
+      <div class="navcard-txt">
+        <h3>Expenses</h3>
+        <p>Log repairs, maintenance and running costs, scan receipts, and export a report for your bookkeeper.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerComplaintsCard" onclick="setView('ownercomplaints')">
+    <div class="navcard-row">
+      <span class="navcard-ic">😕</span>
+      <div class="navcard-txt">
+        <h3>Complaints</h3>
+        <p>Noise, other tenants, security or common-area concerns tenants have raised.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerServicesCard" onclick="setView('ownerservices')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🛎️</span>
+      <div class="navcard-txt">
+        <h3>Service Requests</h3>
+        <p>Access stickers, document copies, cleaning requests and other tenant asks.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerNoticesCard" onclick="setView('ownernotices')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📦</span>
+      <div class="navcard-txt">
+        <h3>Notices to Vacate</h3>
+        <p>Tenants who've given notice — move-out date, forwarding address and reason.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
 <!-- INSTALL APP MODAL (manual instructions, e.g. iOS Safari) -->
 <div class="modal-overlay hidden" id="installModal">
   <div class="modal-card">
@@ -747,160 +814,6 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   </div>
 </div>
 
-<!-- SEND INFO TO TENANTS (owner only) -->
-<div class="wrap hidden" id="viewAnnounce">
-  <header>
-    <a class="backlink" onclick="setView('home')">← Back to Home</a>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Send Info to Tenants</h1>
-    <div class="sub">Post to everyone, or message one room directly.</div>
-  </header>
-  <section id="announceForm">
-    <div class="card formcard">
-      <h2>New announcement</h2>
-      <label class="f"><em>Send to <b>*</b></em>
-        <select id="aAudience" onchange="S('aRoomWrap').classList.toggle('hidden', this.value!=='room')">
-          <option value="all">All Tenants</option>
-          <option value="room">One room only</option>
-        </select>
-      </label>
-      <label class="f hidden" id="aRoomWrap"><em>Room No. <b>*</b></em><input type="text" id="aRoom" placeholder="e.g. 3"></label>
-      <label class="f"><em>Category</em>
-        <select id="aCategory">
-          <option>WiFi</option><option>Bank Details</option><option>General</option><option>Maintenance</option><option>Payment</option><option>Security</option>
-        </select>
-      </label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px">
-        <button type="button" class="btn ghost" style="flex:1;min-width:140px" onclick="insertWifiTemplate()">📶 Insert WiFi details</button>
-        <button type="button" class="btn ghost" style="flex:1;min-width:140px" onclick="insertBankTemplate()">🏦 Insert bank details</button>
-      </div>
-      <label class="f"><em>Title <b>*</b></em><input type="text" id="aTitle" placeholder="e.g. New WiFi password"></label>
-      <label class="f"><em>Message <b>*</b></em><textarea id="aMessage" rows="4" placeholder="e.g. Network: Maoka_5G · Password: ..."></textarea></label>
-      <label class="check"><input type="checkbox" id="aPin"><span>Pin this to the top of tenants' Home screen</span></label>
-      <button class="btn primary" style="width:100%;margin-top:10px" onclick="submitAnnouncement()">Post</button>
-    </div>
-  </section>
-  <section id="announceDone" class="hidden">
-    <div class="card success">
-      <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
-      <h2>Posted</h2>
-      <div class="ref" id="announceRef">—</div>
-      <p id="announceDoneMsg">Tenants will see this next time they open the app.</p>
-      <button class="btn ghost" style="max-width:320px;margin:14px auto 0;display:block" onclick="setView('home')">Back to Home</button>
-    </div>
-  </section>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
-
-<!-- OWNER: EXPENSES -->
-<div class="wrap hidden" id="viewExpenses">
-  <header>
-    <a class="backlink" onclick="setView('home')">← Back to Home</a>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Expenses</h1>
-    <div class="sub">Repairs, maintenance and running costs — with receipts, ready for your bookkeeper.</div>
-  </header>
-
-  <div class="card formcard" id="expenseFormCard">
-    <h2 style="display:flex;justify-content:space-between;align-items:center">
-      <span>Add an expense</span>
-      <button type="button" class="btn ghost" style="padding:6px 12px;font-size:13px" onclick="toggleExpenseForm()" id="expenseFormToggle">Hide</button>
-    </h2>
-    <div id="expenseFormBody">
-      <label class="f"><em>Category <b>*</b></em>
-        <select id="exCategory">
-          <option>Repairs</option><option>Maintenance</option><option>Cleaning</option>
-          <option>Utilities (Water/Electricity)</option><option>WiFi / Internet</option>
-          <option>Municipal / Rates</option><option>Insurance</option><option>Security</option><option>Other</option>
-        </select>
-      </label>
-      <label class="f"><em>Description <b>*</b></em><input type="text" id="exDescription" placeholder="e.g. Yard cleaned, exterior paint, WiFi subscription"></label>
-      <div class="row2">
-        <label class="f"><em>Paid to</em><input type="text" id="exPaidTo" placeholder="e.g. Vodacom, John the painter"></label>
-        <label class="f"><em>Amount (R) <b>*</b></em><input type="number" id="exAmount" inputmode="decimal" placeholder="e.g. 300"></label>
-      </div>
-      <label class="f"><em>Room No. <span style="font-weight:400;color:var(--muted)">(leave blank if not room-specific)</span></em><input type="text" id="exRoom" placeholder="e.g. 3 — for repairs done in a specific room"></label>
-      <label class="f"><em>Date <b>*</b></em><input type="date" id="exDate"></label>
-      <label class="f"><em>Receipt (optional)</em>
-        <input type="file" id="exReceipt" accept="image/*" capture="environment" style="display:none">
-        <button type="button" class="upload" onclick="document.getElementById('exReceipt').click()">📷 &nbsp;Scan or attach a receipt</button>
-        <span id="exReceiptStatus" class="hint" style="display:block;margin-top:8px">No receipt attached.</span>
-      </label>
-      <label class="f"><em>Notes</em><input type="text" id="exNotes" placeholder="Optional"></label>
-      <button class="btn primary" style="width:100%;margin-top:6px" onclick="submitExpense()">Save expense</button>
-    </div>
-  </div>
-
-  <div class="card" style="text-align:left">
-    <h2 style="margin-bottom:10px">Expense log</h2>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-      <select id="exPeriod" onchange="renderExpenses()" style="width:auto">
-        <option value="month">This month</option>
-        <option value="year">This year</option>
-        <option value="all">All time</option>
-      </select>
-      <button type="button" class="btn ghost" style="padding:8px 14px;font-size:13px" onclick="exportExpensesCSV()">⬇ Export CSV</button>
-      <button type="button" class="btn ghost" style="padding:8px 14px;font-size:13px" onclick="exportExpensesPDF()">⬇ Export PDF report</button>
-    </div>
-    <div id="expensesSummary" class="hint" style="margin-bottom:12px"></div>
-    <div id="expensesBody"><p class="hint">Loading expenses…</p></div>
-  </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
-
-<!-- OWNER: RENT PAYMENTS -->
-<div class="wrap hidden" id="viewPayments">
-  <header>
-    <a class="backlink" onclick="setView('home')">← Back to Home</a>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Rent Payments</h1>
-    <div class="sub" id="paymentsMonthLabel">This month</div>
-  </header>
-  <div class="card" style="text-align:left">
-    <div id="paymentsBody"><p class="hint">Loading tenants…</p></div>
-  </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
-
-<!-- OWNER: FAULT REPORTS (view-only) -->
-<div class="wrap hidden" id="viewOwnerfaults">
-  <header>
-    <a class="backlink" onclick="setView('home')">← Back to Home</a>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Fault Reports</h1>
-    <div class="sub">Maintenance issues reported by tenants, newest first.</div>
-  </header>
-  <div class="card" style="text-align:left">
-    <div id="ownerFaultsBody"><p class="hint">Loading fault reports…</p></div>
-  </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
-
-<div class="wrap hidden" id="viewOwnercomplaints">
-  <header>
-    <a class="backlink" onclick="setView('home')">← Back to Home</a>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Complaints</h1>
-    <div class="sub">Tenant concerns, newest first.</div>
-  </header>
-  <div class="card" style="text-align:left">
-    <div id="ownerComplaintsBody"><p class="hint">Loading complaints…</p></div>
-  </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
-
-<div class="wrap hidden" id="viewOwnerservices">
-  <header>
-    <a class="backlink" onclick="setView('home')">← Back to Home</a>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Service Requests</h1>
-    <div class="sub">Tenant requests, newest first.</div>
-  </header>
-  <div class="card" style="text-align:left">
-    <div id="ownerServicesBody"><p class="hint">Loading requests…</p></div>
-  </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
 
 <div class="wrap hidden" id="viewOnboarding">
   <header>
@@ -923,14 +836,10 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
       <h2>Tenant details</h2>
       <label class="f"><em>Full name(s) <b>*</b></em><input type="text" id="tName" placeholder="e.g. Thabo Nkosi" autocomplete="name"></label>
       <div class="row2">
-        <label class="f"><em>ID type <b>*</b></em>
-          <select id="idType"><option>SA ID</option><option>Passport</option></select></label>
-        <label class="f"><em>ID / Passport number <b>*</b></em><input type="text" id="tId" inputmode="numeric" placeholder="13-digit SA ID"></label>
-      </div>
-      <div class="row2">
+        <label class="f"><em>Date of birth <b>*</b></em><input type="date" id="tDob"></label>
         <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="tPhone" inputmode="tel" placeholder="e.g. 073 000 0000"></label>
-        <label class="f"><em>Room number <b>*</b></em><input type="text" id="tRoom" placeholder="e.g. 3"></label>
       </div>
+      <label class="f"><em>Room number <b>*</b></em><input type="text" id="tRoom" placeholder="e.g. 3"></label>
       <label class="f"><em>Permanent address <b>*</b></em><textarea id="tAddr" rows="2" placeholder="Home / permanent address"></textarea></label>
       <div class="row2">
         <label class="f"><em>Next of kin (emergency) <b>*</b></em><input type="text" id="kinName" placeholder="Full name"></label>
@@ -1029,7 +938,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
 
-<!-- FAULT REPORTING -->
+
 <div class="wrap hidden" id="viewFault">
   <header>
     <a class="backlink" onclick="setView('home')">← Back to Home</a>
@@ -1087,7 +996,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
 
-<!-- COMPLAINT -->
+
 <div class="wrap hidden" id="viewComplaint">
   <header>
     <a class="backlink" onclick="setView('home')">← Back to Home</a>
@@ -1140,7 +1049,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
 
-<!-- SERVICE REQUEST -->
+
 <div class="wrap hidden" id="viewService">
   <header>
     <a class="backlink" onclick="setView('home')">← Back to Home</a>
@@ -1186,7 +1095,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
 
-<!-- NOTICE TO VACATE -->
+
 <div class="wrap hidden" id="viewNotice">
   <header>
     <a class="backlink" onclick="setView('home')">← Back to Home</a>
@@ -1233,39 +1142,306 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <button class="btn primary" id="btnNext" onclick="go(1)">Continue</button>
 </div></div>
 
+<div class="wrap hidden" id="viewAnnounce">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Send Info to Tenants</h1>
+    <div class="sub">Post to everyone, or message one room directly.</div>
+  </header>
+  <section id="announceForm">
+    <div class="card formcard">
+      <h2>New announcement</h2>
+      <label class="f"><em>Send to <b>*</b></em>
+        <select id="aAudience" onchange="S('aRoomWrap').classList.toggle('hidden', this.value!=='room')">
+          <option value="all">All Tenants</option>
+          <option value="room">One room only</option>
+        </select>
+      </label>
+      <label class="f hidden" id="aRoomWrap"><em>Room No. <b>*</b></em><input type="text" id="aRoom" placeholder="e.g. 3"></label>
+      <label class="f"><em>Category</em>
+        <select id="aCategory">
+          <option>WiFi</option><option>Bank Details</option><option>General</option><option>Maintenance</option><option>Payment</option><option>Security</option>
+        </select>
+      </label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px">
+        <button type="button" class="btn ghost" style="flex:1;min-width:140px" onclick="insertWifiTemplate()">📶 Insert WiFi details</button>
+        <button type="button" class="btn ghost" style="flex:1;min-width:140px" onclick="insertBankTemplate()">🏦 Insert bank details</button>
+      </div>
+      <label class="f"><em>Title <b>*</b></em><input type="text" id="aTitle" placeholder="e.g. New WiFi password"></label>
+      <label class="f"><em>Message <b>*</b></em><textarea id="aMessage" rows="4" placeholder="e.g. Network: Maoka_5G · Password: ..."></textarea></label>
+      <label class="check"><input type="checkbox" id="aPin"><span>Pin this to the top of tenants' Home screen</span></label>
+      <button class="btn primary" style="width:100%;margin-top:10px" onclick="submitAnnouncement()">Post</button>
+    </div>
+  </section>
+  <section id="announceDone" class="hidden">
+    <div class="card success">
+      <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
+      <h2>Posted</h2>
+      <div class="ref" id="announceRef">—</div>
+      <p id="announceDoneMsg">Tenants will see this next time they open the app.</p>
+      <button class="btn ghost" style="max-width:320px;margin:14px auto 0;display:block" onclick="setView('home')">Back to Home</button>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewExpenses">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Expenses</h1>
+    <div class="sub">Repairs, maintenance and running costs — with receipts, ready for your bookkeeper.</div>
+  </header>
+
+  <div class="card formcard" id="expenseFormCard">
+    <h2 style="display:flex;justify-content:space-between;align-items:center">
+      <span>Add an expense</span>
+      <button type="button" class="btn ghost" style="padding:6px 12px;font-size:13px" onclick="toggleExpenseForm()" id="expenseFormToggle">Hide</button>
+    </h2>
+    <div id="expenseFormBody">
+      <label class="f"><em>Category <b>*</b></em>
+        <select id="exCategory">
+          <option>Repairs</option><option>Maintenance</option><option>Cleaning</option>
+          <option>Utilities (Water/Electricity)</option><option>WiFi / Internet</option>
+          <option>Municipal / Rates</option><option>Insurance</option><option>Security</option><option>Other</option>
+        </select>
+      </label>
+      <label class="f"><em>Description <b>*</b></em><input type="text" id="exDescription" placeholder="e.g. Yard cleaned, exterior paint, WiFi subscription"></label>
+      <div class="row2">
+        <label class="f"><em>Paid to</em><input type="text" id="exPaidTo" placeholder="e.g. Vodacom, John the painter"></label>
+        <label class="f"><em>Amount (R) <b>*</b></em><input type="number" id="exAmount" inputmode="decimal" placeholder="e.g. 300"></label>
+      </div>
+      <label class="f"><em>Room No. <span style="font-weight:400;color:var(--muted)">(leave blank if not room-specific)</span></em><input type="text" id="exRoom" placeholder="e.g. 3 — for repairs done in a specific room"></label>
+      <label class="f"><em>Date <b>*</b></em><input type="date" id="exDate"></label>
+      <label class="f"><em>Receipt (optional)</em>
+        <input type="file" id="exReceipt" accept="image/*" capture="environment" style="display:none">
+        <button type="button" class="upload" onclick="document.getElementById('exReceipt').click()">📷 &nbsp;Scan or attach a receipt</button>
+        <span id="exReceiptStatus" class="hint" style="display:block;margin-top:8px">No receipt attached.</span>
+      </label>
+      <label class="f"><em>Notes</em><input type="text" id="exNotes" placeholder="Optional"></label>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="submitExpense()">Save expense</button>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:left">
+    <h2 style="margin-bottom:10px">Expense log</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <select id="exPeriod" onchange="renderExpenses()" style="width:auto">
+        <option value="month">This month</option>
+        <option value="year">This year</option>
+        <option value="all">All time</option>
+      </select>
+      <button type="button" class="btn ghost" style="padding:8px 14px;font-size:13px" onclick="exportExpensesCSV()">⬇ Export CSV</button>
+      <button type="button" class="btn ghost" style="padding:8px 14px;font-size:13px" onclick="exportExpensesPDF()">⬇ Export PDF report</button>
+    </div>
+    <div id="expensesSummary" class="hint" style="margin-bottom:12px"></div>
+    <div id="expensesBody"><p class="hint">Loading expenses…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewPayments">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Rent Payments</h1>
+    <div class="sub" id="paymentsMonthLabel">This month</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="paymentsBody"><p class="hint">Loading tenants…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewReports">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Reports</h1>
+    <div class="sub" id="reportsMonthLabel">This month</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="reportsBody"><p class="hint">Loading report…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewContracts">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Tenant Contracts</h1>
+    <div class="sub">Every signed lease on file, by room.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="contractsBody"><p class="hint">Loading contracts…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewOwnerfaults">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Fault Reports</h1>
+    <div class="sub">Maintenance issues reported by tenants, newest first.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="ownerFaultsBody"><p class="hint">Loading fault reports…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewOwnercomplaints">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Complaints</h1>
+    <div class="sub">Tenant concerns, newest first.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="ownerComplaintsBody"><p class="hint">Loading complaints…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewOwnerservices">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Service Requests</h1>
+    <div class="sub">Tenant requests, newest first.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="ownerServicesBody"><p class="hint">Loading requests…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<div class="wrap hidden" id="viewOwnernotices">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Notices to Vacate</h1>
+    <div class="sub">Tenants who've given notice, newest first.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="ownerNoticesBody"><p class="hint">Loading notices…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-/* ================= CONFIG ================= */
-// Optional: paste your Google Apps Script Web App URL here to log signed
-// leases to your Google Sheet. Leave blank to run fully offline.
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_q1htW6jdqbXt9F2_l08jr7TzTcZw4i4t5CzFlf1JFDaJA4BD0qZVjq_8ak6xxYPf/exec";
-/* ========================================== */
 
-const LANDLORD = "Mr. and Mrs. Maoka";
-const LANDLORD_PHONE = "062 255 3687 / 073 173 0521";
-const ADDRESS = "7207 Isazi Street, Olivenhoutbosch Extension 36";
-const WIFI_SSID = "MySpot";
-const WIFI_PASSWORD = "Build@2025";
-const WIFI_QR_STRING = `WIFI:T:WPA;S:${WIFI_SSID};P:${WIFI_PASSWORD};;`;
-const BANK_DETAILS = {
-  accountHolder: "Purplemount Business Solutions (Pty) Ltd",
-  bank: "Capitec Business",
-  accountNumber: "1054376204",
-  branchCode: "450105"
+/* =========================================================================
+   FIREBASE AUTH + PROFILE ROUTING
+   Replace firebaseConfig below with YOUR OWN Firebase project's config
+   (Firebase Console → Project settings → General → Your apps → SDK setup).
+   Requires: Authentication (Email/Password provider) + Firestore enabled.
+   ========================================================================= */
+const firebaseConfig = {
+  apiKey: "REPLACE_ME",
+  authDomain: "REPLACE_ME.firebaseapp.com",
+  projectId: "REPLACE_ME",
+  storageBucket: "REPLACE_ME.appspot.com",
+  messagingSenderId: "REPLACE_ME",
+  appId: "REPLACE_ME"
 };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-const CHECKLIST = [
-  ["Walls & Ceiling","All"],["Floor Tiles","All"],["Main Door & Lock","1"],["Windows","2"],
-  ["Lights & Fixtures","All"],["2-Plate Stove","1"],["Toilet & Basin","1"],["Shower & Tiles","All"]
-];
+const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService'];
+const OWNER_VIEW_IDS = ['viewOwnerHome','viewAnnounce','viewExpenses','viewPayments','viewOwnerfaults','viewOwnercomplaints','viewOwnerservices','viewReports','viewContracts','viewOwnernotices'];
 
-let step = 1;
-const S = id => document.getElementById(id);
-const val = id => S(id).value.trim();
+let CURRENT_ROLE = null;
+let CURRENT_PROFILE = null;
 
-/* ---------- view router ---------- */
+function showSignIn(){ S('createProfileCard').classList.add('hidden'); S('signInCard').classList.remove('hidden'); }
+function showCreateProfile(){ S('signInCard').classList.add('hidden'); S('createProfileCard').classList.remove('hidden'); }
+function authErr(id, msg){ const e = S(id); e.textContent = msg; e.style.display = 'block'; }
+function clearAuthErr(id){ const e = S(id); e.style.display = 'none'; }
+
+function friendlyAuthError(err){
+  const map = {
+    'auth/email-already-in-use': 'That email already has a profile — try signing in instead.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/weak-password': 'Password must be at least 6 characters.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'No profile found with that email.',
+    'auth/too-many-requests': 'Too many attempts — please wait a moment and try again.',
+    'auth/network-request-failed': 'Network error — check your connection and try again.'
+  };
+  return map[err.code] || err.message;
+}
+
+function signIn(){
+  clearAuthErr('authError');
+  const email = val('authEmail'), pass = val('authPassword');
+  if(!email || !pass) return authErr('authError', 'Please enter your email and password');
+  auth.signInWithEmailAndPassword(email, pass).catch(err => authErr('authError', friendlyAuthError(err)));
+}
+
+function createProfile(){
+  clearAuthErr('createProfileError');
+  const name = val('cpName'), email = val('cpEmail'), pass = val('cpPassword'), phone = val('cpPhone'), role = S('cpRole').value;
+  if(!name || !email || !pass || !phone) return authErr('createProfileError', 'Please complete all required fields');
+  if(pass.length < 6) return authErr('createProfileError', 'Password must be at least 6 characters');
+  if(role === 'tenant' && !val('cpRoom')) return authErr('createProfileError', 'Please enter your room number');
+  if(role === 'owner' && val('cpOwnerCode') !== OWNER_ACCESS_CODE) return authErr('createProfileError', 'Incorrect owner access code');
+
+  auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+    return db.collection('profiles').doc(cred.user.uid).set({
+      name, phone, role, room: role === 'tenant' ? val('cpRoom') : null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }).catch(err => authErr('createProfileError', friendlyAuthError(err)));
+}
+
+function signOutUser(){ auth.signOut(); }
+
+function hideAllAppViews(){
+  [...TENANT_VIEW_IDS, ...OWNER_VIEW_IDS].forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
+}
+
+auth.onAuthStateChanged(user => {
+  if(!user){
+    CURRENT_ROLE = null; CURRENT_PROFILE = null;
+    S('viewAuth').classList.remove('hidden');
+    hideAllAppViews();
+    S('nav').style.display = 'none';
+    return;
+  }
+  db.collection('profiles').doc(user.uid).get().then(doc => {
+    if(!doc.exists){
+      authErr('authError', 'No profile found for this account. Please create one below.');
+      auth.signOut();
+      return;
+    }
+    CURRENT_PROFILE = doc.data();
+    CURRENT_ROLE = CURRENT_PROFILE.role;
+    S('viewAuth').classList.add('hidden');
+    enterApp();
+  }).catch(() => {
+    authErr('authError', 'Could not load your profile. Please try again.');
+  });
+});
+
+function enterApp(){
+  if(CURRENT_ROLE === 'tenant'){
+    saveProfile(CURRENT_PROFILE.name, CURRENT_PROFILE.room, CURRENT_PROFILE.phone);
+    setView('home');
+    renderRoleUI();
+    loadAnnouncements();
+    paint();
+    requestNotificationPermission();
+  } else if(CURRENT_ROLE === 'owner'){
+    const w = S('ownerWelcome'); if(w) w.textContent = CURRENT_PROFILE.name || 'Owner';
+    setView('home');
+    loadOwnerDashboard();
+  }
+}
+
+/* ---------- unified view router (role-aware) ---------- */
 function setView(v){
-  ['viewHome','viewOnboarding','viewFault','viewNotice','viewAnnounce','viewOwnerfaults','viewPayments','viewExpenses','viewComplaint','viewService','viewOwnercomplaints','viewOwnerservices'].forEach(id=>S(id).classList.add('hidden'));
-  S('view'+v.charAt(0).toUpperCase()+v.slice(1)).classList.remove('hidden');
+  const ids = CURRENT_ROLE === 'owner' ? OWNER_VIEW_IDS : TENANT_VIEW_IDS;
+  ids.forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
+  const targetId = (v === 'home') ? (CURRENT_ROLE === 'owner' ? 'viewOwnerHome' : 'viewHome') : ('view'+v.charAt(0).toUpperCase()+v.slice(1));
+  const el = S(targetId);
+  if(el) el.classList.remove('hidden');
   S('nav').style.display = (v==='onboarding' && step<=4) ? '' : 'none';
   if(v==='fault') applyClaim('fault');
   if(v==='notice') applyClaim('notice');
@@ -1276,10 +1452,31 @@ function setView(v){
   if(v==='expenses') loadExpenses();
   if(v==='ownercomplaints') loadOwnerComplaints();
   if(v==='ownerservices') loadOwnerServices();
+  if(v==='reports') loadReports();
+  if(v==='contracts') loadContracts();
+  if(v==='ownernotices') loadOwnerNotices();
   window.scrollTo({top:0,behavior:'instant'});
 }
 
-/* ---------- claimed room profile (so returning tenants don't re-register) ---------- */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_q1htW6jdqbXt9F2_l08jr7TzTcZw4i4t5CzFlf1JFDaJA4BD0qZVjq_8ak6xxYPf/exec";
+/* ========================================== */
+
+const LANDLORD = "Mr. and Mrs. Maoka";
+const LANDLORD_PHONE = "062 255 3687 / 073 173 0521";
+const ADDRESS = "7207 Isazi Street, Olivenhoutbosch Extension 36";
+const WIFI_SSID = "MySpot";
+const WIFI_PASSWORD = "Build@2025";
+const WIFI_QR_STRING = `WIFI:T:WPA;S:${WIFI_SSID};P:${WIFI_PASSWORD};;`;
+const CHECKLIST = [
+  ["Walls & Ceiling","All"],["Floor Tiles","All"],["Main Door & Lock","1"],["Windows","2"],
+  ["Lights & Fixtures","All"],["2-Plate Stove","1"],["Toilet & Basin","1"],["Shower & Tiles","All"]
+];
+
+let step = 1;
+const S = id => document.getElementById(id);
+const val = id => S(id).value.trim();
+
+/* ---------- view router ---------- */
 function getProfile(){
   try{ return JSON.parse(localStorage.getItem('maoka_profile')||'null'); }catch(e){ return null; }
 }
@@ -1336,7 +1533,7 @@ function renderDoc(){
   <h3>Parties</h3>
   <p>This Residential Lease Agreement ("Agreement") is entered into on ${fill(fmtDate(new Date()),'the date of signature')} by and between
   <b>${LANDLORD}</b> of ${ADDRESS}, contact ${LANDLORD_PHONE} (the "Landlord"), and
-  ${fill(val('tName'),'the Tenant')} (ID/Passport ${fill(val('tId'),'……')}), contact ${fill(val('tPhone'),'……')} (the "Tenant").</p>
+  ${fill(val('tName'),'the Tenant')} (Date of Birth ${fill(val('tDob')?fmtDate(val('tDob')):'','……')}), contact ${fill(val('tPhone'),'……')} (the "Tenant").</p>
   <h3>1. Premises</h3>
   <p>The Landlord leases to the Tenant the residential premises at ${ADDRESS}, <b>Room No. ${fill(val('tRoom'),'……')}</b> (the "Premises").</p>
   <p><b>Meaning of "bachelor room":</b> the Premises is a bachelor room — a single self-contained room with its own cooking and bathroom facilities, let for occupation by <b>one (1) person</b> as the registered Tenant. Short visits by guests are permitted, provided they do not create noise, security or overcrowding concerns. No other person may take up permanent residence in the Premises, or stay for longer than <b>7 consecutive nights or 14 nights in any calendar month</b>, without the Landlord's prior written consent.</p>
@@ -1410,10 +1607,6 @@ S('empStatus').onchange = ()=>{
   S('empTypeWrap').style.display = self ? 'none':'block';
   if(self) S('empType').classList.remove('err');
 };
-S('idType').onchange = ()=>{
-  S('tId').placeholder = S('idType').value==='SA ID' ? '13-digit SA ID' : 'Passport number';
-  S('tId').inputMode = S('idType').value==='SA ID' ? 'numeric' : 'text';
-};
 S('idFile').onchange = e=>{
   const f = e.target.files[0]; if(!f) return;
   const img = new Image();
@@ -1467,16 +1660,14 @@ function need(ids){
 function go(dir){
   if(dir<0){ step=Math.max(1,step-1); paint(); return; }
   if(step===1){
-    const req = ['tName','tId','tPhone','tRoom','tAddr','kinName','kinPhone','tStart','empStatus','empName'];
+    const req = ['tName','tDob','tPhone','tRoom','tAddr','kinName','kinPhone','tStart','empStatus','empName'];
     if(S('empStatus').value==='Employed') req.push('empType');
     if(!need(req)) return toast('Please complete all required fields');
     const digits = s=>s.replace(/\D/g,'');
-    if(S('idType').value==='SA ID'){
-      const id = digits(val('tId'));
-      if(!/^\d{13}$/.test(id)) { S('tId').classList.add('err'); return toast('SA ID number must be exactly 13 digits'); }
-      if(!luhn(id)) { S('tId').classList.add('err'); return toast('That ID number is not valid — please check the digits'); }
-      S('tId').value = id;
-    } else if(val('tId').length < 6){ S('tId').classList.add('err'); return toast('Please enter a valid passport number'); }
+    const dob = new Date(val('tDob'));
+    const age = (Date.now() - dob.getTime()) / (365.25*24*60*60*1000);
+    if(isNaN(dob.getTime()) || dob > new Date()){ S('tDob').classList.add('err'); return toast('Please enter a valid date of birth'); }
+    if(age < 18){ S('tDob').classList.add('err'); return toast('Tenant must be 18 years or older'); }
     if(!/^0\d{9}$/.test(digits(val('tPhone')))){ S('tPhone').classList.add('err'); return toast('Contact number must be 10 digits, starting with 0'); }
     if(!/^0\d{9}$/.test(digits(val('kinPhone')))){ S('kinPhone').classList.add('err'); return toast('Next of kin number must be 10 digits, starting with 0'); }
   }
@@ -1624,7 +1815,7 @@ function finish(){
 function payload(){
   return {
     type:'lease', ref:REF, signedAt:new Date().toISOString(),
-    tenant:{ name:val('tName'), idNo:val('tId'), phone:val('tPhone'), room:val('tRoom'),
+    tenant:{ name:val('tName'), dob:val('tDob'), phone:val('tPhone'), room:val('tRoom'),
       address:val('tAddr'), kinName:val('kinName'), kinPhone:val('kinPhone'), start:val('tStart'),
       vehicle:val('tVehicle') },
     sticker: S('sticker').checked,
@@ -1691,7 +1882,7 @@ function buildPDF(download){
 
   sec('PARTIES');
   kv('Landlord', LANDLORD+' — '+ADDRESS+' — '+LANDLORD_PHONE);
-  kv('Tenant', val('tName')+' (ID/Passport: '+val('tId')+') — '+val('tPhone'));
+  kv('Tenant', val('tName')+' (Date of Birth: '+(val('tDob')?fmtDate(val('tDob')):'—')+') — '+val('tPhone'));
   kv('Room No.', val('tRoom'));
   kv('Permanent address', val('tAddr'));
   kv('Next of kin', val('kinName')+' — '+val('kinPhone'));
@@ -1784,7 +1975,7 @@ function buildPDF(download){
   if(ID_COPY && ID_DIMS){
     doc.addPage(); head();
     sec('ADDENDUM B \u2014 TENANT ID COPY');
-    para('Identity document of '+val('tName')+' ('+S('idType').value+': '+val('tId')+'), provided at signing.');
+    para('Identity document of '+val('tName')+' (Date of Birth: '+(val('tDob')?fmtDate(val('tDob')):'—')+'), provided at signing.');
     const maxW = CW, maxH = 270 - y;
     let iw = maxW, ih = iw * ID_DIMS[1] / ID_DIMS[0];
     if(ih > maxH){ ih = maxH; iw = ih * ID_DIMS[0] / ID_DIMS[1]; }
@@ -1896,88 +2087,16 @@ function refWithPrefix(prefix){
   return `${prefix}-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${Math.floor(1000+Math.random()*9000)}`;
 }
 function waLink(text){ return 'https://wa.me/27622553687?text='+encodeURIComponent(text); }
-function waLinkTo(phone, text){
-  let n = String(phone||'').replace(/[^\d]/g,'');
-  if(n.startsWith('0')) n = '27'+n.slice(1);
-  return 'https://wa.me/'+n+'?text='+encodeURIComponent(text);
-}
-
-/* ---------- roles: tenant / owner ---------- */
-// Change this PIN to whatever you like — it's the only thing gating Owner view.
-const OWNER_PIN = '2533';
-let ROLE = (function(){ try{ return localStorage.getItem('maoka_role') || 'tenant'; }catch(e){ return 'tenant'; } })();
-
+/* This is the Tenant app — a standalone build with no Owner tools. */
 function renderRoleUI(){
-  const isOwner = ROLE === 'owner';
-  S('roleLabel').textContent = isOwner ? 'Owner view' : 'Tenant view';
-  S('roleSwitchLink').textContent = isOwner ? 'Switch to Tenant view' : 'Switch to Owner view';
-  S('ownerAnnounceCard').classList.toggle('hidden', !isOwner);
-  S('ownerFaultsCard').classList.toggle('hidden', !isOwner);
-  S('ownerPaymentsCard').classList.toggle('hidden', !isOwner);
-  S('ownerExpensesCard').classList.toggle('hidden', !isOwner);
-  S('ownerComplaintsCard').classList.toggle('hidden', !isOwner);
-  S('ownerServicesCard').classList.toggle('hidden', !isOwner);
-  S('ownerDashboardCard').classList.toggle('hidden', !isOwner);
+  S('noticesCard').classList.toggle('hidden', !LAST_ANNOUNCEMENTS.length);
   const profile = getProfile();
-  S('onboardingCard').classList.toggle('hidden', isOwner || !!profile);
-  S('alreadyOnboardedCard').classList.toggle('hidden', isOwner || !profile);
-  if(!isOwner && profile){
+  S('onboardingCard').classList.toggle('hidden', !!profile);
+  S('alreadyOnboardedCard').classList.toggle('hidden', !profile);
+  if(profile){
     S('alreadyOnboardedText').textContent = `You're registered as ${profile.name||'a tenant'}, Room ${profile.room}. Use the options below for faults or notices.`;
   }
-  S('reportFaultCard').classList.toggle('hidden', isOwner);
-  S('submitComplaintCard').classList.toggle('hidden', isOwner);
-  S('requestServiceCard').classList.toggle('hidden', isOwner);
-  S('giveNoticeCard').classList.toggle('hidden', isOwner);
-  S('contactLandlordCard').classList.toggle('hidden', isOwner);
-  S('noticesCard').classList.toggle('hidden', isOwner || !LAST_ANNOUNCEMENTS.length);
 }
-function setRole(r){
-  ROLE = r;
-  try{ localStorage.setItem('maoka_role', r); }catch(e){}
-  renderRoleUI();
-  if(r === 'owner') loadOwnerDashboard();
-}
-function promptRoleSwitch(){
-  if(ROLE === 'owner'){ setRole('tenant'); return; }
-  S('pinInput').value=''; S('pinModal').classList.remove('hidden'); setTimeout(()=>S('pinInput').focus(),50);
-}
-function closePinModal(){ S('pinModal').classList.add('hidden'); }
-function checkPin(){
-  if(val('pinInput') === OWNER_PIN){ closePinModal(); setRole('owner'); }
-  else toast('Incorrect PIN');
-}
-
-/* ---------- send info to tenants (owner) ---------- */
-function insertWifiTemplate(){
-  S('aCategory').value = 'WiFi';
-  S('aTitle').value = 'WiFi details';
-  S('aMessage').value = `Network name (SSID): ${WIFI_SSID}\nPassword: ${WIFI_PASSWORD}`;
-}
-function insertBankTemplate(){
-  S('aCategory').value = 'Bank Details';
-  S('aTitle').value = 'Banking details';
-  S('aMessage').value = `Account holder: ${BANK_DETAILS.accountHolder}\nBank: ${BANK_DETAILS.bank}\nAccount number: ${BANK_DETAILS.accountNumber}\nBranch code: ${BANK_DETAILS.branchCode}\n\nBanking reference: Rental \u2013 [Your name / Room no]`;
-}
-function submitAnnouncement(){
-  const audience = S('aAudience').value;
-  const req = ['aTitle','aMessage'];
-  if(audience === 'room') req.push('aRoom');
-  if(!need(req)) return toast(audience === 'room' ? 'Please add a room number, title and message' : 'Please add a title and a message');
-  const ref = refWithPrefix('ANN');
-  const data = { type:'announcement', ref, postedAt:new Date().toISOString(),
-    category:S('aCategory').value, title:val('aTitle'), message:val('aMessage'), pinned:S('aPin').checked,
-    audience, room: audience === 'room' ? val('aRoom') : '' };
-  postToSheet(data);
-  S('announceForm').classList.add('hidden');
-  S('announceDone').classList.remove('hidden');
-  S('announceRef').textContent = ref;
-  S('announceDoneMsg').textContent = audience === 'room'
-    ? `Only Room ${val('aRoom')} will see this on their Home screen.`
-    : 'All tenants will see this next time they open the app.';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-/* ---------- tenant: load & show announcements (JSONP — avoids CORS on GET) ---------- */
 let LAST_ANNOUNCEMENTS = [];
 let SEEN_ANNOUNCEMENT_REFS = (function(){ try{ return JSON.parse(localStorage.getItem('maoka_seen_ann')||'[]'); }catch(e){ return []; } })();
 function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1989,7 +2108,7 @@ function loadAnnouncements(){
     const all = Array.isArray(list) ? list : [];
     const profile = getProfile();
     const myRoom = profile ? String(profile.room).trim() : null;
-    LAST_ANNOUNCEMENTS = ROLE === 'owner' ? all : all.filter(a => {
+    LAST_ANNOUNCEMENTS = all.filter(a => {
       if(!a.audience || a.audience === 'all') return true;
       if(a.audience === 'room') return myRoom && String(a.room).trim() === myRoom;
       return true;
@@ -2018,7 +2137,6 @@ function renderAnnouncements(){
    Anthropic note for Lawrence: this covers "posted while the app is running" — true
    push-when-closed needs VAPID keys + a push subscription store on the Apps Script side. */
 function notifyNewAnnouncements(list){
-  if(ROLE === 'owner') return;
   if(!('Notification' in window)) return;
   const unseen = list.filter(a => a.ref && !SEEN_ANNOUNCEMENT_REFS.includes(a.ref));
   if(!unseen.length){ return; }
@@ -2072,6 +2190,174 @@ function submitFault(){
 }
 
 /* ---------- owner: view & manage fault reports ---------- */
+function submitComplaint(){
+  const req = ['coName','coRoom','coPhone','coCategory','coFrequency','coDesc'];
+  if(!need(req)) return toast('Please complete all required fields');
+  const ref = refWithPrefix('CMP');
+  const data = { type:'complaint', ref, submittedAt:new Date().toISOString(),
+    name:val('coName'), room:val('coRoom'), phone:val('coPhone'),
+    category:val('coCategory'), frequency:val('coFrequency'), description:val('coDesc'),
+    confidential: S('coConfidential').checked };
+  postToSheet(data);
+  saveProfile(val('coName'), val('coRoom'), val('coPhone'));
+  S('complaintForm').classList.add('hidden');
+  S('complaintDone').classList.remove('hidden');
+  S('complaintRef').textContent = ref;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function submitServiceRequest(){
+  const req = ['svName','svRoom','svPhone','svType','svDesc'];
+  if(!need(req)) return toast('Please complete all required fields');
+  const ref = refWithPrefix('SVC');
+  const data = { type:'servicerequest', ref, submittedAt:new Date().toISOString(),
+    name:val('svName'), room:val('svRoom'), phone:val('svPhone'),
+    requestType:val('svType'), description:val('svDesc') };
+  postToSheet(data);
+  saveProfile(val('svName'), val('svRoom'), val('svPhone'));
+  S('serviceForm').classList.add('hidden');
+  S('serviceDone').classList.remove('hidden');
+  S('serviceRef').textContent = ref;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- owner: manage complaints & service requests (shared list engine) ---------- */
+function submitNotice(){
+  const req = ['nName','nRoom','nPhone','nDate','nAddr'];
+  if(!need(req)) return toast('Please complete all required fields');
+  if(!S('nAck').checked) return toast('Please confirm you understand the notice terms');
+  const ref = refWithPrefix('NTV');
+  const data = { type:'notice', ref, submittedAt:new Date().toISOString(),
+    name:val('nName'), room:val('nRoom'), phone:val('nPhone'),
+    moveOutDate:val('nDate'), forwardingAddress:val('nAddr'), reason:val('nReason') };
+  postToSheet(data);
+  saveProfile(val('nName'), val('nRoom'), val('nPhone'));
+  buildNoticePDF(ref);
+  S('noticeForm').classList.add('hidden');
+  S('noticeDone').classList.remove('hidden');
+  S('noticeRef').textContent = ref;
+  const moveOutFmt = fmtDate(val('nDate'));
+  S('noticeSummary').textContent = `Your planned move-out date is ${moveOutFmt}. Your deposit, less lawful deductions, will be refunded within 24 hours of the final move-out inspection.`;
+  const msg = `Notice to Vacate ${ref}\nRoom ${val('nRoom')} · ${val('nName')}\nPlanned move-out: ${moveOutFmt}`;
+  S('noticeWA').setAttribute('onclick', `window.open('${waLink(msg)}','_blank')`);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function buildNoticePDF(ref){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm',format:'a4'});
+  const W=210, M=20, CW=W-M*2; let y=30;
+  const GOLD=[200,138,18], INK=[25,28,34], MUT=[110,116,126];
+  doc.setFillColor(20,23,28); doc.rect(0,0,W,26,'F');
+  doc.setTextColor(232,166,38); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('NOTICE TO VACATE',M,11);
+  doc.setTextColor(220,222,228); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text('7207 Isazi Street, Olivenhoutbosch Ext 36  ·  '+LANDLORD_PHONE, M,17);
+  doc.setFontSize(8); doc.setTextColor(150,160,173);
+  doc.text('Ref: '+ref+'    Generated: '+fmtDate(new Date()), M,22);
+  y=36; doc.setTextColor(...INK); doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  function para(t){ const lines=doc.splitTextToSize(t,CW); lines.forEach(l=>{doc.text(l,M,y); y+=5.5;}); y+=2; }
+  para(`Date: ${fmtDate(new Date())}`);
+  para(`To: ${LANDLORD}, Landlord, ${ADDRESS}.`);
+  para(`From: ${val('nName')}, Tenant, Room ${val('nRoom')}, ${ADDRESS}. Contact: ${val('nPhone')}.`);
+  doc.setFont('helvetica','bold'); doc.text('Re: Notice to Vacate',M,y); y+=7; doc.setFont('helvetica','normal');
+  para(`I, ${val('nName')}, hereby give notice of my intention to vacate Room ${val('nRoom')} at ${ADDRESS}. This letter constitutes my one (1) full calendar month's written notice as required by Clause 4 of my Lease Agreement.`);
+  para(`Planned move-out date: ${fmtDate(val('nDate'))}.`);
+  para(`Forwarding address for deposit refund and correspondence: ${val('nAddr')}.`);
+  if(val('nReason')) para(`Reason for vacating: ${val('nReason')}.`);
+  para(`I understand my security deposit, less any lawful deductions for damages, will be refunded within 24 hours of the final move-out inspection, and that a joint move-out inspection against Addendum A of my original lease will be conducted before I leave.`);
+  y+=8; doc.text('Tenant signature: _________________________     Date: '+fmtDate(new Date()),M,y); y+=14;
+  doc.text('Received by Landlord: _________________________     Date: ______________',M,y);
+  doc.save('Notice-to-Vacate-Room'+(val('nRoom')||'X')+'-'+(val('nName')||'Tenant').replace(/\s+/g,'-')+'.pdf');
+}
+
+/* ---------- PWA: install prompt + service worker ---------- */
+let DEFERRED_INSTALL_PROMPT = null;
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+function updateInstallCard(){
+  const card = S('installCard');
+  if(!card) return;
+  if(isStandalone()){ card.classList.add('hidden'); return; }
+  if(DEFERRED_INSTALL_PROMPT || isIOS()) card.classList.remove('hidden');
+  else card.classList.add('hidden');
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  DEFERRED_INSTALL_PROMPT = e;
+  updateInstallCard();
+});
+window.addEventListener('appinstalled', ()=>{
+  DEFERRED_INSTALL_PROMPT = null;
+  updateInstallCard();
+  toast('Maoka Residence installed — find it on your home screen.');
+});
+async function promptInstall(){
+  if(DEFERRED_INSTALL_PROMPT){
+    DEFERRED_INSTALL_PROMPT.prompt();
+    const { outcome } = await DEFERRED_INSTALL_PROMPT.userChoice;
+    if(outcome === 'accepted') DEFERRED_INSTALL_PROMPT = null;
+    updateInstallCard();
+    return;
+  }
+  S('installInstructions').textContent = isIOS()
+    ? 'Tap the Share icon (square with an arrow) at the bottom of Safari, then choose "Add to Home Screen".'
+    : 'Open your browser menu and choose "Add to Home Screen" or "Install App".';
+  S('installModal').classList.remove('hidden');
+}
+function closeInstallModal(){ S('installModal').classList.add('hidden'); }
+updateInstallCard();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+const BANK_DETAILS = {
+  accountHolder: "Purplemount Business Solutions (Pty) Ltd",
+  bank: "Capitec Business",
+  accountNumber: "1054376204",
+  branchCode: "450105"
+};
+
+function waLinkTo(phone, text){
+  let n = String(phone||'').replace(/[^\d]/g,'');
+  if(n.startsWith('0')) n = '27'+n.slice(1);
+  return 'https://wa.me/'+n+'?text='+encodeURIComponent(text);
+}
+
+/* ---------- roles: tenant / owner ---------- */
+// Change this PIN to whatever you like — it's the only thing gating Owner view.
+/* ---------- PIN gate (this is the Owner-only app) ---------- */
+function insertWifiTemplate(){
+  S('aCategory').value = 'WiFi';
+  S('aTitle').value = 'WiFi details';
+  S('aMessage').value = `Network name (SSID): ${WIFI_SSID}\nPassword: ${WIFI_PASSWORD}`;
+}
+function insertBankTemplate(){
+  S('aCategory').value = 'Bank Details';
+  S('aTitle').value = 'Banking details';
+  S('aMessage').value = `Account holder: ${BANK_DETAILS.accountHolder}\nBank: ${BANK_DETAILS.bank}\nAccount number: ${BANK_DETAILS.accountNumber}\nBranch code: ${BANK_DETAILS.branchCode}\n\nBanking reference: Rental \u2013 [Your name / Room no]`;
+}
+function submitAnnouncement(){
+  const audience = S('aAudience').value;
+  const req = ['aTitle','aMessage'];
+  if(audience === 'room') req.push('aRoom');
+  if(!need(req)) return toast(audience === 'room' ? 'Please add a room number, title and message' : 'Please add a title and a message');
+  const ref = refWithPrefix('ANN');
+  const data = { type:'announcement', ref, postedAt:new Date().toISOString(),
+    category:S('aCategory').value, title:val('aTitle'), message:val('aMessage'), pinned:S('aPin').checked,
+    audience, room: audience === 'room' ? val('aRoom') : '' };
+  postToSheet(data);
+  S('announceForm').classList.add('hidden');
+  S('announceDone').classList.remove('hidden');
+  S('announceRef').textContent = ref;
+  S('announceDoneMsg').textContent = audience === 'room'
+    ? `Only Room ${val('aRoom')} will see this on their Home screen.`
+    : 'All tenants will see this next time they open the app.';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- tenant: load & show announcements (JSONP — avoids CORS on GET) ---------- */
 const URGENCY_ORDER = { Emergency: 0, Urgent: 1, Routine: 2 };
 const URGENCY_COLOR = { Emergency: '#D9534F', Urgent: 'var(--gold)', Routine: 'var(--muted)' };
 const STATUS_COLOR = { Open: '#D9534F', 'In Progress': 'var(--gold)', Resolved: '#4CAF6D' };
@@ -2136,37 +2422,6 @@ function renderOwnerFaults(){
 }
 
 /* ---------- tenant: complaints & service requests ---------- */
-function submitComplaint(){
-  const req = ['coName','coRoom','coPhone','coCategory','coFrequency','coDesc'];
-  if(!need(req)) return toast('Please complete all required fields');
-  const ref = refWithPrefix('CMP');
-  const data = { type:'complaint', ref, submittedAt:new Date().toISOString(),
-    name:val('coName'), room:val('coRoom'), phone:val('coPhone'),
-    category:val('coCategory'), frequency:val('coFrequency'), description:val('coDesc'),
-    confidential: S('coConfidential').checked };
-  postToSheet(data);
-  saveProfile(val('coName'), val('coRoom'), val('coPhone'));
-  S('complaintForm').classList.add('hidden');
-  S('complaintDone').classList.remove('hidden');
-  S('complaintRef').textContent = ref;
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function submitServiceRequest(){
-  const req = ['svName','svRoom','svPhone','svType','svDesc'];
-  if(!need(req)) return toast('Please complete all required fields');
-  const ref = refWithPrefix('SVC');
-  const data = { type:'servicerequest', ref, submittedAt:new Date().toISOString(),
-    name:val('svName'), room:val('svRoom'), phone:val('svPhone'),
-    requestType:val('svType'), description:val('svDesc') };
-  postToSheet(data);
-  saveProfile(val('svName'), val('svRoom'), val('svPhone'));
-  S('serviceForm').classList.add('hidden');
-  S('serviceDone').classList.remove('hidden');
-  S('serviceRef').textContent = ref;
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-/* ---------- owner: manage complaints & service requests (shared list engine) ---------- */
 const OWNER_LIST_STATUSES = ['Open','In Progress','Resolved'];
 function makeOwnerListManager(action, bodyId, statusType){
   const state = { cache: [], filter: 'All' };
@@ -2236,9 +2491,51 @@ const servicesManager = makeOwnerListManager('services', 'ownerServicesBody', 's
 function loadOwnerComplaints(){ complaintsManager.load(); }
 function loadOwnerServices(){ servicesManager.load(); }
 
+/* ---------- owner: notices to vacate ---------- */
+const NOTICE_STATUSES = ['New','Acknowledged','Move-out Confirmed'];
+let OWNER_NOTICES_CACHE = [];
+function loadOwnerNotices(){
+  if(!SCRIPT_URL){ S('ownerNoticesBody').innerHTML = '<p class="hint">Not connected to the backend yet.</p>'; return; }
+  S('ownerNoticesBody').innerHTML = '<p class="hint">Loading notices…</p>';
+  jsonpFetch('notices', list => {
+    OWNER_NOTICES_CACHE = (Array.isArray(list) ? list : []).map(n => ({ status: 'New', ...n }));
+    renderOwnerNotices();
+  }, () => {
+    S('ownerNoticesBody').innerHTML = '<p class="hint">Couldn\'t load notices. The backend may need an "action=notices" endpoint added \u2014 ask your developer.</p>';
+  });
+}
+function updateNoticeStatus(ref, status){
+  const item = OWNER_NOTICES_CACHE.find(n => n.ref === ref);
+  if(item) item.status = status;
+  postToSheet({ type:'noticeStatusUpdate', ref, status, updatedAt:new Date().toISOString() });
+  renderOwnerNotices();
+  toast('Status updated to '+status);
+}
+function renderOwnerNotices(){
+  const list = OWNER_NOTICES_CACHE;
+  if(!list.length){ S('ownerNoticesBody').innerHTML = '<p class="hint">No notices to vacate on file.</p>'; return; }
+  const sorted = [...list].sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
+  S('ownerNoticesBody').innerHTML = sorted.map(n => `
+    <div class="wp-sec">
+      <h4 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="background:${n.status==='New'?'var(--gold)':(n.status==='Acknowledged'?'#4CAF6D':'var(--muted)')};color:#14171C;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px">${escapeHtml(n.status||'New')}</span>
+        Room ${escapeHtml(n.room||'—')} · ${escapeHtml(n.name||'—')}
+      </h4>
+      <p style="font-size:14px;color:var(--paper);margin:0 0 4px">Planned move-out: <b>${n.moveOutDate ? fmtDate(n.moveOutDate) : '—'}</b></p>
+      ${n.reason ? `<p style="font-size:13px;color:var(--paper);margin:0 0 4px">Reason: ${escapeHtml(n.reason)}</p>` : ''}
+      <p class="hint" style="margin:0 0 10px">${escapeHtml(n.phone||'')} · Forwarding address: ${escapeHtml(n.forwardingAddress||'—')} · Submitted ${fmtWhen(n.submittedAt)} · Ref ${escapeHtml(n.ref||'')}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select onchange="updateNoticeStatus('${escapeHtml(n.ref||'')}', this.value)" style="width:auto;padding:6px 10px;font-size:13px">
+          ${NOTICE_STATUSES.map(s => `<option value="${s}" ${s===(n.status||'New')?'selected':''}>${s}</option>`).join('')}
+        </select>
+        ${n.phone ? `<a class="backlink" style="margin:0" href="${waLinkTo(n.phone, 'Hi '+(n.name||'')+', confirming receipt of your notice to vacate '+(n.ref||'')+' (Room '+(n.room||'')+'). Planned move-out: '+(n.moveOutDate?fmtDate(n.moveOutDate):'')+'.')}" target="_blank">Message tenant</a>` : ''}
+      </div>
+    </div>`).join('');
+}
+
 /* ---------- owner: dashboard summary ---------- */
 function loadOwnerDashboard(){
-  if(ROLE !== 'owner' || !S('dashGrid')) return;
+  if(!S('dashGrid')) return;
   if(!SCRIPT_URL){ S('dashGrid').innerHTML = '<p class="hint">Not connected to the backend yet.</p>'; return; }
   S('dashGrid').innerHTML = '<p class="hint">Loading…</p>';
   const results = {}; let pending = 5;
@@ -2278,6 +2575,294 @@ function renderOwnerDashboard(r){
     tile('Open complaints', openComplaints, openComplaints>0 ? 'var(--gold)' : '#4CAF6D') +
     tile('Service requests open', openServices, openServices>0 ? 'var(--gold)' : '#4CAF6D') +
     (emergencyFaults>0 ? tile('⚠ Emergency faults', emergencyFaults, '#D9534F') : '');
+}
+
+/* ---------- owner: tenant contracts (signed leases on file) ---------- */
+let CONTRACTS_CACHE = {};
+function loadContracts(){
+  S('contractsBody').innerHTML = '<p class="hint">Loading contracts…</p>';
+  if(!SCRIPT_URL){ S('contractsBody').innerHTML = '<p class="hint">Not connected to the backend yet.</p>'; return; }
+  jsonpFetch('leases', list => renderContracts(Array.isArray(list) ? list : []),
+    () => { S('contractsBody').innerHTML = '<p class="hint">Couldn\'t load contracts. The backend may need an "action=leases" endpoint added \u2014 ask your developer.</p>'; });
+}
+function renderContracts(leases){
+  // One card per room: keep the most recently signed lease for that room.
+  const byRoom = {};
+  leases.forEach(l => {
+    const room = l.tenant ? l.tenant.room : l.room;
+    if(!room) return;
+    const existing = byRoom[room];
+    if(!existing || new Date(l.signedAt||0) > new Date(existing.signedAt||0)) byRoom[room] = l;
+  });
+  CONTRACTS_CACHE = byRoom;
+  const rooms = Object.keys(byRoom).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+  if(!rooms.length){ S('contractsBody').innerHTML = '<p class="hint">No signed leases yet.</p>'; return; }
+  S('contractsBody').innerHTML = rooms.map(room => {
+    const l = byRoom[room];
+    const t = l.tenant || {};
+    const emp = l.employment || {};
+    const contractId = 'contract_'+room.replace(/[^\w-]/g,'');
+    return `
+    <div class="wp-sec">
+      <h4 style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="document.getElementById('${contractId}').classList.toggle('hidden')">
+        <span>Room ${escapeHtml(room)} — ${escapeHtml(t.name||'—')}</span>
+        <span class="navcard-arrow">›</span>
+      </h4>
+      <p class="hint" style="margin:0">${escapeHtml(t.phone||'—')} · Signed ${fmtWhen(l.signedAt)} · Ref ${escapeHtml(l.ref||'—')}</p>
+      <div id="${contractId}" class="hidden" style="margin-top:10px;font-size:14px;color:var(--paper)">
+        <div class="wp-row"><span>Full name</span><span>${escapeHtml(t.name||'—')}</span></div>
+        <div class="wp-row"><span>Date of birth</span><span>${t.dob ? fmtDate(t.dob) : '—'}</span></div>
+        <div class="wp-row"><span>Contact number</span><span>${escapeHtml(t.phone||'—')}</span></div>
+        <div class="wp-row"><span>Room</span><span>Room ${escapeHtml(room)}</span></div>
+        <div class="wp-row"><span>Previous address</span><span>${escapeHtml(t.address||'—')}</span></div>
+        <div class="wp-row"><span>Move-in date</span><span>${t.start ? fmtDate(t.start) : '—'}</span></div>
+        <div class="wp-row"><span>Vehicle</span><span>${escapeHtml(t.vehicle||'None on file')}</span></div>
+        <div class="wp-row"><span>Employment</span><span>${escapeHtml(emp.status||'—')}${emp.type ? ' ('+escapeHtml(emp.type)+')' : ''}</span></div>
+        <div class="wp-row"><span>Employer / business</span><span>${escapeHtml(emp.employer||'—')}</span></div>
+        <div class="wp-row"><span>Next of kin</span><span>${escapeHtml(t.kinName||'—')} · ${escapeHtml(t.kinPhone||'—')}</span></div>
+        <div class="wp-row"><span>Community access sticker</span><span>${l.sticker ? 'Yes' : 'No'}</span></div>
+        <div class="wp-row"><span>ID copy on file</span><span>${l.idCopy ? 'Yes — Addendum B' : 'Not provided'}</span></div>
+        <div class="wp-row"><span>Reference</span><span>${escapeHtml(l.ref||'—')}</span></div>
+        <div class="wp-row"><span>Signed</span><span>${fmtWhen(l.signedAt)}</span></div>
+        ${l.notes ? `<div class="wp-row"><span>Move-in notes</span><span>${escapeHtml(l.notes)}</span></div>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button type="button" class="btn ghost" style="padding:6px 12px;font-size:13px" onclick="buildContractPDF('${escapeHtml(room)}')">⬇ Download lease copy (PDF)</button>
+          ${t.phone ? `<a class="backlink" style="margin:0;align-self:center" href="${waLinkTo(t.phone, 'Hi '+(t.name||'')+', reaching out about your lease at Maoka Residence (Room '+room+').')}" target="_blank">Message tenant</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- owner: regenerate a copy of the signed lease PDF from stored data ---------- */
+function imgDims(dataUrl){
+  return new Promise(resolve => {
+    if(!dataUrl){ resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve([img.naturalWidth, img.naturalHeight]);
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+async function buildContractPDF(room){
+  const l = CONTRACTS_CACHE[room];
+  if(!l){ toast('Contract not found'); return; }
+  const t = l.tenant || {};
+  const emp = l.employment || {};
+  const checklist = Array.isArray(l.checklist) ? l.checklist : [];
+  const idDims = await imgDims(l.idCopy);
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm',format:'a4'});
+  const W=210, M=16, CW=W-M*2; let y=0;
+  const GOLD=[200,138,18], INK=[25,28,34], MUT=[110,116,126];
+
+  function head(){
+    doc.setFillColor(20,23,28); doc.rect(0,0,W,26,'F');
+    doc.setTextColor(232,166,38); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('RESIDENTIAL LEASE AGREEMENT (COPY)',M,11);
+    doc.setTextColor(220,222,228); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text('Maoka Residence  ·  7207 Isazi Street, Olivenhoutbosch Ext 36  ·  '+LANDLORD_PHONE, M,17);
+    doc.setFontSize(8); doc.setTextColor(150,160,173);
+    doc.text('Ref: '+(l.ref||'—')+'    Copy generated: '+fmtDate(new Date()), M,22);
+    y=34;
+  }
+  function sec(txt){
+    if(y>270){ doc.addPage(); head(); }
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(...GOLD);
+    doc.text(txt,M,y); y+=5;
+    doc.setDrawColor(...GOLD); doc.setLineWidth(.3); doc.line(M,y-3.4,M+CW,y-3.4);
+    doc.setTextColor(...INK); doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  }
+  function para(txt,opts={}){
+    const lines = doc.splitTextToSize(txt,CW - (opts.indent||0));
+    lines.forEach(ln=>{ if(y>282){ doc.addPage(); head(); }
+      doc.text(ln,M+(opts.indent||0),y); y+=4.6; });
+    y+=opts.gap??1.4;
+  }
+  function kv(k,v){
+    const lines = doc.splitTextToSize(String(v||''), CW-58);
+    if(y + lines.length*4.6 > 280){ doc.addPage(); head(); }
+    doc.setFont('helvetica','bold'); doc.text(k,M,y);
+    doc.setFont('helvetica','normal');
+    doc.text(lines,M+58,y);
+    y += lines.length*4.6 + 0.8;
+  }
+
+  head();
+  doc.setFontSize(9.5); doc.setTextColor(...INK);
+
+  sec('PARTIES');
+  kv('Landlord', LANDLORD+' — '+ADDRESS+' — '+LANDLORD_PHONE);
+  kv('Tenant', (t.name||'—')+' (Date of Birth: '+(t.dob?fmtDate(t.dob):'—')+') — '+(t.phone||'—'));
+  kv('Room No.', t.room||'—');
+  kv('Permanent address', t.address||'—');
+  kv('Next of kin', (t.kinName||'—')+' — '+(t.kinPhone||'—'));
+  kv('Employment', (emp.status||'—') + (emp.status==='Employed'&&emp.type ? ' ('+emp.type+')':'') + (emp.employer?' — '+emp.employer:''));
+  kv('ID copy', l.idCopy ? 'Attached — see Addendum B' : 'Not provided (optional)');
+  if(t.vehicle) kv('Vehicle', t.vehicle);
+  kv('Access sticker', l.sticker ? 'Yes — R30.00 once-off (no gate sign-in required)' : 'No — Tenant signs the gate register on every entry');
+  kv('Commencement', (t.start?fmtDate(t.start):'—')+'  (month-to-month)');
+  y+=2;
+
+  sec('1. PREMISES');
+  para('The Landlord leases to the Tenant the residential premises at '+ADDRESS+', Room No. '+(t.room||'—')+' (the "Premises").');
+  para('Meaning of "bachelor room": the Premises is a bachelor room \u2014 a single self-contained room with its own cooking and bathroom facilities, let for occupation by one (1) person as the registered Tenant. Short visits by guests are permitted, provided they do not create noise, security or overcrowding concerns. No other person may take up permanent residence in the Premises, or stay for longer than 7 consecutive nights or 14 nights in any calendar month, without the Landlord\u2019s prior written consent.');
+  para('Meaning of "prior written consent": for purposes of this clause, written consent includes a WhatsApp message, SMS, or email from the Landlord (or the Landlord\u2019s authorised representative) approving the request before the extended stay begins. Verbal approval alone is not sufficient. The Tenant must request consent before the 7th consecutive night, or before the 14-night monthly threshold is reached, whichever comes first. Consent given for one occasion does not apply to future requests.');
+  sec('2–3. DOCUMENTATION');
+  para('The Tenant may, optionally, provide a clear copy of their ID or Passport to the Landlord for emergency-contact purposes or in the event of a breach requiring legal action; this is not a requirement of this Agreement. The permanent address recorded above will be used for any legal notices.');
+  sec('4. LEASE TERM AND TERMINATION');
+  para('The lease commences on '+(t.start?fmtDate(t.start):'—')+' and continues month-to-month. Either party may terminate by giving one (1) full calendar month\u2019s written notice.');
+  sec('5–6. RENT, DEPOSIT AND INITIAL PAYMENT');
+  para('Monthly rent: R3 500.00, payable in advance on or before the last day of the preceding month. Security deposit: R3 500.00 total, payable in two (2) equal instalments of R1 750.00 \u2014 the first on or before signing, the second before the start of the second month\u2019s rent. The deposit, less lawful deductions for damages, is refunded within 24 hours of the final move-out inspection.');
+  sec('5A. LATE PAYMENT AND INTEREST');
+  para('Rent must reflect in the Landlord\u2019s account no later than the 2nd day of the month to which it relates. This is a strict deadline \u2014 no grace period, reminder, or prior payment history extends it. Rent not received in full by the 2nd is late, regardless of the reason for non-payment.');
+  para('Any rent (or part thereof) still outstanding after the 2nd of the month will immediately attract interest at 2% (two percent) per month, or part thereof, calculated on the outstanding balance from the 3rd day of that month until the full amount \u2014 including all accrued interest \u2014 is paid. Interest is charged in addition to the rent owed and does not replace it.');
+  para('Late payment on two (2) or more occasions in any rolling twelve (12)-month period is a material breach of this Agreement, entitling the Landlord to act under clause 11 (Breach and legal), including termination and recovery of all amounts owed plus legal costs.');
+  para('Total due on signing: first month\u2019s rent R3 500.00 + security deposit 1st instalment R1 750.00'
+    + (l.sticker ? ' + community access sticker R30.00 = R5 280.00.' : ' = R5 250.00.')
+    + ' A second deposit instalment of R1 750.00 is due before the start of the second month\u2019s rent.'
+    + ' Banking reference: Rental \u2013 '+(t.name||'—')+' / Room '+(t.room||'—')+'.');
+  sec('7. UTILITIES AND SERVICES');
+  para('Electricity: Tenant (prepaid meter).  Water: Landlord (included in rent).  Refuse removal: Tenant \u2014 bins out by 08:00 every Friday.');
+  sec('8. TENANT OBLIGATIONS AND PROPERTY RULES');
+  para('Keep the Premises clean and sanitary; ensure access gates remain closed. Prohibited: pets; commercial or business activities; illegal activities; meter tampering. Noise: reasonable volume at all times; strictly quiet between 22:00 and 07:00. Several residents work from home during the day \u2014 no loud music, parties, revving engines or shouting in rooms, the yard or common areas at any hour; repeated noise complaints constitute a breach. Safety: no open flames, paraffin stoves or gas heaters inside the room; do not overload electrical sockets or run extension cords between rooms. Surveillance: the Tenant consents to CCTV monitoring in common areas for security purposes. Community Rules: the Community Rules in force at the Main Security Gate of the community must be followed by the Tenant and their visitors at all times.');
+  sec('9. OCCUPANCY, SUBLETTING AND GUESTS');
+  para('Only the registered Tenant may occupy the Premises (see the bachelor-room definition in clause 1). Subletting or assignment is prohibited. All visitors must sign the register at the gate, or be admitted by a resident holding a valid community access sticker. Visitors are day guests; occasional overnight stays are permitted, but a visitor may not move in, keep clothing or belongings in the room, or use the address as their own. Visitors cannot overstay: any stay exceeding thirty (30) consecutive days is strictly prohibited, and a pattern of continuous overnight stays will be treated as unauthorised occupation even if under 30 days. A guest overstaying, or any unauthorised subletting or second occupant, is a material breach entitling the Landlord to immediate termination and eviction.');
+  sec('9A. PARKING');
+  para('The Tenant is entitled to one (1) parking space only, allocated by the Landlord. Only the vehicle registered against the Tenant\u2019s name may occupy this space. Visitors\u2019 vehicles may not be parked on the Premises without the Landlord\u2019s prior consent, and a second vehicle belonging to the Tenant may not be parked on-site on a regular basis. Parking is at the vehicle owner\u2019s risk; the Landlord accepts no liability for loss or damage to any vehicle parked at the Premises.');
+  sec('10. MAINTENANCE, REPAIRS AND ENTRY');
+  para('All defects must be reported immediately to '+LANDLORD_PHONE+'. The Landlord may enter with 24 hours\u2019 notice for inspections or repairs (immediately in emergencies). No drilling, painting or structural changes without written consent.');
+  sec('11. BREACH AND LEGAL');
+  para('Failure to pay rent by the 2nd of the month (see clause 5A), or a breach of house rules, constitutes a material breach. The Landlord shall be entitled to recover all amounts owed, including accrued interest, plus all legal costs on an attorney-and-client scale.');
+  sec('12. ESTATE ACCESS STICKER');
+  para('The Tenant may purchase a community access sticker for a once-off fee of R30.00, allowing entry and exit without signing the register at the gate. The sticker is registered to the Tenant (and vehicle, where applicable), remains the property of the Landlord/community, is non-transferable, and must be returned or removed when the lease ends. A lost or damaged sticker must be reported immediately and replaced at the Tenant\u2019s cost. A Tenant without a sticker must sign the gate register on every entry. Sticker taken by this Tenant: '+(l.sticker?'YES (R30.00 paid once-off).':'NO.'));
+  sec('13. TENANT DECLARATION');
+  para('By signing this agreement the Tenant declares that they are able to comply with the house rules in this Agreement, and that they are able to pay the monthly rent of R3 500.00 and all other amounts due under this lease, in full and on time.');
+  sec('POPIA CONSENT');
+  para('The Tenant consents to the Landlord collecting and storing their personal information (including ID copy, contact details and next of kin) solely for the administration of this lease.');
+
+  if(checklist.length){
+    doc.addPage(); head();
+    sec('ADDENDUM A \u2014 MOVE-IN CONDITION CHECKLIST');
+    doc.setFont('helvetica','bold');
+    doc.text('Item',M,y); doc.text('Qty',M+70,y); doc.text('Cond. (in)',M+86,y); y+=2.4;
+    doc.setDrawColor(200,200,200); doc.line(M,y,M+CW,y); y+=4.4;
+    doc.setFont('helvetica','normal');
+    checklist.forEach(c => {
+      doc.text(String(c.item||''),M,y); doc.text(String(c.qty||''),M+70,y); doc.text(String(c.condition||''),M+86,y);
+      doc.setDrawColor(210,210,210); doc.line(M+120,y+1,M+CW,y+1);
+      y+=6;
+    });
+    doc.setFontSize(9.5); doc.setTextColor(...INK); y+=5;
+    if(l.notes){ doc.setFont('helvetica','bold'); doc.text('Notes:',M,y); doc.setFont('helvetica','normal'); y+=5; para(l.notes); }
+  }
+
+  y+=10; sec('SIGNATURES (LEASE AGREEMENT)');
+  const sw=70, sh=26;
+  function sigBlock(label, img, xoff){
+    doc.setDrawColor(150,150,150); doc.rect(M+xoff,y,sw,sh);
+    if(img) doc.addImage(img,'PNG',M+xoff+3,y+2,sw-6,sh-4,undefined,'FAST');
+    doc.setFontSize(8.5); doc.setTextColor(...MUT);
+    doc.text(label,M+xoff,y+sh+5);
+    doc.setTextColor(...INK); doc.setFontSize(9.5);
+  }
+  sigBlock('TENANT: '+(t.name||'—'), l.sigTenant||null, 0);
+  sigBlock('LANDLORD: '+LANDLORD, l.sigLandlord||null, 95);
+  y+=sh+16;
+  doc.setFontSize(8); doc.setTextColor(...MUT);
+  doc.text('Signed electronically via the Maoka Residence lease portal  ·  Ref '+(l.ref||'—')+'  ·  Signed '+fmtWhen(l.signedAt),M,y);
+
+  if(l.idCopy && idDims){
+    doc.addPage(); head();
+    sec('ADDENDUM B \u2014 TENANT ID COPY');
+    para('Identity document of '+(t.name||'—')+' (Date of Birth: '+(t.dob?fmtDate(t.dob):'—')+'), provided at signing.');
+    const maxW = CW, maxH = 270 - y;
+    let iw = maxW, ih = iw * idDims[1] / idDims[0];
+    if(ih > maxH){ ih = maxH; iw = ih * idDims[0] / idDims[1]; }
+    doc.addImage(l.idCopy,'JPEG',M+(CW-iw)/2,y,iw,ih,undefined,'FAST');
+  }
+
+  doc.save('Lease-Copy-Room'+(t.room||'X')+'-'+(t.name||'Tenant').replace(/\s+/g,'-')+'.pdf');
+}
+function loadReports(){
+  const monthKey = currentMonthKey();
+  S('reportsMonthLabel').textContent = monthLabel(monthKey);
+  S('reportsBody').innerHTML = '<p class="hint">Loading report…</p>';
+  if(!SCRIPT_URL){ S('reportsBody').innerHTML = '<p class="hint">Not connected to the backend yet.</p>'; return; }
+  const results = {}; let pending = 5;
+  function done(key, data){ results[key] = data; pending--; if(pending===0) renderReports(results, monthKey); }
+  jsonpFetch('leases',     d => done('leases',     Array.isArray(d)?d:[]), () => done('leases', []));
+  jsonpFetch('payments',   d => done('payments',   Array.isArray(d)?d:[]), () => done('payments', []));
+  jsonpFetch('expenses',   d => done('expenses',   Array.isArray(d)?d:[]), () => done('expenses', []));
+  jsonpFetch('faults',     d => done('faults',     Array.isArray(d)?d:[]), () => done('faults', []));
+  jsonpFetch('complaints', d => done('complaints', Array.isArray(d)?d:[]), () => done('complaints', []));
+}
+let REPORTS_CACHE = null, REPORTS_MONTH = null;
+function renderReports(r, monthKey){
+  REPORTS_CACHE = r; REPORTS_MONTH = monthKey;
+  const byRoom = {};
+  r.leases.forEach(l => {
+    const room = l.tenant ? l.tenant.room : l.room;
+    if(!room) return;
+    const existing = byRoom[room];
+    if(!existing || new Date(l.signedAt||0) > new Date(existing.signedAt||0)) byRoom[room] = l;
+  });
+  const roomCount = Object.keys(byRoom).length;
+
+  const monthPayments = r.payments.filter(p => p.month === monthKey);
+  const rentCollected = monthPayments.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const paidRoomCount = new Set(monthPayments.map(p => String(p.room))).size;
+
+  const now = new Date();
+  const monthExpenses = r.expenses.filter(e => {
+    if(!e.date) return false;
+    const d = new Date(e.date);
+    return d.getFullYear()===now.getFullYear() && (d.getMonth()+1)===Number(monthKey.split('-')[1]);
+  });
+  const totalExpenses = monthExpenses.reduce((s,e) => s + (Number(e.amount)||0), 0);
+  const net = rentCollected - totalExpenses;
+
+  const openFaults = r.faults.filter(f => (f.status||'Open') !== 'Resolved').length;
+  const openComplaints = r.complaints.filter(c => (c.status||'Open') !== 'Resolved').length;
+
+  const tile = (label, value, color) => `
+    <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px">
+      <div style="font-size:24px;font-weight:800;color:${color||'var(--paper)'}">${value}</div>
+      <div class="hint" style="margin-top:2px">${label}</div>
+    </div>`;
+
+  S('reportsBody').innerHTML = `
+    <h2 style="margin-bottom:12px">Financial summary</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      ${tile('Rent collected', 'R'+rentCollected.toFixed(2), '#4CAF6D')}
+      ${tile('Expenses', 'R'+totalExpenses.toFixed(2), 'var(--gold)')}
+      ${tile('Net', (net>=0?'R':'-R')+Math.abs(net).toFixed(2), net>=0 ? '#4CAF6D' : '#D9534F')}
+      ${tile('Rooms paid', paidRoomCount+' / '+roomCount, paidRoomCount<roomCount ? 'var(--gold)' : '#4CAF6D')}
+    </div>
+    <h2 style="margin-bottom:12px">Open items</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      ${tile('Open faults', openFaults, openFaults>0 ? 'var(--gold)' : '#4CAF6D')}
+      ${tile('Open complaints', openComplaints, openComplaints>0 ? 'var(--gold)' : '#4CAF6D')}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn ghost" style="padding:8px 14px;font-size:13px" onclick="exportRentCSV()">⬇ Export rent collection (CSV)</button>
+      <button type="button" class="btn ghost" style="padding:8px 14px;font-size:13px" onclick="setView('expenses')">Go to Expenses for expense export →</button>
+    </div>`;
+}
+function exportRentCSV(){
+  if(!REPORTS_CACHE){ toast('Report still loading'); return; }
+  const monthPayments = REPORTS_CACHE.payments.filter(p => p.month === REPORTS_MONTH);
+  if(!monthPayments.length){ toast('No payments to export for this month'); return; }
+  const rows = [['Room','Tenant','Amount (R)','Paid At','Method']];
+  monthPayments.forEach(p => rows.push([p.room||'', p.name||'', (Number(p.amount)||0).toFixed(2), p.paidAt||'', p.method||'']));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'Maoka-Residence-Rent-'+REPORTS_MONTH+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /* ---------- owner: rent payment tracking ---------- */
@@ -2493,105 +3078,9 @@ function exportExpensesPDF(){
   doc.save('Maoka-Residence-Expenses-'+S('exPeriod').value+'-'+new Date().toISOString().slice(0,10)+'.pdf');
 }
 
-function submitNotice(){
-  const req = ['nName','nRoom','nPhone','nDate','nAddr'];
-  if(!need(req)) return toast('Please complete all required fields');
-  if(!S('nAck').checked) return toast('Please confirm you understand the notice terms');
-  const ref = refWithPrefix('NTV');
-  const data = { type:'notice', ref, submittedAt:new Date().toISOString(),
-    name:val('nName'), room:val('nRoom'), phone:val('nPhone'),
-    moveOutDate:val('nDate'), forwardingAddress:val('nAddr'), reason:val('nReason') };
-  postToSheet(data);
-  saveProfile(val('nName'), val('nRoom'), val('nPhone'));
-  buildNoticePDF(ref);
-  S('noticeForm').classList.add('hidden');
-  S('noticeDone').classList.remove('hidden');
-  S('noticeRef').textContent = ref;
-  const moveOutFmt = fmtDate(val('nDate'));
-  S('noticeSummary').textContent = `Your planned move-out date is ${moveOutFmt}. Your deposit, less lawful deductions, will be refunded within 24 hours of the final move-out inspection.`;
-  const msg = `Notice to Vacate ${ref}\nRoom ${val('nRoom')} · ${val('nName')}\nPlanned move-out: ${moveOutFmt}`;
-  S('noticeWA').setAttribute('onclick', `window.open('${waLink(msg)}','_blank')`);
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function buildNoticePDF(ref){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'mm',format:'a4'});
-  const W=210, M=20, CW=W-M*2; let y=30;
-  const GOLD=[200,138,18], INK=[25,28,34], MUT=[110,116,126];
-  doc.setFillColor(20,23,28); doc.rect(0,0,W,26,'F');
-  doc.setTextColor(232,166,38); doc.setFont('helvetica','bold'); doc.setFontSize(13);
-  doc.text('NOTICE TO VACATE',M,11);
-  doc.setTextColor(220,222,228); doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  doc.text('7207 Isazi Street, Olivenhoutbosch Ext 36  ·  '+LANDLORD_PHONE, M,17);
-  doc.setFontSize(8); doc.setTextColor(150,160,173);
-  doc.text('Ref: '+ref+'    Generated: '+fmtDate(new Date()), M,22);
-  y=36; doc.setTextColor(...INK); doc.setFont('helvetica','normal'); doc.setFontSize(10);
-  function para(t){ const lines=doc.splitTextToSize(t,CW); lines.forEach(l=>{doc.text(l,M,y); y+=5.5;}); y+=2; }
-  para(`Date: ${fmtDate(new Date())}`);
-  para(`To: ${LANDLORD}, Landlord, ${ADDRESS}.`);
-  para(`From: ${val('nName')}, Tenant, Room ${val('nRoom')}, ${ADDRESS}. Contact: ${val('nPhone')}.`);
-  doc.setFont('helvetica','bold'); doc.text('Re: Notice to Vacate',M,y); y+=7; doc.setFont('helvetica','normal');
-  para(`I, ${val('nName')}, hereby give notice of my intention to vacate Room ${val('nRoom')} at ${ADDRESS}. This letter constitutes my one (1) full calendar month's written notice as required by Clause 4 of my Lease Agreement.`);
-  para(`Planned move-out date: ${fmtDate(val('nDate'))}.`);
-  para(`Forwarding address for deposit refund and correspondence: ${val('nAddr')}.`);
-  if(val('nReason')) para(`Reason for vacating: ${val('nReason')}.`);
-  para(`I understand my security deposit, less any lawful deductions for damages, will be refunded within 24 hours of the final move-out inspection, and that a joint move-out inspection against Addendum A of my original lease will be conducted before I leave.`);
-  y+=8; doc.text('Tenant signature: _________________________     Date: '+fmtDate(new Date()),M,y); y+=14;
-  doc.text('Received by Landlord: _________________________     Date: ______________',M,y);
-  doc.save('Notice-to-Vacate-Room'+(val('nRoom')||'X')+'-'+(val('nName')||'Tenant').replace(/\s+/g,'-')+'.pdf');
-}
-
 setView('home');
-renderRoleUI();
-loadAnnouncements();
-paint();
-if(ROLE !== 'owner') requestNotificationPermission();
-else loadOwnerDashboard();
-
+loadOwnerDashboard();
 /* ---------- PWA: install prompt + service worker ---------- */
-let DEFERRED_INSTALL_PROMPT = null;
-const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-function updateInstallCard(){
-  const card = S('installCard');
-  if(!card) return;
-  if(isStandalone()){ card.classList.add('hidden'); return; }
-  if(DEFERRED_INSTALL_PROMPT || isIOS()) card.classList.remove('hidden');
-  else card.classList.add('hidden');
-}
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  DEFERRED_INSTALL_PROMPT = e;
-  updateInstallCard();
-});
-window.addEventListener('appinstalled', ()=>{
-  DEFERRED_INSTALL_PROMPT = null;
-  updateInstallCard();
-  toast('Maoka Residence installed — find it on your home screen.');
-});
-async function promptInstall(){
-  if(DEFERRED_INSTALL_PROMPT){
-    DEFERRED_INSTALL_PROMPT.prompt();
-    const { outcome } = await DEFERRED_INSTALL_PROMPT.userChoice;
-    if(outcome === 'accepted') DEFERRED_INSTALL_PROMPT = null;
-    updateInstallCard();
-    return;
-  }
-  S('installInstructions').textContent = isIOS()
-    ? 'Tap the Share icon (square with an arrow) at the bottom of Safari, then choose "Add to Home Screen".'
-    : 'Open your browser menu and choose "Add to Home Screen" or "Install App".';
-  S('installModal').classList.remove('hidden');
-}
-function closeInstallModal(){ S('installModal').classList.add('hidden'); }
-updateInstallCard();
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
-}
-
 </script>
 </body>
 </html>
