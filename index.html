@@ -547,6 +547,7 @@ button.btn{flex:1;border:none;border-radius:14px;padding:17px 10px;font-size:16.
 .paysum div.tot{border-top:1px solid var(--line);padding-top:8px;font-weight:700;color:var(--gold);font-size:16px;}
 footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-height:1.6;}
 </style>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -644,7 +645,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     </div>
   </div>
 
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a></footer>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); clearAppCache()">Not seeing the latest update? Tap here</a></footer>
 </div>
 
 <div class="wrap hidden" id="viewOwnerHome">
@@ -652,7 +653,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     <span class="badge">MAOKA RESIDENCE · OWNER</span>
     <h1>Owner Console</h1>
     <div class="sub">Managing multiple properties — pick a location, or view all combined.</div>
-    <div class="rolebar"><span id="ownerWelcome">Owner</span> · <a class="backlink" style="margin:0" onclick="backToTenantView()">Switch to Tenant view</a></div>
+    <div class="rolebar"><span id="ownerWelcome">Owner</span> · <a class="backlink" style="margin:0" onclick="backToTenantView()">Switch to Tenant view</a> · <a class="backlink" style="margin:0" onclick="clearAppCache()">Clear cache</a></div>
   </header>
 
   <div class="card" style="text-align:left">
@@ -1152,7 +1153,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     <p class="hint">If you believe this is a mistake, or you still need something from the Landlord, please get in touch directly:</p>
     <p style="margin-top:10px"><a class="backlink" style="margin:0" href="https://wa.me/27622553687" target="_blank">Message the Landlord on WhatsApp</a></p>
   </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a></footer>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); clearAppCache()">Not seeing the latest update? Tap here</a></footer>
 </div>
 
 <div class="wrap hidden" id="viewAnnounce">
@@ -2303,6 +2304,22 @@ if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{});
   });
+}
+
+/* ---------- manual cache clear (for "not seeing the latest update?") ---------- */
+async function clearAppCache(){
+  try{
+    if('caches' in window){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  }catch(e){ console.error('Cache clear failed:', e); }
+  toast('Cache cleared — reloading…');
+  setTimeout(() => { window.location.reload(true); }, 600);
 }
 const BANK_DETAILS = {
   businessEntity: "Home Owners",
