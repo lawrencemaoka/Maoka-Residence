@@ -14,9 +14,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Maoka">
 <!-- Firebase (compat SDK — simplest for a plain-script app, no bundler needed) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script>/** @license
  *
  * jsPDF - PDF Document creation from JavaScript
@@ -553,77 +550,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<div class="wrap" id="viewAuth">
-  <header>
-    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
-    <h1>Welcome</h1>
-    <div class="sub">Sign in to continue, or create your profile if this is your first time.</div>
-  </header>
-
-  <div class="card formcard" id="signInCard">
-    <h2>Sign in</h2>
-    <div style="display:flex;gap:8px;margin-bottom:4px">
-      <button type="button" class="btn ghost" style="flex:1;padding:10px 8px;font-size:13px" onclick="signInWithGoogle()">🔵 Google</button>
-      <button type="button" class="btn ghost" style="flex:1;padding:10px 8px;font-size:13px" onclick="signInWithMicrosoft()">🟦 Microsoft</button>
-    </div>
-    <p class="hint" style="text-align:center;margin:10px 0">— or sign in with email —</p>
-    <label class="f"><em>Email <b>*</b></em><input type="email" id="authEmail" autocomplete="email"></label>
-    <label class="f"><em>Password <b>*</b></em><input type="password" id="authPassword" autocomplete="current-password"></label>
-    <button class="btn primary" style="width:100%;margin-top:6px" onclick="signIn()">Sign In</button>
-    <p class="hint" id="authError" style="color:#D9534F;display:none;margin-top:10px"></p>
-    <p class="hint" id="authInfo" style="color:#4CAF6D;display:none;margin-top:10px"></p>
-    <p class="hint" style="margin-top:14px"><a class="backlink" style="margin:0" onclick="showForgotPassword()">Forgot password?</a></p>
-    <p class="hint" style="margin-top:6px">New here? <a class="backlink" style="margin:0" onclick="showCreateProfile()">Create your profile →</a></p>
-  </div>
-
-  <div class="card formcard hidden" id="forgotPasswordCard">
-    <h2>Reset your password</h2>
-    <p class="hint" style="margin-bottom:4px">Enter the email you signed up with — we'll send you a link to set a new password.</p>
-    <label class="f"><em>Email <b>*</b></em><input type="email" id="fpEmail" autocomplete="email"></label>
-    <button class="btn primary" style="width:100%;margin-top:6px" onclick="sendPasswordReset()">Send Reset Link</button>
-    <p class="hint" id="forgotPasswordError" style="color:#D9534F;display:none;margin-top:10px"></p>
-    <p class="hint" id="forgotPasswordInfo" style="color:#4CAF6D;display:none;margin-top:10px"></p>
-    <p class="hint" style="margin-top:14px"><a class="backlink" style="margin:0" onclick="showSignIn()">← Back to sign in</a></p>
-  </div>
-
-  <div class="card formcard hidden" id="createProfileCard">
-    <h2>Create your profile</h2>
-    <label class="f"><em>Full name <b>*</b></em><input type="text" id="cpName" autocomplete="name"></label>
-    <label class="f"><em>Email <b>*</b></em><input type="email" id="cpEmail" autocomplete="email"></label>
-    <label class="f"><em>Password <b>*</b></em><input type="password" id="cpPassword" autocomplete="new-password" placeholder="At least 8 characters, mixed case + number"></label>
-    <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="cpPhone" inputmode="tel" placeholder="e.g. 073 000 0000"></label>
-    <label class="f"><em>I am a... <b>*</b></em>
-      <select id="cpRole" onchange="S('cpRoomWrap').classList.toggle('hidden', this.value!=='tenant'); S('cpOwnerCodeWrap').classList.toggle('hidden', this.value!=='owner')">
-        <option value="tenant">Tenant</option>
-        <option value="owner">Owner / Landlord</option>
-      </select>
-    </label>
-    <label class="f" id="cpRoomWrap"><em>Room number <b>*</b></em><input type="text" id="cpRoom" placeholder="e.g. 3"></label>
-    <label class="f hidden" id="cpOwnerCodeWrap"><em>Owner access code <b>*</b></em><input type="password" id="cpOwnerCode" placeholder="Ask the Landlord for this"></label>
-    <button class="btn primary" style="width:100%;margin-top:6px" onclick="createProfile()">Create Profile</button>
-    <p class="hint" id="createProfileError" style="color:#D9534F;display:none;margin-top:10px"></p>
-    <p class="hint" style="margin-top:14px">Already have a profile? <a class="backlink" style="margin:0" onclick="showSignIn()">Sign in →</a></p>
-  </div>
-
-  <div class="card formcard hidden" id="completeProfileCard">
-    <h2>Finish setting up your profile</h2>
-    <p class="hint" style="margin-bottom:8px">Welcome, <span id="completeProfileName">there</span>! Just a few more details to finish setting up.</p>
-    <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="compPhone" inputmode="tel" placeholder="e.g. 073 000 0000"></label>
-    <label class="f"><em>I am a... <b>*</b></em>
-      <select id="compRole" onchange="S('compRoomWrap').classList.toggle('hidden', this.value!=='tenant'); S('compOwnerCodeWrap').classList.toggle('hidden', this.value!=='owner')">
-        <option value="tenant">Tenant</option>
-        <option value="owner">Owner / Landlord</option>
-      </select>
-    </label>
-    <label class="f" id="compRoomWrap"><em>Room number <b>*</b></em><input type="text" id="compRoom" placeholder="e.g. 3"></label>
-    <label class="f hidden" id="compOwnerCodeWrap"><em>Owner access code <b>*</b></em><input type="password" id="compOwnerCode" placeholder="Ask the Landlord for this"></label>
-    <button class="btn primary" style="width:100%;margin-top:6px" onclick="completeOAuthProfile()">Finish Setup</button>
-    <p class="hint" id="completeProfileError" style="color:#D9534F;display:none;margin-top:10px"></p>
-  </div>
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
-</div>
-
-<div class="wrap hidden" id="viewHome">
+<div class="wrap" id="viewHome">
   <header>
     <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
     <h1>Smart Residential</h1>
@@ -717,7 +644,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     </div>
   </div>
 
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); signOutUser()">Sign out</a></footer>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a></footer>
 </div>
 
 <div class="wrap hidden" id="viewOwnerHome">
@@ -725,7 +652,7 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
     <span class="badge">MAOKA RESIDENCE · OWNER</span>
     <h1>Owner Console</h1>
     <div class="sub">7207 Isazi Street, Olivenhoutbosch Ext 36 · Run the property from here</div>
-    <div class="rolebar"><span id="ownerWelcome">Owner</span> · <a class="backlink" style="margin:0" onclick="signOutUser()">Sign out</a></div>
+    <div class="rolebar"><span id="ownerWelcome">Owner</span> · <a class="backlink" style="margin:0" onclick="backToTenantView()">Switch to Tenant view</a></div>
   </header>
 
   <div class="card" id="ownerDashboardCard" style="text-align:left">
@@ -837,6 +764,20 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
 <!-- INSTALL APP MODAL (manual instructions, e.g. iOS Safari) -->
+<!-- PIN MODAL (owner access) -->
+<div class="modal-overlay hidden" id="pinModal">
+  <div class="modal-card">
+    <h3>Owner access</h3>
+    <p class="hint" style="margin-bottom:4px">Enter the owner PIN to continue.</p>
+    <label class="f"><input type="password" id="pinInput" placeholder="PIN" inputmode="numeric"></label>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closePinModal()">Cancel</button>
+      <button class="btn primary" onclick="checkPin()">Confirm</button>
+    </div>
+    <p class="hint" id="pinError" style="color:#D9534F;display:none;margin-top:8px">Incorrect PIN — try again.</p>
+  </div>
+</div>
+
 <div class="modal-overlay hidden" id="installModal">
   <div class="modal-card">
     <h3>Install the App</h3>
@@ -1175,6 +1116,21 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <button class="btn primary" id="btnNext" onclick="go(1)">Continue</button>
 </div></div>
 
+<div class="wrap hidden" id="viewAccessrevoked">
+  <header>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Access Ended</h1>
+    <div class="sub">Your notice period has concluded.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <h2 style="margin-bottom:10px">🔒 This room's tenant access has ended</h2>
+    <p class="hint" id="accessRevokedText" style="margin-bottom:14px">Your one calendar month's notice to vacate has concluded, so tenant access to this app for your room has ended.</p>
+    <p class="hint">If you believe this is a mistake, or you still need something from the Landlord, please get in touch directly:</p>
+    <p style="margin-top:10px"><a class="backlink" style="margin:0" href="https://wa.me/27622553687" target="_blank">Message the Landlord on WhatsApp</a></p>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a></footer>
+</div>
+
 <div class="wrap hidden" id="viewAnnounce">
   <header>
     <a class="backlink" onclick="setView('home')">← Back to Home</a>
@@ -1364,183 +1320,67 @@ const S = id => document.getElementById(id);
 const val = id => S(id).value.trim();
 function toast(m){ const t=S('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2600); }
 
-/* =========================================================================
-   FIREBASE AUTH + PROFILE ROUTING
-   Replace firebaseConfig below with YOUR OWN Firebase project's config
-   (Firebase Console → Project settings → General → Your apps → SDK setup).
-   Requires: Authentication (Email/Password provider) + Firestore enabled.
-   ========================================================================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyCsohZbLtwZajZvQcHlak1vJO_Cx_wmMFs",
-  authDomain: "maoka-residence.firebaseapp.com",
-  projectId: "maoka-residence",
-  storageBucket: "maoka-residence.firebasestorage.app",
-  messagingSenderId: "660418494859",
-  appId: "1:660418494859:web:5ff458bb1599dac85caf8e"
-};
-let FIREBASE_READY = false;
-let auth, db;
-try{
-  if(firebaseConfig.apiKey === "REPLACE_ME") throw new Error('Firebase config not set up yet');
-  firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-  FIREBASE_READY = true;
-}catch(e){
-  console.error('Firebase setup problem:', e.message);
-  const box = document.createElement('div');
-  box.style.cssText = 'background:#D9534F;color:#fff;padding:14px 18px;text-align:center;font-size:14px;position:relative;z-index:200';
-  box.innerHTML = "<b>This app isn't connected to a live Firebase project yet.</b><br>Sign-in and profile creation won't work until <code>firebaseConfig</code> in the page source is filled in with a real project's details.";
-  document.body.prepend(box);
-}
-
-const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService'];
+/* ---------- role gate: Tenant (default) / Owner (PIN-gated) ---------- */
+const OWNER_PIN = '2533'; // Change this to your own owner access code
+const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService','viewAccessrevoked'];
 const OWNER_VIEW_IDS = ['viewOwnerHome','viewAnnounce','viewExpenses','viewPayments','viewOwnerfaults','viewOwnercomplaints','viewOwnerservices','viewReports','viewContracts','viewOwnernotices'];
+let CURRENT_ROLE = 'tenant'; // resets to tenant on every fresh page load — PIN is required each session to reach Owner
+let TENANT_ACCESS_REVOKED = false;
 
-let CURRENT_ROLE = null;
-let CURRENT_PROFILE = null;
-
-function showSignIn(){ S('createProfileCard').classList.add('hidden'); S('forgotPasswordCard').classList.add('hidden'); S('completeProfileCard').classList.add('hidden'); S('signInCard').classList.remove('hidden'); }
-function showCreateProfile(){ S('signInCard').classList.add('hidden'); S('forgotPasswordCard').classList.add('hidden'); S('completeProfileCard').classList.add('hidden'); S('createProfileCard').classList.remove('hidden'); }
-function showForgotPassword(){ S('signInCard').classList.add('hidden'); S('createProfileCard').classList.add('hidden'); S('forgotPasswordCard').classList.remove('hidden'); }
-function sendPasswordReset(){
-  clearAuthErr('forgotPasswordError'); S('forgotPasswordInfo').style.display='none';
-  if(!FIREBASE_READY) return authErr('forgotPasswordError', 'This app isn\'t connected to a Firebase project yet — ask your developer to finish setup.');
-  const email = val('fpEmail');
-  if(!email) return authErr('forgotPasswordError', 'Please enter your email address');
-  auth.sendPasswordResetEmail(email).then(() => {
-    const info = S('forgotPasswordInfo'); info.textContent = 'Reset link sent — check your email (including spam/junk).'; info.style.display='block';
-  }).catch(err => authErr('forgotPasswordError', friendlyAuthError(err)));
+/* ---------- tenant access auto-revocation: one calendar month after notice is given ---------- */
+function addCalendarMonth(d){
+  const nd = new Date(d);
+  nd.setMonth(nd.getMonth() + 1);
+  return nd;
 }
-function authErr(id, msg){ const e = S(id); e.textContent = msg; e.style.display = 'block'; }
-function clearAuthErr(id){ const e = S(id); e.style.display = 'none'; }
-
-function friendlyAuthError(err){
-  const map = {
-    'auth/email-already-in-use': 'That email already has a profile — try signing in instead.',
-    'auth/invalid-email': 'Please enter a valid email address.',
-    'auth/weak-password': 'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a number.',
-    'auth/wrong-password': 'Incorrect password.',
-    'auth/user-not-found': 'No profile found with that email.',
-    'auth/too-many-requests': 'Too many attempts — please wait a moment and try again.',
-    'auth/network-request-failed': 'Network error — check your connection and try again.'
-  };
-  return map[err.code] || err.message;
+function checkTenantAccess(){
+  const profile = getProfile();
+  if(!profile || !profile.room || !SCRIPT_URL) return;
+  jsonpFetch('notices', list => {
+    const notices = Array.isArray(list) ? list : [];
+    const mine = notices.filter(n => String(n.room||'').trim() === String(profile.room).trim());
+    if(!mine.length) return;
+    const latest = mine.sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0))[0];
+    if(!latest.submittedAt) return;
+    const revokeDate = addCalendarMonth(new Date(latest.submittedAt));
+    if(new Date() >= revokeDate){
+      TENANT_ACCESS_REVOKED = true;
+      S('accessRevokedText').textContent = `Your one calendar month's notice to vacate (given ${fmtDate(latest.submittedAt)}) concluded on ${fmtDate(revokeDate)}, so tenant access to this app for Room ${profile.room} has ended.`;
+      if(CURRENT_ROLE === 'tenant') setView('accessrevoked');
+    }
+  }, () => {});
 }
 
-function signInWithGoogle(){
-  clearAuthErr('authError');
-  if(!FIREBASE_READY) return authErr('authError', 'This app isn\'t connected to a Firebase project yet — ask your developer to finish setup.');
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => authErr('authError', friendlyAuthError(err)));
+function promptRoleSwitch(){
+  S('pinInput').value = '';
+  S('pinError').style.display = 'none';
+  S('pinModal').classList.remove('hidden');
+  setTimeout(()=>S('pinInput').focus(), 50);
 }
-function signInWithMicrosoft(){
-  clearAuthErr('authError');
-  if(!FIREBASE_READY) return authErr('authError', 'This app isn\'t connected to a Firebase project yet — ask your developer to finish setup.');
-  const provider = new firebase.auth.OAuthProvider('microsoft.com');
-  auth.signInWithPopup(provider).catch(err => authErr('authError', friendlyAuthError(err)));
+function closePinModal(){ S('pinModal').classList.add('hidden'); }
+function checkPin(){
+  if(val('pinInput') === OWNER_PIN){
+    closePinModal();
+    CURRENT_ROLE = 'owner';
+    setView('home');
+    loadOwnerDashboard();
+  } else {
+    S('pinError').style.display = 'block';
+  }
 }
-function signIn(){
-  clearAuthErr('authError');
-  if(!FIREBASE_READY) return authErr('authError', 'This app isn\'t connected to a Firebase project yet — ask your developer to finish setup.');
-  const email = val('authEmail'), pass = val('authPassword');
-  if(!email || !pass) return authErr('authError', 'Please enter your email and password');
-  auth.signInWithEmailAndPassword(email, pass).catch(err => authErr('authError', friendlyAuthError(err)));
+function backToTenantView(){
+  CURRENT_ROLE = 'tenant';
+  setView('home');
+  renderRoleUI();
+  loadAnnouncements();
 }
-
-function isMixedPassword(pass){
-  return pass.length >= 8 && /[A-Z]/.test(pass) && /[a-z]/.test(pass) && /[0-9]/.test(pass);
-}
-function createProfile(){
-  clearAuthErr('createProfileError');
-  if(!FIREBASE_READY) return authErr('createProfileError', 'This app isn\'t connected to a Firebase project yet — ask your developer to finish setup.');
-  const name = val('cpName'), email = val('cpEmail'), pass = val('cpPassword'), phone = val('cpPhone'), role = S('cpRole').value;
-  if(!name || !email || !pass || !phone) return authErr('createProfileError', 'Please complete all required fields');
-  if(!isMixedPassword(pass)) return authErr('createProfileError', 'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a number.');
-  if(role === 'tenant' && !val('cpRoom')) return authErr('createProfileError', 'Please enter your room number');
-  if(role === 'owner' && val('cpOwnerCode') !== OWNER_ACCESS_CODE) return authErr('createProfileError', 'Incorrect owner access code');
-
-  auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-    return db.collection('profiles').doc(cred.user.uid).set({
-      name, phone, role, room: role === 'tenant' ? val('cpRoom') : null,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => cred.user.sendEmailVerification().catch(()=>{}));
-  }).catch(err => authErr('createProfileError', friendlyAuthError(err)));
-}
-
-function signOutUser(){ if(FIREBASE_READY) auth.signOut(); }
-
 function hideAllAppViews(){
   [...TENANT_VIEW_IDS, ...OWNER_VIEW_IDS].forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
 }
 
-if(FIREBASE_READY) auth.onAuthStateChanged(user => {
-  if(!user){
-    CURRENT_ROLE = null; CURRENT_PROFILE = null;
-    S('viewAuth').classList.remove('hidden');
-    hideAllAppViews();
-    S('nav').style.display = 'none';
-    return;
-  }
-  db.collection('profiles').doc(user.uid).get().then(doc => {
-    if(!doc.exists){
-      // No profile yet — typical for a first-time Google/Microsoft sign-in. Ask them to finish setup
-      // rather than signing them out (email/password sign-up already writes the profile at creation time).
-      S('signInCard').classList.add('hidden');
-      S('createProfileCard').classList.add('hidden');
-      S('forgotPasswordCard').classList.add('hidden');
-      S('completeProfileCard').classList.remove('hidden');
-      const nameEl = S('completeProfileName'); if(nameEl) nameEl.textContent = user.displayName || user.email || 'there';
-      return;
-    }
-    CURRENT_PROFILE = doc.data();
-    CURRENT_ROLE = CURRENT_PROFILE.role;
-    S('viewAuth').classList.add('hidden');
-    enterApp();
-  }).catch(() => {
-    authErr('authError', 'Could not load your profile. Please try again.');
-  });
-});
-
-function completeOAuthProfile(){
-  clearAuthErr('completeProfileError');
-  const user = auth.currentUser;
-  if(!user) return authErr('completeProfileError', 'Your session expired — please sign in again.');
-  const phone = val('compPhone'), role = S('compRole').value;
-  if(!phone) return authErr('completeProfileError', 'Please enter your contact number');
-  if(role === 'tenant' && !val('compRoom')) return authErr('completeProfileError', 'Please enter your room number');
-  if(role === 'owner' && val('compOwnerCode') !== OWNER_ACCESS_CODE) return authErr('completeProfileError', 'Incorrect owner access code');
-
-  const name = user.displayName || user.email || 'User';
-  db.collection('profiles').doc(user.uid).set({
-    name, phone, role, room: role === 'tenant' ? val('compRoom') : null,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    CURRENT_PROFILE = { name, phone, role, room: role === 'tenant' ? val('compRoom') : null };
-    CURRENT_ROLE = role;
-    S('completeProfileCard').classList.add('hidden');
-    S('viewAuth').classList.add('hidden');
-    enterApp();
-  }).catch(err => authErr('completeProfileError', friendlyAuthError(err)));
-}
-
-function enterApp(){
-  if(CURRENT_ROLE === 'tenant'){
-    saveProfile(CURRENT_PROFILE.name, CURRENT_PROFILE.room, CURRENT_PROFILE.phone);
-    setView('home');
-    renderRoleUI();
-    loadAnnouncements();
-    paint();
-    requestNotificationPermission();
-  } else if(CURRENT_ROLE === 'owner'){
-    const w = S('ownerWelcome'); if(w) w.textContent = CURRENT_PROFILE.name || 'Owner';
-    setView('home');
-    loadOwnerDashboard();
-  }
-}
-
 /* ---------- unified view router (role-aware) ---------- */
 function setView(v){
+  if(CURRENT_ROLE === 'tenant' && TENANT_ACCESS_REVOKED) v = 'accessrevoked';
   const ids = CURRENT_ROLE === 'owner' ? OWNER_VIEW_IDS : TENANT_VIEW_IDS;
   ids.forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
   const targetId = (v === 'home') ? (CURRENT_ROLE === 'owner' ? 'viewOwnerHome' : 'viewHome') : ('view'+v.charAt(0).toUpperCase()+v.slice(1));
@@ -1561,6 +1401,7 @@ function setView(v){
   if(v==='ownernotices') loadOwnerNotices();
   window.scrollTo({top:0,behavior:'instant'});
 }
+
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_q1htW6jdqbXt9F2_l08jr7TzTcZw4i4t5CzFlf1JFDaJA4BD0qZVjq_8ak6xxYPf/exec";
 /* ========================================== */
@@ -3180,7 +3021,11 @@ function exportExpensesPDF(){
 }
 
 setView('home');
-loadOwnerDashboard();
+renderRoleUI();
+loadAnnouncements();
+paint();
+requestNotificationPermission();
+checkTenantAccess();
 /* ---------- PWA: install prompt + service worker ---------- */
 </script>
 </body>
