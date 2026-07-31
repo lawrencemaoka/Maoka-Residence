@@ -651,9 +651,18 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   <header>
     <span class="badge">MAOKA RESIDENCE · OWNER</span>
     <h1>Owner Console</h1>
-    <div class="sub">7207 Isazi Street, Olivenhoutbosch Ext 36 · Run the property from here</div>
+    <div class="sub">Managing multiple properties — pick a location, or view all combined.</div>
     <div class="rolebar"><span id="ownerWelcome">Owner</span> · <a class="backlink" style="margin:0" onclick="backToTenantView()">Switch to Tenant view</a></div>
   </header>
+
+  <div class="card" style="text-align:left">
+    <label class="f" style="margin:0"><em>Viewing</em>
+      <select id="locationFilterSelect" onchange="setLocationFilter(this.value)">
+        <option value="All">🌍 All Locations (combined)</option>
+        <option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option>
+      </select>
+    </label>
+  </div>
 
   <div class="card" id="ownerDashboardCard" style="text-align:left">
     <h2 style="margin-bottom:12px">📊 This month at a glance</h2>
@@ -813,6 +822,13 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
         <label class="f"><em>Date of birth <b>*</b></em><input type="date" id="tDob"></label>
         <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="tPhone" inputmode="tel" placeholder="e.g. 073 000 0000"></label>
       </div>
+      <label class="f"><em>Email address <span style="font-weight:400;color:var(--muted)">(optional — for your Welcome Pack)</span></em><input type="email" id="tEmail" autocomplete="email" placeholder="e.g. name@email.com"></label>
+      <label class="f"><em>Property location <b>*</b></em>
+        <select id="tLocation">
+          <option value="">Select…</option>
+          <option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option>
+        </select>
+      </label>
       <label class="f"><em>Room number <b>*</b></em><input type="text" id="tRoom" placeholder="e.g. 3"></label>
       <label class="f"><em>Permanent address <b>*</b></em><textarea id="tAddr" rows="2" placeholder="Home / permanent address"></textarea></label>
       <div class="row2">
@@ -930,9 +946,11 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
       <div id="faultIdFields">
         <label class="f"><em>Full name <b>*</b></em><input type="text" id="fName" placeholder="Your name"></label>
         <div class="row2">
+          <label class="f"><em>Location <b>*</b></em>
+            <select id="fLocation"><option value="">Select…</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select></label>
           <label class="f"><em>Room No. <b>*</b></em><input type="text" id="fRoom" placeholder="e.g. 3"></label>
-          <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="fPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
         </div>
+        <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="fPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
       </div>
       <label class="f"><em>Category <b>*</b></em>
         <select id="fCategory">
@@ -988,9 +1006,11 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
       <div id="complaintIdFields">
         <label class="f"><em>Full name <b>*</b></em><input type="text" id="coName" placeholder="Your name"></label>
         <div class="row2">
+          <label class="f"><em>Location <b>*</b></em>
+            <select id="coLocation"><option value="">Select…</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select></label>
           <label class="f"><em>Room No. <b>*</b></em><input type="text" id="coRoom" placeholder="e.g. 3"></label>
-          <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="coPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
         </div>
+        <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="coPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
       </div>
       <label class="f"><em>What's this about? <b>*</b></em>
         <select id="coCategory">
@@ -1041,9 +1061,11 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
       <div id="serviceIdFields">
         <label class="f"><em>Full name <b>*</b></em><input type="text" id="svName" placeholder="Your name"></label>
         <div class="row2">
+          <label class="f"><em>Location <b>*</b></em>
+            <select id="svLocation"><option value="">Select…</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select></label>
           <label class="f"><em>Room No. <b>*</b></em><input type="text" id="svRoom" placeholder="e.g. 3"></label>
-          <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="svPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
         </div>
+        <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="svPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
       </div>
       <label class="f"><em>What do you need? <b>*</b></em>
         <select id="svType">
@@ -1087,9 +1109,11 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
       <div id="noticeIdFields">
         <label class="f"><em>Full name <b>*</b></em><input type="text" id="nName" placeholder="As it appears on your lease"></label>
         <div class="row2">
+          <label class="f"><em>Location <b>*</b></em>
+            <select id="nLocation"><option value="">Select…</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select></label>
           <label class="f"><em>Room No. <b>*</b></em><input type="text" id="nRoom" placeholder="e.g. 3"></label>
-          <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="nPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
         </div>
+        <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="nPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
       </div>
       <label class="f"><em>Planned move-out date <b>*</b></em><input type="date" id="nDate"></label>
       <label class="f"><em>Forwarding address (for deposit refund) <b>*</b></em><textarea id="nAddr" rows="2" placeholder="Where should we send your deposit / correspondence after you leave?"></textarea></label>
@@ -1338,14 +1362,17 @@ function checkTenantAccess(){
   if(!profile || !profile.room || !SCRIPT_URL) return;
   jsonpFetch('notices', list => {
     const notices = Array.isArray(list) ? list : [];
-    const mine = notices.filter(n => String(n.room||'').trim() === String(profile.room).trim());
+    const mine = notices.filter(n =>
+      String(n.room||'').trim() === String(profile.room).trim() &&
+      String(n.location||'').trim() === String(profile.location||'').trim()
+    );
     if(!mine.length) return;
     const latest = mine.sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0))[0];
     if(!latest.submittedAt) return;
     const revokeDate = addCalendarMonth(new Date(latest.submittedAt));
     if(new Date() >= revokeDate){
       TENANT_ACCESS_REVOKED = true;
-      S('accessRevokedText').textContent = `Your one calendar month's notice to vacate (given ${fmtDate(latest.submittedAt)}) concluded on ${fmtDate(revokeDate)}, so tenant access to this app for Room ${profile.room} has ended.`;
+      S('accessRevokedText').textContent = `Your one calendar month's notice to vacate (given ${fmtDate(latest.submittedAt)}) concluded on ${fmtDate(revokeDate)}, so tenant access to this app for ${profile.location ? profile.location+' · ' : ''}Room ${profile.room} has ended.`;
       if(CURRENT_ROLE === 'tenant') setView('accessrevoked');
     }
   }, () => {});
@@ -1403,7 +1430,7 @@ function setView(v){
 }
 
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_q1htW6jdqbXt9F2_l08jr7TzTcZw4i4t5CzFlf1JFDaJA4BD0qZVjq_8ak6xxYPf/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0I4ng45Q-zHjldfEKjq1Z82TcnhG0uYhfoTUHNd3bPzTLzXy33MF-jkmQeckIi8mr/exec";
 /* ========================================== */
 
 const LANDLORD = "Mr. and Mrs. Maoka";
@@ -1412,6 +1439,8 @@ const ADDRESS = "7207 Isazi Street, Olivenhoutbosch Extension 36";
 const WIFI_SSID = "MySpot";
 const WIFI_PASSWORD = "Build@2025";
 const WIFI_QR_STRING = `WIFI:T:WPA;S:${WIFI_SSID};P:${WIFI_PASSWORD};;`;
+// Edit this list to add/remove properties you manage — used everywhere a location is selected or filtered.
+const LOCATIONS = ['Olieven', 'Midrand', 'Tembisa', 'Pretoria'];
 const CHECKLIST = [
   ["Walls & Ceiling","All"],["Floor Tiles","All"],["Main Door & Lock","1"],["Windows","2"],
   ["Lights & Fixtures","All"],["2-Plate Stove","1"],["Toilet & Basin","1"],["Shower & Tiles","All"]
@@ -1423,15 +1452,16 @@ let step = 1;
 function getProfile(){
   try{ return JSON.parse(localStorage.getItem('maoka_profile')||'null'); }catch(e){ return null; }
 }
-function saveProfile(name, room, phone){
+function saveProfile(name, room, phone, location){
   if(!name || !room) return;
-  try{ localStorage.setItem('maoka_profile', JSON.stringify({name, room, phone})); }catch(e){}
+  const existing = getProfile() || {};
+  try{ localStorage.setItem('maoka_profile', JSON.stringify({name, room, phone, location: location || existing.location || ''})); }catch(e){}
 }
 const CLAIM_MAP = {
-  fault:     { wrap:'faultIdFields',     box:'faultClaimBox',     name:'fName',  room:'fRoom',  phone:'fPhone',  boxName:'faultClaimName',     boxRoom:'faultClaimRoom' },
-  notice:    { wrap:'noticeIdFields',    box:'noticeClaimBox',    name:'nName',  room:'nRoom',  phone:'nPhone',  boxName:'noticeClaimName',    boxRoom:'noticeClaimRoom' },
-  complaint: { wrap:'complaintIdFields', box:'complaintClaimBox', name:'coName', room:'coRoom', phone:'coPhone', boxName:'complaintClaimName', boxRoom:'complaintClaimRoom' },
-  service:   { wrap:'serviceIdFields',   box:'serviceClaimBox',   name:'svName', room:'svRoom', phone:'svPhone', boxName:'serviceClaimName',   boxRoom:'serviceClaimRoom' }
+  fault:     { wrap:'faultIdFields',     box:'faultClaimBox',     name:'fName',  room:'fRoom',  phone:'fPhone',  location:'fLocation',  boxName:'faultClaimName',     boxRoom:'faultClaimRoom' },
+  notice:    { wrap:'noticeIdFields',    box:'noticeClaimBox',    name:'nName',  room:'nRoom',  phone:'nPhone',  location:'nLocation',  boxName:'noticeClaimName',    boxRoom:'noticeClaimRoom' },
+  complaint: { wrap:'complaintIdFields', box:'complaintClaimBox', name:'coName', room:'coRoom', phone:'coPhone', location:'coLocation', boxName:'complaintClaimName', boxRoom:'complaintClaimRoom' },
+  service:   { wrap:'serviceIdFields',   box:'serviceClaimBox',   name:'svName', room:'svRoom', phone:'svPhone', location:'svLocation', boxName:'serviceClaimName',   boxRoom:'serviceClaimRoom' }
 };
 function applyClaim(kind){
   const m = CLAIM_MAP[kind]; if(!m) return;
@@ -1441,8 +1471,9 @@ function applyClaim(kind){
     S(m.name).value = p.name;
     S(m.room).value = p.room;
     S(m.phone).value = p.phone || '';
+    if(S(m.location)) S(m.location).value = p.location || '';
     S(m.boxName).textContent = p.name;
-    S(m.boxRoom).textContent = p.room;
+    S(m.boxRoom).textContent = (p.location ? p.location+' · Room ' : 'Room ') + p.room;
     idFields.classList.add('hidden');
     box.classList.remove('hidden');
   } else {
@@ -1602,7 +1633,7 @@ function need(ids){
 function go(dir){
   if(dir<0){ step=Math.max(1,step-1); paint(); return; }
   if(step===1){
-    const req = ['tName','tDob','tPhone','tRoom','tAddr','kinName','kinPhone','tStart','empStatus','empName'];
+    const req = ['tName','tDob','tPhone','tLocation','tRoom','tAddr','kinName','kinPhone','tStart','empStatus','empName'];
     if(S('empStatus').value==='Employed') req.push('empType');
     if(!need(req)) return toast('Please complete all required fields');
     const digits = s=>s.replace(/\D/g,'');
@@ -1708,6 +1739,16 @@ function renderWelcomePack(){
       </ul>
     </div>
     <div class="wp-sec">
+      <h4>Payment Details</h4>
+      <div class="wp-row"><span>Business Entity</span><span>${BANK_DETAILS.businessEntity}</span></div>
+      <div class="wp-row"><span>Account Name</span><span>${BANK_DETAILS.accountHolder}</span></div>
+      <div class="wp-row"><span>Bank</span><span>${BANK_DETAILS.bank}</span></div>
+      <div class="wp-row"><span>Account No.</span><span>${BANK_DETAILS.accountNumber.replace(/(\d{4})(\d{4})(\d{2})/, '$1 $2 $3')}</span></div>
+      <div class="wp-row"><span>Branch Code</span><span>${BANK_DETAILS.branchCode}</span></div>
+      <div class="wp-row"><span>Location</span><span>${BANK_DETAILS.location}</span></div>
+      <p class="hint" style="margin-top:8px">Banking reference: <b style="color:var(--gold)">Rental – ${val('tName')||'[Your name]'} / Room ${room}</b></p>
+    </div>
+    <div class="wp-sec">
       <h4>Payments to remember</h4>
       <div class="wp-row"><span>Monthly rent</span><span>R3 500.00, in advance</span></div>
       <div class="wp-row"><span>2nd deposit instalment (R1 750.00)</span><span>Due by ${secondDepositDate()}</span></div>
@@ -1750,14 +1791,14 @@ function finish(){
   S('phase2').classList.add('on');
   S('phasebar').classList.add('done');
   syncToSheet();
-  saveProfile(val('tName'), val('tRoom'), val('tPhone'));
+  saveProfile(val('tName'), val('tRoom'), val('tPhone'), val('tLocation'));
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function payload(){
   return {
     type:'lease', ref:REF, signedAt:new Date().toISOString(),
-    tenant:{ name:val('tName'), dob:val('tDob'), phone:val('tPhone'), room:val('tRoom'),
+    tenant:{ name:val('tName'), dob:val('tDob'), phone:val('tPhone'), email:val('tEmail'), location:val('tLocation'), room:val('tRoom'),
       address:val('tAddr'), kinName:val('kinName'), kinPhone:val('kinPhone'), start:val('tStart'),
       vehicle:val('tVehicle') },
     sticker: S('sticker').checked,
@@ -2006,6 +2047,15 @@ function buildWelcomePackPDF(download){
   bullet('CCTV operates in common areas for everyone\u2019s security.');
   bullet('Guests are welcome for short visits; no stay may exceed 30 consecutive days, and subletting is not permitted.');
 
+  y+=2; sec('PAYMENT DETAILS');
+  kv('Business Entity', BANK_DETAILS.businessEntity);
+  kv('Account Name', BANK_DETAILS.accountHolder);
+  kv('Bank', BANK_DETAILS.bank);
+  kv('Account No.', BANK_DETAILS.accountNumber.replace(/(\d{4})(\d{4})(\d{2})/, '$1 $2 $3'));
+  kv('Branch Code', BANK_DETAILS.branchCode);
+  kv('Location', BANK_DETAILS.location);
+  kv('Banking reference', 'Rental – '+(val('tName')||'[Your name]')+' / Room '+(val('tRoom')||'—'));
+
   y+=2; sec('PAYMENTS TO REMEMBER');
   kv('Monthly rent', 'R3 500.00, in advance');
   kv('2nd deposit instalment (R1 750.00)', 'Due by '+secondDepositDate());
@@ -2115,14 +2165,14 @@ document.getElementById('fFile') && document.getElementById('fFile').addEventLis
   reader.readAsDataURL(f);
 });
 function submitFault(){
-  const req = ['fName','fRoom','fPhone','fCategory','fDesc'];
+  const req = ['fName','fLocation','fRoom','fPhone','fCategory','fDesc'];
   if(!need(req)) return toast('Please complete all required fields');
   const ref = refWithPrefix('FLT');
   const data = { type:'fault', ref, submittedAt:new Date().toISOString(),
-    name:val('fName'), room:val('fRoom'), phone:val('fPhone'),
+    name:val('fName'), location:val('fLocation'), room:val('fRoom'), phone:val('fPhone'),
     category:S('fCategory').value, urgency:S('fUrgency').value, description:val('fDesc'), photo:FAULT_PHOTO };
   postToSheet(data);
-  saveProfile(val('fName'), val('fRoom'), val('fPhone'));
+  saveProfile(val('fName'), val('fRoom'), val('fPhone'), val('fLocation'));
   S('faultForm').classList.add('hidden');
   S('faultDone').classList.remove('hidden');
   S('faultRef').textContent = ref;
@@ -2133,29 +2183,29 @@ function submitFault(){
 
 /* ---------- owner: view & manage fault reports ---------- */
 function submitComplaint(){
-  const req = ['coName','coRoom','coPhone','coCategory','coFrequency','coDesc'];
+  const req = ['coName','coLocation','coRoom','coPhone','coCategory','coFrequency','coDesc'];
   if(!need(req)) return toast('Please complete all required fields');
   const ref = refWithPrefix('CMP');
   const data = { type:'complaint', ref, submittedAt:new Date().toISOString(),
-    name:val('coName'), room:val('coRoom'), phone:val('coPhone'),
+    name:val('coName'), location:val('coLocation'), room:val('coRoom'), phone:val('coPhone'),
     category:val('coCategory'), frequency:val('coFrequency'), description:val('coDesc'),
     confidential: S('coConfidential').checked };
   postToSheet(data);
-  saveProfile(val('coName'), val('coRoom'), val('coPhone'));
+  saveProfile(val('coName'), val('coRoom'), val('coPhone'), val('coLocation'));
   S('complaintForm').classList.add('hidden');
   S('complaintDone').classList.remove('hidden');
   S('complaintRef').textContent = ref;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function submitServiceRequest(){
-  const req = ['svName','svRoom','svPhone','svType','svDesc'];
+  const req = ['svName','svLocation','svRoom','svPhone','svType','svDesc'];
   if(!need(req)) return toast('Please complete all required fields');
   const ref = refWithPrefix('SVC');
   const data = { type:'servicerequest', ref, submittedAt:new Date().toISOString(),
-    name:val('svName'), room:val('svRoom'), phone:val('svPhone'),
+    name:val('svName'), location:val('svLocation'), room:val('svRoom'), phone:val('svPhone'),
     requestType:val('svType'), description:val('svDesc') };
   postToSheet(data);
-  saveProfile(val('svName'), val('svRoom'), val('svPhone'));
+  saveProfile(val('svName'), val('svRoom'), val('svPhone'), val('svLocation'));
   S('serviceForm').classList.add('hidden');
   S('serviceDone').classList.remove('hidden');
   S('serviceRef').textContent = ref;
@@ -2164,15 +2214,15 @@ function submitServiceRequest(){
 
 /* ---------- owner: manage complaints & service requests (shared list engine) ---------- */
 function submitNotice(){
-  const req = ['nName','nRoom','nPhone','nDate','nAddr'];
+  const req = ['nName','nLocation','nRoom','nPhone','nDate','nAddr'];
   if(!need(req)) return toast('Please complete all required fields');
   if(!S('nAck').checked) return toast('Please confirm you understand the notice terms');
   const ref = refWithPrefix('NTV');
   const data = { type:'notice', ref, submittedAt:new Date().toISOString(),
-    name:val('nName'), room:val('nRoom'), phone:val('nPhone'),
+    name:val('nName'), location:val('nLocation'), room:val('nRoom'), phone:val('nPhone'),
     moveOutDate:val('nDate'), forwardingAddress:val('nAddr'), reason:val('nReason') };
   postToSheet(data);
-  saveProfile(val('nName'), val('nRoom'), val('nPhone'));
+  saveProfile(val('nName'), val('nRoom'), val('nPhone'), val('nLocation'));
   buildNoticePDF(ref);
   S('noticeForm').classList.add('hidden');
   S('noticeDone').classList.remove('hidden');
@@ -2255,10 +2305,12 @@ if('serviceWorker' in navigator){
   });
 }
 const BANK_DETAILS = {
+  businessEntity: "Home Owners",
   accountHolder: "Purplemount Business Solutions (Pty) Ltd",
   bank: "Capitec Business",
   accountNumber: "1054376204",
-  branchCode: "450105"
+  branchCode: "450105",
+  location: "Centurion, Gauteng"
 };
 
 function waLinkTo(phone, text){
