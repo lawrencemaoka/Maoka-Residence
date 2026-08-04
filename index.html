@@ -695,6 +695,28 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
     </div>
   </div>
 
+  <div class="card navcard" id="browsePropertiesCard" onclick="setView('browseProperties')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🏘️</span>
+      <div class="navcard-txt">
+        <h3>Browse Properties for Rent</h3>
+        <p>Rooms, bachelors, townhouses and houses listed by landlords across the platform.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="applyCard" onclick="setView('apply')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📝</span>
+      <div class="navcard-txt">
+        <h3>Apply for Accommodation</h3>
+        <p>Not a tenant yet? Submit an application for a room and we'll get back to you.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
   <div class="card navcard" id="giveNoticeCard" onclick="setView('notice')">
     <div class="navcard-row">
       <span class="navcard-ic">📦</span>
@@ -717,7 +739,7 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
     </div>
   </div>
 
-  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); clearAppCache()">Not seeing the latest update? Tap here</a></footer>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); logoutTenant()">Sign out</a> &nbsp;·&nbsp; <a class="backlink hidden" id="landlordPortalHomeLink" style="margin:0" href="#" onclick="event.preventDefault(); setView('landlordPortal')">Landlord Portal</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); clearAppCache()">Not seeing the latest update? Tap here</a></footer>
 </div>
 
 <div class="wrap hidden" id="viewOwnerHome">
@@ -838,6 +860,17 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
       <div class="navcard-txt">
         <h3>Notices to Vacate</h3>
         <p>Tenants who've given notice — move-out date, forwarding address and reason.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="card navcard" id="ownerApplicationsCard" onclick="setView('ownerapplications')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📝</span>
+      <div class="navcard-txt">
+        <h3>Accommodation Applications</h3>
+        <p>Applications from prospective tenants — review, approve, or decline.</p>
       </div>
       <span class="navcard-arrow">›</span>
     </div>
@@ -985,9 +1018,11 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
       <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
       <h2>Lease signed</h2>
       <div class="ref" id="refNo">—</div>
-      <p>Your signed lease PDF has been downloaded to this device. Keep it safe and send a copy to the Landlord on WhatsApp at <b style="color:var(--gold)">062 255 3687 / 073 173 0521</b>.</p>
+      <p>Your signed lease PDF has been downloaded to this device, and WhatsApp should have opened so you can send it straight to the Landlord at <b style="color:var(--gold)">062 255 3687</b>. If it didn't open, use the button below.</p>
       <p id="syncMsg" style="font-size:13px"></p>
-      <button class="btn primary" style="max-width:320px;margin:14px auto 0;display:block" onclick="buildPDF(true)">Download PDF again</button>
+      <p id="waStatus" style="font-size:13px"></p>
+      <button class="btn primary" style="max-width:320px;margin:14px auto 0;display:block" onclick="sendLeaseToLandlordWhatsApp(buildPDF(false))">Send lease on WhatsApp</button>
+      <button class="btn ghost" style="max-width:320px;margin:10px auto 0;display:block" onclick="buildPDF(true)">Download PDF again</button>
     </div>
 
     <div class="card" style="margin-top:16px;text-align:left">
@@ -1228,6 +1263,266 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); clearAppCache()">Not seeing the latest update? Tap here</a></footer>
 </div>
 
+<div class="wrap hidden" id="viewLogin">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Tenant Login</h1>
+    <div class="sub">Sign in to manage your lease, faults and applications.</div>
+  </header>
+  <section id="loginForm">
+    <div class="card formcard">
+      <h2>Sign in</h2>
+      <label class="f"><em>Username <b>*</b></em><input type="text" id="loUsername" autocomplete="username" placeholder="Your username"></label>
+      <label class="f"><em>Password <b>*</b></em><input type="password" id="loPassword" autocomplete="current-password" placeholder="Your password"></label>
+      <div id="loginError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px">Incorrect username or password — try again.</div>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="loginTenant()">Sign in</button>
+      <p class="hint" style="margin-top:14px;text-align:center">
+        <a class="backlink" style="margin:0" onclick="setView('forgotPassword')">Forgot password?</a>
+        &nbsp;·&nbsp;
+        <a class="backlink" style="margin:0" onclick="setView('register')">Register as a Tenant</a>
+      </p>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewRegister">
+  <header>
+    <a class="backlink" onclick="setView('login')">← Back to Login</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Create an Account</h1>
+    <div class="sub">Register as a tenant, or as a landlord to list your own properties.</div>
+  </header>
+  <section id="registerForm">
+    <div class="card formcard">
+      <h2>Your details</h2>
+      <label class="f"><em>I am registering as a <b>*</b></em>
+        <select id="reRole"><option value="Tenant">Tenant — looking for accommodation</option><option value="Landlord">Landlord — I want to list properties</option></select></label>
+      <label class="f"><em>Full name <b>*</b></em><input type="text" id="reName" placeholder="Your name"></label>
+      <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="rePhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
+      <label class="f"><em>Email address (optional)</em><input type="email" id="reEmail" placeholder="you@example.com" autocomplete="email"></label>
+      <label class="f"><em>Choose a username <b>*</b></em><input type="text" id="reUsername" autocomplete="username" placeholder="e.g. jsmith"></label>
+      <label class="f"><em>Choose a password <b>*</b></em><input type="password" id="rePassword" autocomplete="new-password" placeholder="At least 6 characters"></label>
+      <label class="f"><em>Confirm password <b>*</b></em><input type="password" id="rePassword2" autocomplete="new-password" placeholder="Re-enter your password"></label>
+      <div id="registerError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="registerTenant()">Create account</button>
+      <p class="hint" style="margin-top:14px;text-align:center">Already have an account? <a class="backlink" style="margin:0" onclick="setView('login')">Sign in</a></p>
+    </div>
+  </section>
+  <section id="registerDone" class="hidden">
+    <div class="card success">
+      <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
+      <h2>Account created</h2>
+      <p>You're registered. You can now sign in and submit an accommodation application.</p>
+      <button class="btn primary" style="max-width:320px;margin:14px auto 0;display:block" onclick="setView('login')">Go to Login</button>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewForgotPassword">
+  <header>
+    <a class="backlink" onclick="setView('login')">← Back to Login</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Forgot Password</h1>
+    <div class="sub">We'll send a reset code to your registered contact number.</div>
+  </header>
+  <section id="forgotForm">
+    <div class="card formcard">
+      <h2>Reset your password</h2>
+      <label class="f"><em>Username <b>*</b></em><input type="text" id="fpUsername" placeholder="Your username"></label>
+      <div id="forgotError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="requestPasswordReset()">Send reset code</button>
+    </div>
+  </section>
+  <section id="forgotDone" class="hidden">
+    <div class="card success">
+      <h2>Check WhatsApp</h2>
+      <p>A reset code has been sent. Tap below once you have it.</p>
+      <button class="btn primary" style="max-width:320px;margin:14px auto 0;display:block" onclick="setView('resetPassword')">I have my code</button>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewResetPassword">
+  <header>
+    <a class="backlink" onclick="setView('login')">← Back to Login</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Reset Password</h1>
+    <div class="sub">Enter the code you received and choose a new password.</div>
+  </header>
+  <section id="resetForm">
+    <div class="card formcard">
+      <label class="f"><em>Username <b>*</b></em><input type="text" id="rpUsername" placeholder="Your username"></label>
+      <label class="f"><em>Reset code <b>*</b></em><input type="text" id="rpCode" placeholder="6-digit code" inputmode="numeric"></label>
+      <label class="f"><em>New password <b>*</b></em><input type="password" id="rpPassword" autocomplete="new-password" placeholder="At least 6 characters"></label>
+      <label class="f"><em>Confirm new password <b>*</b></em><input type="password" id="rpPassword2" autocomplete="new-password" placeholder="Re-enter new password"></label>
+      <div id="resetError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="resetPassword()">Reset password</button>
+    </div>
+  </section>
+  <section id="resetDone" class="hidden">
+    <div class="card success">
+      <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
+      <h2>Password reset</h2>
+      <p>You can now sign in with your new password.</p>
+      <button class="btn primary" style="max-width:320px;margin:14px auto 0;display:block" onclick="setView('login')">Go to Login</button>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewApply">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Accommodation Application</h1>
+    <div class="sub">Tell us about yourself and which room you're interested in.</div>
+  </header>
+  <section id="applyForm">
+    <div class="card formcard">
+      <h2>Applicant details</h2>
+      <div id="applyClaimBox" class="hint hidden" style="background:rgba(200,138,18,.12);border:1px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:12px;color:var(--paper)">
+        Applying as <b id="applyClaimName">—</b>
+        &nbsp;·&nbsp;<a class="backlink" style="margin:0" onclick="editClaim('apply')">Not you? Edit details</a>
+      </div>
+      <div id="applyIdFields">
+        <label class="f"><em>Full name <b>*</b></em><input type="text" id="apName" placeholder="Your name"></label>
+        <label class="f"><em>Contact number <b>*</b></em><input type="tel" id="apPhone" placeholder="e.g. 0730001234" inputmode="numeric"></label>
+      </div>
+      <label class="f"><em>Preferred location <b>*</b></em>
+        <select id="apLocation"><option value="">Select…</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select></label>
+      <label class="f"><em>Preferred move-in date <b>*</b></em><input type="date" id="apMoveIn"></label>
+      <label class="f"><em>Employment status <b>*</b></em>
+        <select id="apEmployment"><option value="">Select…</option><option>Employed</option><option>Self-employed</option><option>Student</option><option>Unemployed</option></select></label>
+      <label class="f"><em>Employer / business name (optional)</em><input type="text" id="apEmployer" placeholder="e.g. ABC Logistics"></label>
+      <label class="f"><em>Anything else we should know? (optional)</em><textarea id="apNotes" rows="3" placeholder="Number of occupants, vehicle, move-in flexibility, etc."></textarea></label>
+      <div id="applyError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="submitApplication()">Submit application</button>
+    </div>
+  </section>
+  <section id="applyDone" class="hidden">
+    <div class="card success">
+      <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
+      <h2>Application submitted</h2>
+      <div class="ref" id="applyRef">—</div>
+      <p>Thanks — the Landlord will review your application and get back to you.</p>
+      <button class="btn primary" id="applyWA" style="max-width:320px;margin:14px auto 0;display:block" onclick="">Send details on WhatsApp</button>
+      <button class="btn ghost" style="max-width:320px;margin:10px auto 0;display:block" onclick="setView('home')">Back to Home</button>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewBrowseProperties">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">PROPERTY MARKETPLACE</span>
+    <h1>Properties for Rent</h1>
+    <div class="sub">Listed by landlords across the platform.</div>
+  </header>
+  <div class="card" style="text-align:left;padding:14px 14px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="propertyFilterBar">
+      <button class="btn ghost propFilterBtn on" data-type="" style="flex:0 0 auto;padding:8px 14px;font-size:13.5px" onclick="setPropertyFilter('')">All</button>
+      <button class="btn ghost propFilterBtn" data-type="Room" style="flex:0 0 auto;padding:8px 14px;font-size:13.5px" onclick="setPropertyFilter('Room')">Room</button>
+      <button class="btn ghost propFilterBtn" data-type="Bachelor" style="flex:0 0 auto;padding:8px 14px;font-size:13.5px" onclick="setPropertyFilter('Bachelor')">Bachelor</button>
+      <button class="btn ghost propFilterBtn" data-type="TownHouse" style="flex:0 0 auto;padding:8px 14px;font-size:13.5px" onclick="setPropertyFilter('TownHouse')">Townhouse</button>
+      <button class="btn ghost propFilterBtn" data-type="House" style="flex:0 0 auto;padding:8px 14px;font-size:13.5px" onclick="setPropertyFilter('House')">House</button>
+    </div>
+  </div>
+  <div id="browsePropertiesBody"><p class="hint">Loading properties…</p></div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewLandlordPortal">
+  <header>
+    <a class="backlink" onclick="event.preventDefault(); logoutTenant()">Sign out</a>
+    <span class="badge">PROPERTY MARKETPLACE</span>
+    <h1>Landlord Portal</h1>
+    <div class="sub">List and manage your rental properties.</div>
+  </header>
+  <div id="landlordPortalLoggedOut" class="card hidden">
+    <h2>Sign in as a Landlord</h2>
+    <p class="hint" style="margin-bottom:14px">Register or sign in with a Landlord account to list your properties.</p>
+    <button class="btn primary" style="width:100%;margin-bottom:10px" onclick="setView('login')">Sign in</button>
+    <button class="btn ghost" style="width:100%" onclick="setView('register')">Register as a Landlord</button>
+  </div>
+  <div id="landlordPortalWrongRole" class="card hidden">
+    <h2>This account isn't a Landlord account</h2>
+    <p class="hint">You're signed in as a tenant. Register a separate account with the Landlord role to list properties.</p>
+    <button class="btn ghost" style="width:100%;margin-top:10px" onclick="setView('register')">Register as a Landlord</button>
+  </div>
+  <div id="landlordPortalBody" class="hidden">
+    <div class="card navcard" onclick="setView('listProperty')">
+      <div class="navcard-row">
+        <span class="navcard-ic">➕</span>
+        <div class="navcard-txt">
+          <h3>List a New Property</h3>
+          <p>Add a Room, Bachelor, Townhouse, or House to the marketplace.</p>
+        </div>
+        <span class="navcard-arrow">›</span>
+      </div>
+    </div>
+    <div class="card navcard" onclick="event.preventDefault(); promptRoleSwitch()">
+      <div class="navcard-row">
+        <span class="navcard-ic">🏠</span>
+        <div class="navcard-txt">
+          <h3>Manage Maoka Residence</h3>
+          <p>Fault reports, payments, contracts and tenants at 7207 Isazi Street (PIN required).</p>
+        </div>
+        <span class="navcard-arrow">›</span>
+      </div>
+    </div>
+    <div class="card" style="text-align:left">
+      <h2 style="margin-bottom:10px">My Listings</h2>
+      <div id="myPropertiesBody"><p class="hint">Loading your properties…</p></div>
+    </div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
+<div class="wrap hidden" id="viewListProperty">
+  <header>
+    <a class="backlink" onclick="setView('landlordPortal')">← Back to Landlord Portal</a>
+    <span class="badge">PROPERTY MARKETPLACE</span>
+    <h1 id="listPropertyTitle">List a Property</h1>
+    <div class="sub">Fill in the details prospective tenants will see.</div>
+  </header>
+  <section id="listPropertyForm">
+    <div class="card formcard">
+      <input type="hidden" id="lpRef" value="">
+      <label class="f"><em>Property type <b>*</b></em>
+        <select id="lpType"><option value="">Select…</option><option value="Room">Room</option><option value="Bachelor">Bachelor</option><option value="TownHouse">Townhouse</option><option value="House">House</option></select></label>
+      <label class="f"><em>Listing title <b>*</b></em><input type="text" id="lpTitle" placeholder="e.g. Sunny bachelor flat near taxi rank"></label>
+      <label class="f"><em>Location / suburb <b>*</b></em><input type="text" id="lpLocation" placeholder="e.g. Olievenhoutbosch, Centurion"></label>
+      <label class="f"><em>Full address (optional, shown only after contact)</em><input type="text" id="lpAddress" placeholder="Street address"></label>
+      <div class="row2">
+        <label class="f"><em>Monthly rent (R) <b>*</b></em><input type="number" id="lpRent" placeholder="e.g. 3500"></label>
+        <label class="f"><em>Available from <b>*</b></em><input type="date" id="lpAvailable"></label>
+      </div>
+      <div class="row2">
+        <label class="f"><em>Bedrooms</em><input type="number" id="lpBedrooms" min="0" placeholder="e.g. 2"></label>
+        <label class="f"><em>Bathrooms</em><input type="number" id="lpBathrooms" min="0" placeholder="e.g. 1"></label>
+      </div>
+      <label class="f"><em>Description <b>*</b></em><textarea id="lpDesc" rows="4" placeholder="What makes this property a good fit? Include amenities, parking, security, etc."></textarea></label>
+      <label class="f"><em>Contact number for enquiries <b>*</b></em><input type="tel" id="lpContact" placeholder="e.g. 0730001234" inputmode="numeric"></label>
+      <div id="listPropertyError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
+      <button class="btn primary" style="width:100%;margin-top:6px" onclick="saveProperty()">Publish listing</button>
+    </div>
+  </section>
+  <section id="listPropertyDone" class="hidden">
+    <div class="card success">
+      <div class="tick"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1B1403" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg></div>
+      <h2>Listing published</h2>
+      <p>Your property is now visible in the marketplace.</p>
+      <button class="btn primary" style="max-width:320px;margin:14px auto 0;display:block" onclick="setView('landlordPortal')">Back to Landlord Portal</button>
+    </div>
+  </section>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
+
 <div class="wrap hidden" id="viewAnnounce">
   <header>
     <a class="backlink" onclick="setView('home')">← Back to Home</a>
@@ -1409,6 +1704,19 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
   </div>
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
+
+<div class="wrap hidden" id="viewOwnerapplications">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · 7207 ISAZI ST</span>
+    <h1>Accommodation Applications</h1>
+    <div class="sub">Applications from prospective tenants, newest first.</div>
+  </header>
+  <div class="card" style="text-align:left">
+    <div id="ownerApplicationsBody"><p class="hint">Loading applications…</p></div>
+  </div>
+  <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 
@@ -1419,8 +1727,8 @@ function toast(m){ const t=S('toast'); t.textContent=m; t.style.display='block';
 
 /* ---------- role gate: Tenant (default) / Owner (PIN-gated) ---------- */
 const OWNER_PIN = '2533'; // Change this to your own owner access code
-const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService','viewAccessrevoked'];
-const OWNER_VIEW_IDS = ['viewOwnerHome','viewAnnounce','viewExpenses','viewPayments','viewOwnerfaults','viewOwnercomplaints','viewOwnerservices','viewReports','viewContracts','viewOwnernotices'];
+const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService','viewAccessrevoked','viewLogin','viewRegister','viewForgotPassword','viewResetPassword','viewApply','viewBrowseProperties','viewLandlordPortal','viewListProperty'];
+const OWNER_VIEW_IDS = ['viewOwnerHome','viewAnnounce','viewExpenses','viewPayments','viewOwnerfaults','viewOwnercomplaints','viewOwnerservices','viewReports','viewContracts','viewOwnernotices','viewOwnerapplications'];
 let CURRENT_ROLE = 'tenant'; // resets to tenant on every fresh page load — PIN is required each session to reach Owner
 let TENANT_ACCESS_REVOKED = false;
 
@@ -1490,12 +1798,15 @@ function hideAllAppViews(){
 }
 
 /* ---------- unified view router (role-aware) ---------- */
+const AUTH_FREE_VIEWS = ['login','register','forgotPassword','resetPassword'];
 function setView(v){
+  if(!AUTH_FREE_VIEWS.includes(v) && !getSession()){ v = 'login'; }
   if(CURRENT_ROLE === 'tenant' && TENANT_ACCESS_REVOKED) v = 'accessrevoked';
   [...TENANT_VIEW_IDS, ...OWNER_VIEW_IDS].forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
   const targetId = (v === 'home') ? (CURRENT_ROLE === 'owner' ? 'viewOwnerHome' : 'viewHome') : ('view'+v.charAt(0).toUpperCase()+v.slice(1));
   const el = S(targetId);
   if(el) el.classList.remove('hidden');
+  if(v === 'home') applyTenantRoleVisibility();
   S('nav').style.display = (v==='onboarding' && step<=4) ? '' : 'none';
   if(v==='fault') applyClaim('fault');
   if(v==='notice') applyClaim('notice');
@@ -1509,6 +1820,11 @@ function setView(v){
   if(v==='reports') loadReports();
   if(v==='contracts') loadContracts();
   if(v==='ownernotices') loadOwnerNotices();
+  if(v==='ownerapplications') loadOwnerApplications();
+  if(v==='apply') prefillApply();
+  if(v==='browseProperties') loadBrowseProperties();
+  if(v==='landlordPortal') loadLandlordPortal();
+  if(v==='listProperty') prefillListProperty();
   window.scrollTo({top:0,behavior:'instant'});
 }
 
@@ -1568,6 +1884,313 @@ function editClaim(kind){
   const m = CLAIM_MAP[kind]; if(!m) return;
   S(m.wrap).classList.remove('hidden');
   S(m.box).classList.add('hidden');
+}
+
+/* ================= Accommodation Application ================= */
+function prefillApply(){
+  const p = getProfile();
+  const idFields = S('applyIdFields'), box = S('applyClaimBox');
+  if(p && p.name){
+    S('apName').value = p.name;
+    S('apPhone').value = p.phone || '';
+    if(S('apLocation')) S('apLocation').value = p.location || '';
+    S('applyClaimName').textContent = p.name;
+    idFields.classList.add('hidden');
+    box.classList.remove('hidden');
+  } else {
+    idFields.classList.remove('hidden');
+    box.classList.add('hidden');
+  }
+}
+function submitApplication(){
+  const req = ['apName','apPhone','apLocation','apMoveIn','apEmployment'];
+  S('applyError').classList.add('hidden');
+  if(!need(req)){ S('applyError').textContent = 'Please complete all required fields.'; S('applyError').classList.remove('hidden'); return; }
+  const ref = refWithPrefix('APP');
+  const data = { type:'application', ref, submittedAt:new Date().toISOString(), status:'Pending',
+    name:val('apName'), phone:val('apPhone'), location:val('apLocation'), moveInDate:val('apMoveIn'),
+    employmentStatus:S('apEmployment').value, employer:val('apEmployer'), notes:val('apNotes') };
+  postToSheet(data);
+  S('applyForm').classList.add('hidden');
+  S('applyDone').classList.remove('hidden');
+  S('applyRef').textContent = ref;
+  const msg = `Accommodation application ${ref}\n${val('apName')} · ${val('apPhone')}\nLocation: ${val('apLocation')} · Move-in: ${val('apMoveIn')}\nEmployment: ${S('apEmployment').value}`;
+  S('applyWA').setAttribute('onclick', `window.open('${waLink(msg)}','_blank')`);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= Owner: review accommodation applications ================= */
+function loadOwnerApplications(){
+  const body = S('ownerApplicationsBody');
+  body.innerHTML = '<p class="hint">Loading applications…</p>';
+  if(!SCRIPT_URL){ body.innerHTML = '<p class="hint">Not connected to the backend yet.</p>'; return; }
+  jsonpFetch('applications', list => renderOwnerApplications(Array.isArray(list) ? list : []),
+    () => { body.innerHTML = '<p class="hint">Couldn\'t load applications. The backend may need an "action=applications" endpoint added \u2014 see the Code.gs additions.</p>'; });
+}
+function renderOwnerApplications(list){
+  const body = S('ownerApplicationsBody');
+  if(!list.length){ body.innerHTML = '<p class="hint">No applications yet.</p>'; return; }
+  const sorted = list.slice().sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
+  body.innerHTML = sorted.map(a => {
+    const status = a.status || 'Pending';
+    const statusColor = status === 'Approved' ? 'var(--good)' : status === 'Declined' ? 'var(--bad)' : 'var(--gold)';
+    return `
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <b style="font-size:16px">${a.name || '—'}</b>
+          <div class="hint" style="margin-top:2px">${a.phone || ''} · ${a.location || ''}</div>
+        </div>
+        <span class="cond" style="color:${statusColor};font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.08em">${status}</span>
+      </div>
+      <div class="hint" style="margin-top:8px">
+        Move-in: ${a.moveInDate || '—'} · Employment: ${a.employmentStatus || '—'}${a.employer ? ' ('+a.employer+')' : ''}
+      </div>
+      ${a.notes ? `<div class="hint" style="margin-top:4px">Notes: ${a.notes}</div>` : ''}
+      <div class="hint" style="margin-top:4px">Ref: ${a.ref || '—'} · Submitted: ${fmtDate(a.submittedAt)}</div>
+      ${status === 'Pending' ? `
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn primary" style="flex:1" onclick="reviewApplication('${a.ref}','Approved')">Approve</button>
+        <button class="btn ghost" style="flex:1" onclick="reviewApplication('${a.ref}','Declined')">Decline</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+async function reviewApplication(ref, decision){
+  if(!SCRIPT_URL) return;
+  await postToSheet({ type:'applicationReview', ref, status:decision, reviewedAt:new Date().toISOString() });
+  toast(decision === 'Approved' ? 'Application approved' : 'Application declined');
+  loadOwnerApplications();
+}
+
+/* ================= Tenant authentication: register / login / password reset ================= */
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function jsonpFetchP(action, params, cb, onError){
+  if(!SCRIPT_URL){ onError && onError(); return; }
+  const cbName = 'maokaCB_' + action + '_' + Date.now();
+  window[cbName] = function(data){ cb(data); delete window[cbName]; scriptEl.remove(); };
+  const qs = Object.keys(params).map(k => encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
+  const scriptEl = document.createElement('script');
+  scriptEl.src = SCRIPT_URL + '?action=' + action + '&' + qs + '&callback=' + cbName;
+  scriptEl.onerror = function(){ delete window[cbName]; scriptEl.remove(); onError && onError(); };
+  document.body.appendChild(scriptEl);
+}
+function getSession(){
+  try{ return JSON.parse(localStorage.getItem('maoka_session')||'null'); }catch(e){ return null; }
+}
+function saveSession(username, name, role, phone){
+  try{ localStorage.setItem('maoka_session', JSON.stringify({username, name, role: role || 'Tenant', phone: phone || '', loggedInAt:new Date().toISOString()})); }catch(e){}
+}
+function logoutTenant(){
+  try{ localStorage.removeItem('maoka_session'); }catch(e){}
+  toast('Signed out');
+  setView('home');
+}
+async function registerTenant(){
+  const req = ['reName','rePhone','reUsername','rePassword','rePassword2'];
+  S('registerError').classList.add('hidden');
+  if(!need(req)){ S('registerError').textContent = 'Please complete all required fields.'; S('registerError').classList.remove('hidden'); return; }
+  if(val('rePassword').length < 6){ S('registerError').textContent = 'Password must be at least 6 characters.'; S('registerError').classList.remove('hidden'); return; }
+  if(val('rePassword') !== val('rePassword2')){ S('registerError').textContent = 'Passwords do not match.'; S('registerError').classList.remove('hidden'); return; }
+  const passwordHash = await sha256Hex(val('rePassword'));
+  const role = S('reRole') ? S('reRole').value : 'Tenant';
+  jsonpFetchP('register', {
+    username: val('reUsername'), passwordHash, name: val('reName'), phone: val('rePhone'), email: val('reEmail'), role
+  }, res => {
+    if(res && res.ok){
+      if(role === 'Tenant') saveProfile(val('reName'), '', val('rePhone'), '');
+      S('registerForm').classList.add('hidden');
+      S('registerDone').classList.remove('hidden');
+    } else {
+      S('registerError').textContent = (res && res.message) || 'That username is already taken — please choose another.';
+      S('registerError').classList.remove('hidden');
+    }
+  }, () => { S('registerError').textContent = 'Could not reach the server. Please try again.'; S('registerError').classList.remove('hidden'); });
+}
+async function loginTenant(){
+  const req = ['loUsername','loPassword'];
+  S('loginError').classList.add('hidden');
+  if(!need(req)) return;
+  const passwordHash = await sha256Hex(val('loPassword'));
+  jsonpFetchP('login', { username: val('loUsername'), passwordHash }, res => {
+    if(res && res.ok){
+      saveSession(val('loUsername'), res.name || val('loUsername'), res.role || 'Tenant', res.phone || '');
+      if(res.role !== 'Landlord' && (res.name || res.phone)) saveProfile(res.name || val('loUsername'), res.room || '', res.phone || '', res.location || '');
+      toast('Signed in');
+      setView(res.role === 'Landlord' ? 'landlordPortal' : 'home');
+    } else {
+      S('loginError').classList.remove('hidden');
+    }
+  }, () => { S('loginError').textContent = 'Could not reach the server. Please try again.'; S('loginError').classList.remove('hidden'); });
+}
+
+/* ================= Property Marketplace ================= */
+let PROPERTY_FILTER = '';
+let BROWSE_PROPERTIES_CACHE = [];
+function setPropertyFilter(type){
+  PROPERTY_FILTER = type;
+  document.querySelectorAll('.propFilterBtn').forEach(b => b.classList.toggle('on', b.getAttribute('data-type') === type));
+  loadBrowseProperties();
+}
+function loadBrowseProperties(){
+  const body = S('browsePropertiesBody');
+  body.innerHTML = '<p class="hint">Loading properties…</p>';
+  if(!SCRIPT_URL){ body.innerHTML = '<p class="hint">Not connected to the backend yet.</p>'; return; }
+  jsonpFetch('browseProperties', list => renderBrowseProperties(Array.isArray(list) ? list : []),
+    () => { body.innerHTML = '<p class="hint">Couldn\'t load properties. The backend may need a "browseProperties" endpoint added \u2014 see the Code.gs additions.</p>'; });
+}
+function renderBrowseProperties(list){
+  BROWSE_PROPERTIES_CACHE = list;
+  const body = S('browsePropertiesBody');
+  let filtered = list.filter(p => (p.status || 'Active') === 'Active');
+  if(PROPERTY_FILTER) filtered = filtered.filter(p => p.type === PROPERTY_FILTER);
+  if(!filtered.length){ body.innerHTML = '<div class="card"><p class="hint">No properties listed yet' + (PROPERTY_FILTER ? ' for '+PROPERTY_FILTER : '') + '.</p></div>'; return; }
+  const sorted = filtered.slice().sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+  body.innerHTML = sorted.map(p => `
+    <div class="card" style="margin-bottom:12px;text-align:left">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <span class="cond" style="color:var(--gold);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase">${p.type || ''}</span>
+          <h3 style="margin:2px 0 4px">${p.title || 'Untitled listing'}</h3>
+          <div class="hint">${p.location || ''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div class="cond" style="font-size:20px;font-weight:700;color:var(--gold)">R${p.rent || '—'}</div>
+          <div class="hint">per month</div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:14.5px;line-height:1.5">${p.description || ''}</p>
+      <div class="hint" style="margin-top:8px">
+        ${p.bedrooms ? p.bedrooms+' bed · ' : ''}${p.bathrooms ? p.bathrooms+' bath · ' : ''}Available from ${p.availableFrom || 'now'}
+      </div>
+      <button class="btn primary" style="width:100%;margin-top:12px" onclick="contactLandlordAbout('${p.ref}')">💬 Contact Landlord</button>
+    </div>`).join('');
+}
+
+function contactLandlordAbout(ref){
+  const p = BROWSE_PROPERTIES_CACHE.find(x => x.ref === ref);
+  if(!p) return;
+  const msg = `Hi, I'm interested in your listing: ${p.title||''} (${p.location||''}, R${p.rent||''}/month). Ref: ${p.ref||''}`;
+  window.open(waLinkTo(p.contact, msg), '_blank');
+}
+
+function loadLandlordPortal(){
+  const s = getSession();
+  S('landlordPortalLoggedOut').classList.toggle('hidden', !!s);
+  S('landlordPortalWrongRole').classList.toggle('hidden', !s || s.role === 'Landlord');
+  S('landlordPortalBody').classList.toggle('hidden', !s || s.role !== 'Landlord');
+  if(s && s.role === 'Landlord') loadMyProperties();
+}
+function loadMyProperties(){
+  const body = S('myPropertiesBody');
+  const s = getSession();
+  if(!s){ body.innerHTML = ''; return; }
+  body.innerHTML = '<p class="hint">Loading your properties…</p>';
+  jsonpFetchP('myProperties', { username: s.username }, list => renderMyProperties(Array.isArray(list) ? list : []),
+    () => { body.innerHTML = '<p class="hint">Couldn\'t load your properties. The backend may need a "myProperties" endpoint added \u2014 see the Code.gs additions.</p>'; });
+}
+function renderMyProperties(list){
+  const body = S('myPropertiesBody');
+  if(!list.length){ body.innerHTML = '<p class="hint">You haven\'t listed any properties yet.</p>'; return; }
+  const sorted = list.slice().sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+  body.innerHTML = sorted.map(p => `
+    <div style="padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <b>${p.title || 'Untitled listing'}</b>
+          <div class="hint">${p.type || ''} · ${p.location || ''} · R${p.rent || '—'}/month</div>
+        </div>
+        <span class="cond" style="color:${p.status === 'Rented' ? 'var(--muted)' : 'var(--good)'};font-weight:700;font-size:12px;text-transform:uppercase">${p.status || 'Active'}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn ghost" style="flex:1;padding:8px;font-size:13px" onclick="editProperty('${p.ref}')">Edit</button>
+        ${p.status !== 'Rented' ? `<button class="btn ghost" style="flex:1;padding:8px;font-size:13px" onclick="setPropertyStatus('${p.ref}','Rented')">Mark Rented</button>` : `<button class="btn ghost" style="flex:1;padding:8px;font-size:13px" onclick="setPropertyStatus('${p.ref}','Active')">Reactivate</button>`}
+        <button class="btn ghost" style="flex:1;padding:8px;font-size:13px;color:var(--bad)" onclick="setPropertyStatus('${p.ref}','Removed')">Remove</button>
+      </div>
+    </div>`).join('');
+}
+let EDITING_PROPERTY = null;
+function prefillListProperty(){
+  const s = getSession();
+  if(!EDITING_PROPERTY && s) S('lpContact').value = s.phone || '';
+  S('listPropertyTitle').textContent = EDITING_PROPERTY ? 'Edit Property' : 'List a Property';
+}
+function editProperty(ref){
+  jsonpFetchP('myProperties', { username: getSession().username }, list => {
+    const p = (list || []).find(x => x.ref === ref);
+    if(!p) return toast('Listing not found');
+    EDITING_PROPERTY = ref;
+    S('lpRef').value = p.ref;
+    S('lpType').value = p.type || '';
+    S('lpTitle').value = p.title || '';
+    S('lpLocation').value = p.location || '';
+    S('lpAddress').value = p.address || '';
+    S('lpRent').value = p.rent || '';
+    S('lpAvailable').value = p.availableFrom || '';
+    S('lpBedrooms').value = p.bedrooms || '';
+    S('lpBathrooms').value = p.bathrooms || '';
+    S('lpDesc').value = p.description || '';
+    S('lpContact').value = p.contact || '';
+    setView('listProperty');
+  }, () => toast('Could not load listing'));
+}
+function setPropertyStatus(ref, status){
+  const s = getSession(); if(!s) return;
+  postToSheet({ type:'propertyStatus', ref, status, username: s.username });
+  toast(status === 'Removed' ? 'Listing removed' : status === 'Rented' ? 'Marked as rented' : 'Listing reactivated');
+  setTimeout(loadMyProperties, 400);
+}
+function saveProperty(){
+  const s = getSession();
+  if(!s || s.role !== 'Landlord'){ toast('Please sign in as a Landlord'); return setView('login'); }
+  const req = ['lpType','lpTitle','lpLocation','lpRent','lpAvailable','lpDesc','lpContact'];
+  S('listPropertyError').classList.add('hidden');
+  if(!need(req)){ S('listPropertyError').textContent = 'Please complete all required fields.'; S('listPropertyError').classList.remove('hidden'); return; }
+  const ref = EDITING_PROPERTY || refWithPrefix('PROP');
+  const data = { type:'property', ref, isUpdate: !!EDITING_PROPERTY, username: s.username, ownerName: s.name,
+    propertyType: S('lpType').value, title: val('lpTitle'), location: val('lpLocation'), address: val('lpAddress'),
+    rent: val('lpRent'), availableFrom: val('lpAvailable'), bedrooms: val('lpBedrooms'), bathrooms: val('lpBathrooms'),
+    description: val('lpDesc'), contact: val('lpContact'), status:'Active', createdAt: new Date().toISOString() };
+  postToSheet(data);
+  EDITING_PROPERTY = null;
+  S('listPropertyForm').classList.add('hidden');
+  S('listPropertyDone').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function requestPasswordReset(){
+  const req = ['fpUsername'];
+  S('forgotError').classList.add('hidden');
+  if(!need(req)) return;
+  jsonpFetchP('forgotPassword', { username: val('fpUsername') }, res => {
+    if(res && res.ok){
+      S('forgotForm').classList.add('hidden');
+      S('forgotDone').classList.remove('hidden');
+      S('rpUsername').value = val('fpUsername');
+    } else {
+      S('forgotError').textContent = (res && res.message) || 'We could not find that username.';
+      S('forgotError').classList.remove('hidden');
+    }
+  }, () => { S('forgotError').textContent = 'Could not reach the server. Please try again.'; S('forgotError').classList.remove('hidden'); });
+}
+async function resetPassword(){
+  const req = ['rpUsername','rpCode','rpPassword','rpPassword2'];
+  S('resetError').classList.add('hidden');
+  if(!need(req)){ S('resetError').textContent = 'Please complete all required fields.'; S('resetError').classList.remove('hidden'); return; }
+  if(val('rpPassword').length < 6){ S('resetError').textContent = 'Password must be at least 6 characters.'; S('resetError').classList.remove('hidden'); return; }
+  if(val('rpPassword') !== val('rpPassword2')){ S('resetError').textContent = 'Passwords do not match.'; S('resetError').classList.remove('hidden'); return; }
+  const passwordHash = await sha256Hex(val('rpPassword'));
+  jsonpFetchP('resetPassword', { username: val('rpUsername'), code: val('rpCode'), passwordHash }, res => {
+    if(res && res.ok){
+      S('resetForm').classList.add('hidden');
+      S('resetDone').classList.remove('hidden');
+    } else {
+      S('resetError').textContent = (res && res.message) || 'That code is invalid or has expired.';
+      S('resetError').classList.remove('hidden');
+    }
+  }, () => { S('resetError').textContent = 'Could not reach the server. Please try again.'; S('resetError').classList.remove('hidden'); });
 }
 
 /* ---------- checklist rows ---------- */
@@ -1645,7 +2268,24 @@ function renderDoc(){
   <h3>12. Community access sticker</h3>
   <p>The Tenant may purchase a community access sticker for a <b>once-off fee of R30.00</b>. The sticker allows the Tenant to enter and leave without signing the register at the gate. It is registered to the Tenant (and vehicle, where applicable), remains the property of the Landlord/community, is non-transferable, and must be returned or removed when the lease ends. A lost or damaged sticker must be reported immediately and replaced at the Tenant's cost. A Tenant without a sticker must sign the gate register on every entry.</p>
   <h3>13. Tenant declaration</h3>
-  <p>By signing this agreement the Tenant declares that they are able to comply with the house rules in this Agreement, and that they are able to pay the monthly rent of R3 500.00 and all other amounts due under this lease, in full and on time.</p>`;
+  <p>By signing this agreement the Tenant declares that they are able to comply with the house rules in this Agreement, and that they are able to pay the monthly rent of R3 500.00 and all other amounts due under this lease, in full and on time.</p>
+  <h3>14. Landlord's other responsibilities</h3>
+  <p>The Landlord must provide the Tenant with vacant occupation of the Premises at the start of this lease, and allow the Tenant undisturbed enjoyment of the Premises for the duration of the lease. The Landlord is responsible for maintaining the exterior, roof, gutters and downpipes in good order (fair wear and tear excluded), and for the structural installations, locks, windows and geysers, save where repairs are required due to the Tenant's fault. The Landlord is responsible for payment of the municipal rates and taxes on the Premises.</p>
+  <h3>15. Insurance and damage to the Tenant's property</h3>
+  <p>The Tenant is responsible for its own household, vehicle or other insurance, protecting its goods while residing on the Premises. The Landlord has no responsibility or liability towards the Tenant for any loss, theft or damage to the Tenant's household articles kept on the Premises. A temporary interruption in water or electricity supply does not entitle the Tenant to cancel this Agreement, and the Landlord will not be held liable for any resulting loss, damage or inconvenience.</p>
+  <h3>16. Liability and indemnity</h3>
+  <p>The Tenant indemnifies the Landlord for any loss or damage to property, or injury to persons, suffered on the Premises as a result of any act or omission by the Tenant or the Tenant's guests, visitors or agents. The Tenant is liable for its own acts and omissions, and for those of its guests, visitors or agents, while on or in the Premises.</p>
+  <h3>17. Damage or destruction of the Premises</h3>
+  <p>Should the Premises be damaged or destroyed to the extent that the Tenant is deprived of beneficial use and occupation, this Agreement will end, and neither party will have any further claim against the other beyond obligations already due. Should the Premises be only partially damaged, this Agreement remains in force, the Landlord will repair the damage as soon as reasonably possible, and the Tenant will be entitled to a fair, agreed reduction in rent for the affected period. The Tenant remains responsible for any damage or destruction caused by its own act or negligence, or that of anyone it is responsible for.</p>
+  <h3>18. Landlord's tacit hypothec</h3>
+  <p>The Landlord has a tacit hypothec (a legal right of security) over the Tenant's furniture and goods brought onto the Premises, as security for unpaid rent and any other amounts owed under this Agreement. Should the Tenant vacate the Premises following a breach, movable goods remaining on the Premises and subject to this hypothec may be moved into storage by the Landlord to allow a new tenant to move in.</p>
+  <h3>19. Consent to jurisdiction and legal costs</h3>
+  <p>The Landlord and Tenant consent to the jurisdiction of the Magistrate's Court in respect of any legal action or proceedings relating to this Agreement or its breach. The Tenant is liable for all costs the Landlord incurs in enforcing this Agreement, on an attorney-and-client scale, including collection commission.</p>
+  <h3>20. Notices</h3>
+  <p>Notices under this Agreement must be delivered by hand, WhatsApp, SMS or email to the addresses and numbers recorded above, which the parties choose as their address for legal notices (domicilium citandi et executandi). A notice sent by WhatsApp, SMS or email is regarded as received the next day; a hand-delivered notice is regarded as received once given to a responsible person at the Premises. Either party must notify the other of any change to these details.</p>
+  <h3>21. General terms</h3>
+  <p>No changes to this Agreement have any effect unless agreed to in writing by both parties. This document represents the entire agreement between the Landlord and Tenant; neither has any right arising from an undertaking, warranty or representation not contained here. A relaxation or indulgence by either party in exercising its rights does not mean that right is waived, and does not prevent its exercise, or the exercise of any other right, in future. Headings are for reference only. Words in the singular include the plural and vice versa; words importing one gender include the other.</p>
+  <p class="hint" style="margin-top:10px">This Agreement incorporates and is based on the LAW FOR ALL Residential Lease Agreement template, adapted for Maoka Residence's bachelor-room, month-to-month structure. As with any legal document, the parties are encouraged to raise questions with the Landlord before signing.</p>`;
 }
 
 /* ---------- vetting: ID validation + upload ---------- */
@@ -1862,7 +2502,7 @@ function finish(){
   if(!pads.T?.has) return toast('Tenant signature is required');
   if(!pads.L?.has) return toast('Landlord signature is required');
   REF = refNo();
-  buildPDF(true);
+  const pdfDoc = buildPDF(true);
   [1,2,3,4].forEach(n=>S('step'+n).classList.add('hidden'));
   S('stepDone').classList.remove('hidden');
   S('refNo').textContent = REF;
@@ -1875,6 +2515,7 @@ function finish(){
   S('phasebar').classList.add('done');
   syncToSheet();
   saveProfile(val('tName'), val('tRoom'), val('tPhone'), val('tLocation'));
+  sendLeaseToLandlordWhatsApp(pdfDoc);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1993,6 +2634,22 @@ function buildPDF(download){
   para('The Tenant may purchase a community access sticker for a once-off fee of R30.00, allowing entry and exit without signing the register at the gate. The sticker is registered to the Tenant (and vehicle, where applicable), remains the property of the Landlord/community, is non-transferable, and must be returned or removed when the lease ends. A lost or damaged sticker must be reported immediately and replaced at the Tenant\u2019s cost. A Tenant without a sticker must sign the gate register on every entry. Sticker taken by this Tenant: '+(S('sticker').checked?'YES (R30.00 paid once-off).':'NO.'));
   sec('13. TENANT DECLARATION');
   para('By signing this agreement the Tenant declares that they are able to comply with the house rules in this Agreement, and that they are able to pay the monthly rent of R3 500.00 and all other amounts due under this lease, in full and on time.');
+  sec('14. LANDLORD\u2019S OTHER RESPONSIBILITIES');
+  para('The Landlord must provide the Tenant with vacant occupation of the Premises at the start of this lease, and allow the Tenant undisturbed enjoyment of the Premises for the duration of the lease. The Landlord is responsible for maintaining the exterior, roof, gutters and downpipes in good order (fair wear and tear excluded), and for the structural installations, locks, windows and geysers, save where repairs are required due to the Tenant\u2019s fault. The Landlord is responsible for payment of the municipal rates and taxes on the Premises.');
+  sec('15. INSURANCE AND DAMAGE TO THE TENANT\u2019S PROPERTY');
+  para('The Tenant is responsible for its own household, vehicle or other insurance, protecting its goods while residing on the Premises. The Landlord has no responsibility or liability towards the Tenant for any loss, theft or damage to the Tenant\u2019s household articles kept on the Premises. A temporary interruption in water or electricity supply does not entitle the Tenant to cancel this Agreement, and the Landlord will not be held liable for any resulting loss, damage or inconvenience.');
+  sec('16. LIABILITY AND INDEMNITY');
+  para('The Tenant indemnifies the Landlord for any loss or damage to property, or injury to persons, suffered on the Premises as a result of any act or omission by the Tenant or the Tenant\u2019s guests, visitors or agents. The Tenant is liable for its own acts and omissions, and for those of its guests, visitors or agents, while on or in the Premises.');
+  sec('17. DAMAGE OR DESTRUCTION OF THE PREMISES');
+  para('Should the Premises be damaged or destroyed to the extent that the Tenant is deprived of beneficial use and occupation, this Agreement will end, and neither party will have any further claim against the other beyond obligations already due. Should the Premises be only partially damaged, this Agreement remains in force, the Landlord will repair the damage as soon as reasonably possible, and the Tenant will be entitled to a fair, agreed reduction in rent for the affected period. The Tenant remains responsible for any damage or destruction caused by its own act or negligence, or that of anyone it is responsible for.');
+  sec('18. LANDLORD\u2019S TACIT HYPOTHEC');
+  para('The Landlord has a tacit hypothec (a legal right of security) over the Tenant\u2019s furniture and goods brought onto the Premises, as security for unpaid rent and any other amounts owed under this Agreement. Should the Tenant vacate the Premises following a breach, movable goods remaining on the Premises and subject to this hypothec may be moved into storage by the Landlord to allow a new tenant to move in.');
+  sec('19. CONSENT TO JURISDICTION AND LEGAL COSTS');
+  para('The Landlord and Tenant consent to the jurisdiction of the Magistrate\u2019s Court in respect of any legal action or proceedings relating to this Agreement or its breach. The Tenant is liable for all costs the Landlord incurs in enforcing this Agreement, on an attorney-and-client scale, including collection commission.');
+  sec('20. NOTICES');
+  para('Notices under this Agreement must be delivered by hand, WhatsApp, SMS or email to the addresses and numbers recorded above, which the parties choose as their address for legal notices (domicilium citandi et executandi). A notice sent by WhatsApp, SMS or email is regarded as received the next day; a hand-delivered notice is regarded as received once given to a responsible person at the Premises. Either party must notify the other of any change to these details.');
+  sec('21. GENERAL TERMS');
+  para('No changes to this Agreement have any effect unless agreed to in writing by both parties. This document represents the entire agreement between the Landlord and Tenant; neither has any right arising from an undertaking, warranty or representation not contained here. A relaxation or indulgence by either party in exercising its rights does not mean that right is waived, and does not prevent its exercise, or the exercise of any other right, in future. Headings are for reference only. Words in the singular include the plural and vice versa; words importing one gender include the other.');
   sec('POPIA CONSENT');
   para('The Tenant consents to the Landlord collecting and storing their personal information (including ID copy, contact details and next of kin) solely for the administration of this lease.');
 
@@ -2049,6 +2706,29 @@ function buildPDF(download){
   }
 
   if(download) doc.save('Lease-7207-Room'+(val('tRoom')||'X')+'-'+(val('tName')||'Tenant').replace(/\s+/g,'-')+'.pdf');
+  return doc;
+}
+
+/* ---------- WhatsApp: send the signed lease straight to the Landlord ---------- */
+const LANDLORD_WA = '27622553687'; // 062 255 3687, international format for wa.me
+function leaseFileName(){
+  return 'Lease-7207-Room'+(val('tRoom')||'X')+'-'+(val('tName')||'Tenant').replace(/\s+/g,'-')+'.pdf';
+}
+async function sendLeaseToLandlordWhatsApp(doc){
+  const msg = 'Hi, this is '+(val('tName')||'a new tenant')+' — Room '+(val('tRoom')||'—')+' at Maoka Residence. Attached is my signed lease, Ref '+(REF||'—')+'.';
+  const m = S('waStatus');
+  try{
+    const blob = doc.output('blob');
+    const file = new File([blob], leaseFileName(), {type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'Signed Lease — '+leaseFileName(), text: msg});
+      if(m) m.textContent = 'Lease sent via WhatsApp ✓';
+      return true;
+    }
+  }catch(e){ /* share cancelled or unsupported — fall back to opening a WhatsApp chat below */ }
+  window.open('https://wa.me/'+LANDLORD_WA+'?text='+encodeURIComponent(msg+' (PDF downloaded to my device — attaching it now.)'), '_blank');
+  if(m) m.textContent = 'WhatsApp opened — please attach the downloaded PDF and send.';
+  return false;
 }
 
 /* ---------- welcome pack PDF ---------- */
@@ -2171,6 +2851,14 @@ function renderRoleUI(){
   if(profile){
     S('alreadyOnboardedText').textContent = `You're registered as ${profile.name||'a tenant'}, Room ${profile.room}. Use the options below for faults or notices.`;
   }
+}
+function applyTenantRoleVisibility(){
+  // Tenants see only the tenant console — marketplace/landlord entry points are hidden here.
+  const s = getSession();
+  const isTenant = s && s.role !== 'Landlord';
+  if(S('browsePropertiesCard')) S('browsePropertiesCard').classList.toggle('hidden', !isTenant);
+  const landlordLink = document.getElementById('landlordPortalHomeLink');
+  if(landlordLink) landlordLink.classList.toggle('hidden', true); // landlords land in the Landlord Portal directly, not via Tenant Home
 }
 let LAST_ANNOUNCEMENTS = [];
 let SEEN_ANNOUNCEMENT_REFS = (function(){ try{ return JSON.parse(localStorage.getItem('maoka_seen_ann')||'[]'); }catch(e){ return []; } })();
@@ -2832,6 +3520,22 @@ async function buildContractPDF(room){
   para('The Tenant may purchase a community access sticker for a once-off fee of R30.00, allowing entry and exit without signing the register at the gate. The sticker is registered to the Tenant (and vehicle, where applicable), remains the property of the Landlord/community, is non-transferable, and must be returned or removed when the lease ends. A lost or damaged sticker must be reported immediately and replaced at the Tenant\u2019s cost. A Tenant without a sticker must sign the gate register on every entry. Sticker taken by this Tenant: '+(l.sticker?'YES (R30.00 paid once-off).':'NO.'));
   sec('13. TENANT DECLARATION');
   para('By signing this agreement the Tenant declares that they are able to comply with the house rules in this Agreement, and that they are able to pay the monthly rent of R3 500.00 and all other amounts due under this lease, in full and on time.');
+  sec('14. LANDLORD\u2019S OTHER RESPONSIBILITIES');
+  para('The Landlord must provide the Tenant with vacant occupation of the Premises at the start of this lease, and allow the Tenant undisturbed enjoyment of the Premises for the duration of the lease. The Landlord is responsible for maintaining the exterior, roof, gutters and downpipes in good order (fair wear and tear excluded), and for the structural installations, locks, windows and geysers, save where repairs are required due to the Tenant\u2019s fault. The Landlord is responsible for payment of the municipal rates and taxes on the Premises.');
+  sec('15. INSURANCE AND DAMAGE TO THE TENANT\u2019S PROPERTY');
+  para('The Tenant is responsible for its own household, vehicle or other insurance, protecting its goods while residing on the Premises. The Landlord has no responsibility or liability towards the Tenant for any loss, theft or damage to the Tenant\u2019s household articles kept on the Premises. A temporary interruption in water or electricity supply does not entitle the Tenant to cancel this Agreement, and the Landlord will not be held liable for any resulting loss, damage or inconvenience.');
+  sec('16. LIABILITY AND INDEMNITY');
+  para('The Tenant indemnifies the Landlord for any loss or damage to property, or injury to persons, suffered on the Premises as a result of any act or omission by the Tenant or the Tenant\u2019s guests, visitors or agents. The Tenant is liable for its own acts and omissions, and for those of its guests, visitors or agents, while on or in the Premises.');
+  sec('17. DAMAGE OR DESTRUCTION OF THE PREMISES');
+  para('Should the Premises be damaged or destroyed to the extent that the Tenant is deprived of beneficial use and occupation, this Agreement will end, and neither party will have any further claim against the other beyond obligations already due. Should the Premises be only partially damaged, this Agreement remains in force, the Landlord will repair the damage as soon as reasonably possible, and the Tenant will be entitled to a fair, agreed reduction in rent for the affected period. The Tenant remains responsible for any damage or destruction caused by its own act or negligence, or that of anyone it is responsible for.');
+  sec('18. LANDLORD\u2019S TACIT HYPOTHEC');
+  para('The Landlord has a tacit hypothec (a legal right of security) over the Tenant\u2019s furniture and goods brought onto the Premises, as security for unpaid rent and any other amounts owed under this Agreement. Should the Tenant vacate the Premises following a breach, movable goods remaining on the Premises and subject to this hypothec may be moved into storage by the Landlord to allow a new tenant to move in.');
+  sec('19. CONSENT TO JURISDICTION AND LEGAL COSTS');
+  para('The Landlord and Tenant consent to the jurisdiction of the Magistrate\u2019s Court in respect of any legal action or proceedings relating to this Agreement or its breach. The Tenant is liable for all costs the Landlord incurs in enforcing this Agreement, on an attorney-and-client scale, including collection commission.');
+  sec('20. NOTICES');
+  para('Notices under this Agreement must be delivered by hand, WhatsApp, SMS or email to the addresses and numbers recorded above, which the parties choose as their address for legal notices (domicilium citandi et executandi). A notice sent by WhatsApp, SMS or email is regarded as received the next day; a hand-delivered notice is regarded as received once given to a responsible person at the Premises. Either party must notify the other of any change to these details.');
+  sec('21. GENERAL TERMS');
+  para('No changes to this Agreement have any effect unless agreed to in writing by both parties. This document represents the entire agreement between the Landlord and Tenant; neither has any right arising from an undertaking, warranty or representation not contained here. A relaxation or indulgence by either party in exercising its rights does not mean that right is waived, and does not prevent its exercise, or the exercise of any other right, in future. Headings are for reference only. Words in the singular include the plural and vice versa; words importing one gender include the other.');
   sec('POPIA CONSENT');
   para('The Tenant consents to the Landlord collecting and storing their personal information (including ID copy, contact details and next of kin) solely for the administration of this lease.');
 
@@ -3171,13 +3875,26 @@ function exportExpensesPDF(){
   doc.save('Maoka-Residence-Expenses-'+S('exPeriod').value+'-'+new Date().toISOString().slice(0,10)+'.pdf');
 }
 
-setView('home');
-renderRoleUI();
-loadAnnouncements();
-paint();
-requestNotificationPermission();
-checkTenantAccess();
-updateTopbarStatus();
+function bootApp(){
+  const s = getSession();
+  if(!s){
+    setView('login');
+    paint();
+    return;
+  }
+  if(s.role === 'Landlord'){
+    setView('landlordPortal');
+  } else {
+    setView('home');
+    renderRoleUI();
+    loadAnnouncements();
+    checkTenantAccess();
+  }
+  paint();
+  requestNotificationPermission();
+  updateTopbarStatus();
+}
+bootApp();
 /* ---------- PWA: install prompt + service worker ---------- */
 </script>
 </div>
