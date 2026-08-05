@@ -1433,6 +1433,10 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
     </div>
   </div>
   <div id="browsePropertiesBody"><p class="hint">Loading properties…</p></div>
+  <div class="card" style="text-align:center;margin-top:6px">
+    <p class="hint" style="margin-bottom:10px">Have a room, bachelor, townhouse or house to rent out?</p>
+    <button class="btn ghost" style="width:100%" onclick="setView('landlordPortal')">List your property</button>
+  </div>
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.</footer>
 </div>
 
@@ -1494,7 +1498,7 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
     <div class="card formcard">
       <input type="hidden" id="lpRef" value="">
       <label class="f"><em>Property type <b>*</b></em>
-        <select id="lpType"><option value="">Select…</option><option value="Room">Room</option><option value="Bachelor">Bachelor</option><option value="TownHouse">Townhouse</option><option value="House">House</option></select></label>
+        <select id="lpType" onchange="toggleLpUnitsRow()"><option value="">Select…</option><option value="Room">Room</option><option value="Bachelor">Bachelor</option><option value="TownHouse">Townhouse</option><option value="House">House</option></select></label>
       <label class="f"><em>Listing title <b>*</b></em><input type="text" id="lpTitle" placeholder="e.g. Sunny bachelor flat near taxi rank"></label>
       <label class="f"><em>Location / suburb <b>*</b></em><input type="text" id="lpLocation" placeholder="e.g. Olievenhoutbosch, Centurion"></label>
       <label class="f"><em>Full address (optional, shown only after contact)</em><input type="text" id="lpAddress" placeholder="Street address"></label>
@@ -1506,7 +1510,24 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
         <label class="f"><em>Bedrooms</em><input type="number" id="lpBedrooms" min="0" placeholder="e.g. 2"></label>
         <label class="f"><em>Bathrooms</em><input type="number" id="lpBathrooms" min="0" placeholder="e.g. 1"></label>
       </div>
-      <label class="f"><em>Description <b>*</b></em><textarea id="lpDesc" rows="4" placeholder="What makes this property a good fit? Include amenities, parking, security, etc."></textarea></label>
+      <label class="f"><em>Room / unit size (m²) <span style="font-weight:400;color:var(--muted)">(optional)</span></em><input type="number" id="lpSize" min="0" step="0.5" placeholder="e.g. 18"></label>
+      <div class="row2" id="lpUnitsRow">
+        <label class="f"><em>Total units at this property</em><input type="number" id="lpUnitsTotal" min="1" placeholder="e.g. 4 bachelors on site"></label>
+        <label class="f"><em>Units currently available</em><input type="number" id="lpUnitsAvailable" min="0" placeholder="e.g. 1"></label>
+      </div>
+      <div class="row2">
+        <label class="f"><em>Bathroom</em>
+          <select id="lpBathroomType"><option value="">Select…</option><option value="Shower only">Shower only</option><option value="Bath only">Bath only</option><option value="Shower &amp; bath">Shower &amp; bath</option><option value="Shared bathroom">Shared bathroom</option></select></label>
+        <label class="f"><em>Parking</em>
+          <select id="lpParking"><option value="">Select…</option><option value="No parking">No parking</option><option value="Open parking">Open parking</option><option value="Covered parking">Covered parking</option><option value="Garage">Garage</option></select></label>
+      </div>
+      <div class="row2">
+        <label class="f"><em>Wi-Fi</em>
+          <select id="lpWifi"><option value="">Select…</option><option value="Not available">Not available</option><option value="Included in rent">Included in rent</option><option value="Available — extra cost">Available — extra cost</option></select></label>
+        <label class="f"><em>Pets</em>
+          <select id="lpPets"><option value="">Select…</option><option value="No pets allowed">No pets allowed</option><option value="Pets allowed">Pets allowed</option><option value="Case-by-case, please ask">Case-by-case, please ask</option></select></label>
+      </div>
+      <label class="f"><em>Description <b>*</b></em><textarea id="lpDesc" rows="4" placeholder="What makes this property a good fit? Include amenities, security, nearby transport, etc."></textarea></label>
       <label class="f"><em>Contact number for enquiries <b>*</b></em><input type="tel" id="lpContact" placeholder="e.g. 0730001234" inputmode="numeric"></label>
       <div id="listPropertyError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
       <button class="btn primary" style="width:100%;margin-top:6px" onclick="saveProperty()">Publish listing</button>
@@ -1798,9 +1819,9 @@ function hideAllAppViews(){
 }
 
 /* ---------- unified view router (role-aware) ---------- */
-const AUTH_FREE_VIEWS = ['login','register','forgotPassword','resetPassword'];
+const AUTH_REQUIRED_VIEWS = ['listProperty']; // adding/editing a listing needs a signed-in Landlord account — everything else (home, browsing, onboarding, faults, etc.) is open to everyone
 function setView(v){
-  if(!AUTH_FREE_VIEWS.includes(v) && !getSession()){ v = 'login'; }
+  if(AUTH_REQUIRED_VIEWS.includes(v) && !getSession()){ v = 'login'; }
   if(CURRENT_ROLE === 'tenant' && TENANT_ACCESS_REVOKED) v = 'accessrevoked';
   [...TENANT_VIEW_IDS, ...OWNER_VIEW_IDS].forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
   const targetId = (v === 'home') ? (CURRENT_ROLE === 'owner' ? 'viewOwnerHome' : 'viewHome') : ('view'+v.charAt(0).toUpperCase()+v.slice(1));
@@ -2064,8 +2085,15 @@ function renderBrowseProperties(list){
       </div>
       <p style="margin-top:10px;font-size:14.5px;line-height:1.5">${p.description || ''}</p>
       <div class="hint" style="margin-top:8px">
-        ${p.bedrooms ? p.bedrooms+' bed · ' : ''}${p.bathrooms ? p.bathrooms+' bath · ' : ''}Available from ${p.availableFrom || 'now'}
+        ${p.bedrooms ? p.bedrooms+' bed · ' : ''}${p.bathrooms ? p.bathrooms+' bath · ' : ''}${p.sizeSqm ? p.sizeSqm+' m² · ' : ''}Available from ${p.availableFrom || 'now'}
       </div>
+      ${(p.type==='Room'||p.type==='Bachelor') && p.unitsTotal ? `<div class="hint" style="margin-top:2px">${p.unitsAvailable||0} of ${p.unitsTotal} unit${p.unitsTotal==1?'':'s'} available</div>` : ''}
+      ${(p.bathroomType||p.parking||p.wifi||p.pets) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        ${p.bathroomType ? `<span class="badge" style="font-size:11px">🚿 ${escapeHtml(p.bathroomType)}</span>` : ''}
+        ${p.parking ? `<span class="badge" style="font-size:11px">🚗 ${escapeHtml(p.parking)}</span>` : ''}
+        ${p.wifi ? `<span class="badge" style="font-size:11px">📶 ${escapeHtml(p.wifi)}</span>` : ''}
+        ${p.pets ? `<span class="badge" style="font-size:11px">🐾 ${escapeHtml(p.pets)}</span>` : ''}
+      </div>` : ''}
       <button class="btn primary" style="width:100%;margin-top:12px" onclick="contactLandlordAbout('${p.ref}')">💬 Contact Landlord</button>
     </div>`).join('');
 }
@@ -2117,6 +2145,7 @@ function prefillListProperty(){
   const s = getSession();
   if(!EDITING_PROPERTY && s) S('lpContact').value = s.phone || '';
   S('listPropertyTitle').textContent = EDITING_PROPERTY ? 'Edit Property' : 'List a Property';
+  if(!EDITING_PROPERTY) toggleLpUnitsRow();
 }
 function editProperty(ref){
   jsonpFetchP('myProperties', { username: getSession().username }, list => {
@@ -2132,8 +2161,16 @@ function editProperty(ref){
     S('lpAvailable').value = p.availableFrom || '';
     S('lpBedrooms').value = p.bedrooms || '';
     S('lpBathrooms').value = p.bathrooms || '';
+    S('lpSize').value = p.sizeSqm || '';
+    S('lpUnitsTotal').value = p.unitsTotal || '';
+    S('lpUnitsAvailable').value = p.unitsAvailable || '';
+    S('lpBathroomType').value = p.bathroomType || '';
+    S('lpParking').value = p.parking || '';
+    S('lpWifi').value = p.wifi || '';
+    S('lpPets').value = p.pets || '';
     S('lpDesc').value = p.description || '';
     S('lpContact').value = p.contact || '';
+    toggleLpUnitsRow();
     setView('listProperty');
   }, () => toast('Could not load listing'));
 }
@@ -2142,6 +2179,12 @@ function setPropertyStatus(ref, status){
   postToSheet({ type:'propertyStatus', ref, status, username: s.username });
   toast(status === 'Removed' ? 'Listing removed' : status === 'Rented' ? 'Marked as rented' : 'Listing reactivated');
   setTimeout(loadMyProperties, 400);
+}
+function toggleLpUnitsRow(){
+  const row = S('lpUnitsRow');
+  if(!row) return;
+  const t = S('lpType').value;
+  row.style.display = (t === 'Room' || t === 'Bachelor') ? '' : 'none';
 }
 function saveProperty(){
   const s = getSession();
@@ -2153,6 +2196,8 @@ function saveProperty(){
   const data = { type:'property', ref, isUpdate: !!EDITING_PROPERTY, username: s.username, ownerName: s.name,
     propertyType: S('lpType').value, title: val('lpTitle'), location: val('lpLocation'), address: val('lpAddress'),
     rent: val('lpRent'), availableFrom: val('lpAvailable'), bedrooms: val('lpBedrooms'), bathrooms: val('lpBathrooms'),
+    sizeSqm: val('lpSize'), unitsTotal: val('lpUnitsTotal'), unitsAvailable: val('lpUnitsAvailable'),
+    bathroomType: S('lpBathroomType').value, parking: S('lpParking').value, wifi: S('lpWifi').value, pets: S('lpPets').value,
     description: val('lpDesc'), contact: val('lpContact'), status:'Active', createdAt: new Date().toISOString() };
   postToSheet(data);
   EDITING_PROPERTY = null;
@@ -2853,10 +2898,8 @@ function renderRoleUI(){
   }
 }
 function applyTenantRoleVisibility(){
-  // Tenants see only the tenant console — marketplace/landlord entry points are hidden here.
-  const s = getSession();
-  const isTenant = s && s.role !== 'Landlord';
-  if(S('browsePropertiesCard')) S('browsePropertiesCard').classList.toggle('hidden', !isTenant);
+  // Browsing the marketplace is public — no login required. Only the "list/manage a room" action needs a Landlord account.
+  if(S('browsePropertiesCard')) S('browsePropertiesCard').classList.remove('hidden');
   const landlordLink = document.getElementById('landlordPortalHomeLink');
   if(landlordLink) landlordLink.classList.toggle('hidden', true); // landlords land in the Landlord Portal directly, not via Tenant Home
 }
