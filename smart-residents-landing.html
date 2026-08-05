@@ -35,16 +35,17 @@
   .brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(155deg,var(--gold-bright),var(--gold));display:flex;align-items:center;justify-content:center;color:#1B1403;font-family:'Barlow Condensed';font-weight:700;font-size:19px;flex-shrink:0;}
   .brand-word{font-family:'Barlow Condensed';font-weight:700;letter-spacing:.03em;font-size:19px;}
   .brand-word span{color:var(--gold);}
-  .nav-links{display:flex;align-items:center;gap:30px;}
+  .nav-links{display:none;align-items:center;gap:30px;}
   .nav-links a{font-size:14.5px;color:var(--muted);transition:color .2s var(--ease);}
   .nav-links a:hover{color:var(--paper);}
+  @media(min-width:760px){.nav-links{display:flex;}}
   .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:transform .15s var(--ease),box-shadow .2s var(--ease),background .2s var(--ease);white-space:nowrap;}
   .btn-gold{background:var(--gold);color:#1B1403;padding:11px 20px;font-size:14.5px;}
   .btn-gold:hover{background:var(--gold-bright);box-shadow:0 8px 22px rgba(232,166,38,.28);transform:translateY(-1px);}
   .btn-ghost{border-color:var(--line);color:var(--paper);padding:10px 18px;font-size:14.5px;background:transparent;}
   .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-  .nav-cta{display:none;}
-  @media(min-width:720px){.nav-cta{display:inline-flex;}}
+  .nav-cta{display:inline-flex;padding:9px 14px;font-size:13.5px;}
+  @media(min-width:480px){.nav-cta{padding:11px 20px;font-size:14.5px;}}
 
   /* ---------- hero ---------- */
   .hero{position:relative;padding:88px 0 110px;overflow:hidden;}
@@ -63,8 +64,12 @@
   .trust-row b{color:var(--paper);font-family:'Barlow Condensed';font-weight:700;font-size:20px;display:block;}
 
   /* ---------- signature: stacked listing cards ---------- */
-  .stack{position:relative;height:420px;}
-  .lcard{position:absolute;width:100%;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 20px 18px;box-shadow:0 20px 50px rgba(0,0,0,.4);transition:transform .5s var(--ease);}
+  .stack{position:relative;height:480px;}
+  @media(max-width:400px){.stack{height:440px;}}
+  .lcard{position:absolute;width:100%;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:0 0 18px;box-shadow:0 20px 50px rgba(0,0,0,.4);transition:transform .5s var(--ease);overflow:hidden;}
+  .lcard-photo{position:relative;height:120px;background:linear-gradient(135deg,#3A3020,#4A3A1E 45%,#2A2318);}
+  .lcard-photo .count{position:absolute;bottom:8px;right:9px;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:100px;}
+  .lcard-body{padding:14px 20px 0;}
   .lcard .type{font-family:'Barlow Condensed';font-weight:700;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
   .lcard h4{font-family:'Barlow Condensed';font-weight:700;font-size:20px;margin:4px 0 3px;}
   .lcard .loc{color:var(--muted);font-size:13px;margin-bottom:14px;}
@@ -103,6 +108,10 @@
   .spec-wrap{display:grid;grid-template-columns:1fr;gap:44px;align-items:center;}
   @media(min-width:900px){.spec-wrap{grid-template-columns:.95fr 1.05fr;}}
   .spec-sheet{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;}
+  .ss-photos{display:grid;grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:150px;margin-bottom:18px;}
+  .ss-photo-main{grid-row:1/3;border-radius:12px;background:linear-gradient(135deg,#4A3A1E,#2E2517);}
+  .ss-photo-sub{border-radius:10px;background:linear-gradient(135deg,#3A3020,#241E14);position:relative;}
+  .ss-more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);color:#fff;font-weight:700;font-size:15px;border-radius:10px;}
   .spec-sheet .sh-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line);}
   .spec-sheet .sh-top h4{font-family:'Barlow Condensed';font-weight:700;font-size:22px;margin:2px 0 4px;}
   .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -139,9 +148,13 @@
   .foot-col a:hover{color:var(--gold);}
   .foot-bottom{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;}
 
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease),transform .6s var(--ease);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
   @media(prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
-    .lcard, .btn{transition:none;}
+    .lcard, .btn, .reveal{transition:none;}
+    .reveal{opacity:1;transform:none;}
   }
 </style>
 </head>
@@ -180,28 +193,37 @@
     </div>
     <div class="stack" aria-hidden="true">
       <div class="lcard c1">
+        <div class="lcard-photo" style="background:linear-gradient(135deg,#33404A,#22303A 55%,#182229)"><span class="count">1/2 📷</span></div>
+        <div class="lcard-body">
         <div class="type">Room</div>
         <h4>Quiet room, Wi-Fi included</h4>
         <div class="loc">Mamelodi, Pretoria</div>
         <div class="price">R2,800<span> /month</span></div>
         <div class="avail">1 of 2 units available</div>
         <div class="tags"><span class="tag">🚿 Shared bathroom</span><span class="tag">📶 Wi-Fi</span></div>
+        </div>
       </div>
       <div class="lcard c2">
+        <div class="lcard-photo" style="background:linear-gradient(135deg,#3D3630,#2B2620 55%,#1C1915)"><span class="count">1/4 📷</span></div>
+        <div class="lcard-body">
         <div class="type">Townhouse</div>
         <h4>2-bed near taxi rank</h4>
         <div class="loc">Soshanguve, Pretoria</div>
         <div class="price">R6,200<span> /month</span></div>
         <div class="avail">Available from 1 Sept</div>
         <div class="tags"><span class="tag">🚗 Covered parking</span><span class="tag">🐾 No pets</span></div>
+        </div>
       </div>
       <div class="lcard c3">
+        <div class="lcard-photo"><span class="count">1/4 📷</span></div>
+        <div class="lcard-body">
         <div class="type">Bachelor</div>
         <h4>Bachelor rooms, 7207 Isazi St</h4>
         <div class="loc">Olievenhoutbosch, Centurion</div>
         <div class="price">R3,500<span> /month</span></div>
         <div class="avail">1 of 4 units available</div>
         <div class="tags"><span class="tag">🚿 Shower &amp; bath</span><span class="tag">🚗 Open parking</span><span class="tag">📶 Included</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -209,12 +231,12 @@
 
 <section id="features">
   <div class="wrap">
-    <div class="section-head">
+    <div class="reveal section-head">
       <div class="eyebrow" style="color:var(--gold)">BUILT FOR BOTH SIDES</div>
       <h2>Everything unlocks the moment you log in.</h2>
       <p>Browsing is open to anyone. Once a landlord or tenant signs in, the app becomes their control room — no separate spreadsheets, no lost WhatsApp threads.</p>
     </div>
-    <div class="split">
+    <div class="reveal split">
       <div class="aud-card">
         <div class="aud-tag">For tenants</div>
         <h3>Move in without the paper trail.</h3>
@@ -230,6 +252,7 @@
         <h3>List once. Manage everything.</h3>
         <ul>
           <li>Add a Room, Bachelor, Townhouse or House — with the real details tenants ask about first.</li>
+          <li>Upload up to 4 photos per listing, straight from your phone. No editing skills needed.</li>
           <li>Running four bachelor rooms off one address? Show total units and how many are free, at a glance.</li>
           <li>Track applicants, leases, faults and payments from one dashboard.</li>
         </ul>
@@ -244,13 +267,20 @@
     <div>
       <div class="eyebrow" style="color:var(--gold)">THE DETAIL THAT SELLS A ROOM</div>
       <h2 class="cond" style="font-size:clamp(26px,4vw,36px);margin:0 0 18px;">A listing that actually answers the question.</h2>
-      <ul class="feature-list">
-        <li><span class="fi-num">01</span><div><h5>Room size, in square metres</h5><p>So nobody arrives expecting a bedroom and finds a cupboard.</p></div></li>
-        <li><span class="fi-num">02</span><div><h5>Units total vs. units available</h5><p>Four bachelor rooms on one stand? Show it as one listing — "1 of 4 available" — instead of four confusing duplicates.</p></div></li>
-        <li><span class="fi-num">03</span><div><h5>Bathroom, parking, Wi-Fi and pets</h5><p>The four questions every enquiry starts with, answered before the first message is sent.</p></div></li>
+      <ul class="reveal feature-list">
+        <li><span class="fi-num">01</span><div><h5>Real photos, taken on a phone</h5><p>Up to four photos per listing, compressed automatically so pages load fast even on slow data.</p></div></li>
+        <li><span class="fi-num">02</span><div><h5>Room size, in square metres</h5><p>So nobody arrives expecting a bedroom and finds a cupboard.</p></div></li>
+        <li><span class="fi-num">03</span><div><h5>Units total vs. units available</h5><p>Four bachelor rooms on one stand? Show it as one listing — "1 of 4 available" — instead of four confusing duplicates.</p></div></li>
+        <li><span class="fi-num">04</span><div><h5>Bathroom, parking, Wi-Fi and pets</h5><p>The four questions every enquiry starts with, answered before the first message is sent.</p></div></li>
       </ul>
     </div>
-    <div class="spec-sheet">
+    <div class="reveal spec-sheet">
+      <div class="ss-photos">
+        <div class="ss-photo-main"></div>
+        <div class="ss-photo-sub"></div>
+        <div class="ss-photo-sub"></div>
+        <div class="ss-photo-sub" style="position:relative"><span class="ss-more">+1</span></div>
+      </div>
       <div class="sh-top">
         <div>
           <div class="type" style="font-family:'Barlow Condensed';font-weight:700;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">BACHELOR</div>
@@ -276,12 +306,12 @@
 
 <section id="how">
   <div class="wrap">
-    <div class="section-head">
+    <div class="reveal section-head">
       <div class="eyebrow" style="color:var(--gold)">GETTING STARTED</div>
       <h2>Three steps, either side of the deal.</h2>
       <p>No paperwork to chase, no keys handed over without a signature on file.</p>
     </div>
-    <div class="steps">
+    <div class="reveal steps">
       <div class="step">
         <div class="num">01</div>
         <h4>Browse or list</h4>
@@ -303,7 +333,7 @@
 
 <section>
   <div class="wrap">
-    <div class="band">
+    <div class="reveal band">
       <h2>Your next room — or your next tenant — is a tap away.</h2>
       <p>Smart Residents is free to browse and free to list.</p>
       <div class="hero-ctas">
@@ -347,5 +377,23 @@
   </div>
 </footer>
 
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window) || !els.length){
+    els.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(function(el){ io.observe(el); });
+})();
+</script>
 </body>
 </html>

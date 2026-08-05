@@ -458,6 +458,13 @@ input.err,select.err{border-color:var(--bad);box-shadow:0 0 0 3px rgba(229,100,9
 .upload:hover{background:var(--gold-soft);}
 .upload.err{border-color:var(--bad);}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.lp-photo-slot{position:relative;aspect-ratio:1/1;border:1.5px dashed var(--line);border-radius:12px;background:var(--panel2,#212836);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:border-color .2s var(--ease);}
+.lp-photo-slot:hover{border-color:var(--gold);}
+.lp-photo-slot img{width:100%;height:100%;object-fit:cover;display:block;}
+.lp-photo-plus{font-size:26px;color:var(--muted);font-weight:300;}
+.lp-photo-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:13px;line-height:20px;text-align:center;cursor:pointer;}
+.listing-photo{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px 12px 0 0;background:var(--panel2,#212836);display:block;}
+.listing-photo-ph{width:100%;aspect-ratio:16/10;border-radius:12px 12px 0 0;background:linear-gradient(135deg,var(--panel2,#212836),var(--line,#2A313D));display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:28px;}
 @media(max-width:480px){.row2{grid-template-columns:1fr;}}
 @media(max-width:380px){
   .wrap{padding:16px 14px 130px;}
@@ -1529,6 +1536,13 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
       </div>
       <label class="f"><em>Description <b>*</b></em><textarea id="lpDesc" rows="4" placeholder="What makes this property a good fit? Include amenities, security, nearby transport, etc."></textarea></label>
       <label class="f"><em>Contact number for enquiries <b>*</b></em><input type="tel" id="lpContact" placeholder="e.g. 0730001234" inputmode="numeric"></label>
+      <label class="f"><em>Photos <span style="font-weight:400;color:var(--muted)">(up to 4, optional but recommended)</span></em>
+        <div id="lpPhotoGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">
+          <div class="lp-photo-slot" id="lpPhotoSlot0" onclick="S('lpPhotoInput').click()"><span class="lp-photo-plus">+</span></div>
+        </div>
+        <input type="file" id="lpPhotoInput" accept="image/*" multiple style="display:none" onchange="handleLpPhotoSelect(event)">
+        <div class="hint" id="lpPhotoHint" style="margin-top:6px">Tap a square to add a photo. Photos are compressed automatically to keep listings fast to load.</div>
+      </label>
       <div id="listPropertyError" class="hint hidden" style="color:var(--bad);margin-top:-6px;margin-bottom:10px"></div>
       <button class="btn primary" style="width:100%;margin-top:6px" onclick="saveProperty()">Publish listing</button>
     </div>
@@ -2071,7 +2085,9 @@ function renderBrowseProperties(list){
   if(!filtered.length){ body.innerHTML = '<div class="card"><p class="hint">No properties listed yet' + (PROPERTY_FILTER ? ' for '+PROPERTY_FILTER : '') + '.</p></div>'; return; }
   const sorted = filtered.slice().sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
   body.innerHTML = sorted.map(p => `
-    <div class="card" style="margin-bottom:12px;text-align:left">
+    <div class="card" style="margin-bottom:12px;text-align:left;padding:0 0 18px;overflow:hidden">
+      ${p.photo1 ? `<img class="listing-photo" style="border-radius:18px 18px 0 0" src="${p.photo1}" loading="lazy">` : `<div class="listing-photo-ph" style="border-radius:18px 18px 0 0">🏠</div>`}
+      <div style="padding:18px 18px 0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
         <div>
           <span class="cond" style="color:var(--gold);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase">${p.type || ''}</span>
@@ -2095,6 +2111,7 @@ function renderBrowseProperties(list){
         ${p.pets ? `<span class="badge" style="font-size:11px">🐾 ${escapeHtml(p.pets)}</span>` : ''}
       </div>` : ''}
       <button class="btn primary" style="width:100%;margin-top:12px" onclick="contactLandlordAbout('${p.ref}')">💬 Contact Landlord</button>
+      </div>
     </div>`).join('');
 }
 
@@ -2127,9 +2144,12 @@ function renderMyProperties(list){
   body.innerHTML = sorted.map(p => `
     <div style="padding:12px 0;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div>
-          <b>${p.title || 'Untitled listing'}</b>
-          <div class="hint">${p.type || ''} · ${p.location || ''} · R${p.rent || '—'}/month</div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          ${p.photo1 ? `<img src="${p.photo1}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0" loading="lazy">` : `<div style="width:52px;height:52px;border-radius:10px;flex-shrink:0;background:var(--panel2);display:flex;align-items:center;justify-content:center;color:var(--muted)">🏠</div>`}
+          <div>
+            <b>${p.title || 'Untitled listing'}</b>
+            <div class="hint">${p.type || ''} · ${p.location || ''} · R${p.rent || '—'}/month</div>
+          </div>
         </div>
         <span class="cond" style="color:${p.status === 'Rented' ? 'var(--muted)' : 'var(--good)'};font-weight:700;font-size:12px;text-transform:uppercase">${p.status || 'Active'}</span>
       </div>
@@ -2141,11 +2161,66 @@ function renderMyProperties(list){
     </div>`).join('');
 }
 let EDITING_PROPERTY = null;
+let LP_PHOTOS = []; // array of compressed data-URL strings, max 4
+function renderLpPhotoGrid(){
+  const grid = S('lpPhotoGrid');
+  if(!grid) return;
+  let html = '';
+  for(let i=0;i<LP_PHOTOS.length;i++){
+    html += `<div class="lp-photo-slot"><img src="${LP_PHOTOS[i]}"><span class="lp-photo-remove" onclick="event.stopPropagation();removeLpPhoto(${i})">✕</span></div>`;
+  }
+  if(LP_PHOTOS.length < 4){
+    html += `<div class="lp-photo-slot" onclick="S('lpPhotoInput').click()"><span class="lp-photo-plus">+</span></div>`;
+  }
+  grid.innerHTML = html;
+  const hint = S('lpPhotoHint');
+  if(hint) hint.textContent = LP_PHOTOS.length ? `${LP_PHOTOS.length} of 4 photos added.` : 'Tap a square to add a photo. Photos are compressed automatically to keep listings fast to load.';
+}
+function compressImageFile(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 900;
+        const scale = Math.min(1, maxW / img.width);
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.55));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function handleLpPhotoSelect(event){
+  const files = Array.from(event.target.files || []);
+  event.target.value = '';
+  const room = 4 - LP_PHOTOS.length;
+  if(room <= 0){ toast('You can add up to 4 photos'); return; }
+  const hint = S('lpPhotoHint');
+  if(hint) hint.textContent = 'Compressing photo(s)…';
+  for(const file of files.slice(0, room)){
+    try{
+      const dataUrl = await compressImageFile(file);
+      LP_PHOTOS.push(dataUrl);
+    }catch(e){ toast('Could not read that photo'); }
+  }
+  renderLpPhotoGrid();
+}
+function removeLpPhoto(idx){
+  LP_PHOTOS.splice(idx, 1);
+  renderLpPhotoGrid();
+}
 function prefillListProperty(){
   const s = getSession();
   if(!EDITING_PROPERTY && s) S('lpContact').value = s.phone || '';
   S('listPropertyTitle').textContent = EDITING_PROPERTY ? 'Edit Property' : 'List a Property';
-  if(!EDITING_PROPERTY) toggleLpUnitsRow();
+  if(!EDITING_PROPERTY){ toggleLpUnitsRow(); LP_PHOTOS = []; renderLpPhotoGrid(); }
 }
 function editProperty(ref){
   jsonpFetchP('myProperties', { username: getSession().username }, list => {
@@ -2170,6 +2245,8 @@ function editProperty(ref){
     S('lpPets').value = p.pets || '';
     S('lpDesc').value = p.description || '';
     S('lpContact').value = p.contact || '';
+    LP_PHOTOS = [p.photo1, p.photo2, p.photo3, p.photo4].filter(Boolean);
+    renderLpPhotoGrid();
     toggleLpUnitsRow();
     setView('listProperty');
   }, () => toast('Could not load listing'));
@@ -2198,6 +2275,7 @@ function saveProperty(){
     rent: val('lpRent'), availableFrom: val('lpAvailable'), bedrooms: val('lpBedrooms'), bathrooms: val('lpBathrooms'),
     sizeSqm: val('lpSize'), unitsTotal: val('lpUnitsTotal'), unitsAvailable: val('lpUnitsAvailable'),
     bathroomType: S('lpBathroomType').value, parking: S('lpParking').value, wifi: S('lpWifi').value, pets: S('lpPets').value,
+    photo1: LP_PHOTOS[0] || '', photo2: LP_PHOTOS[1] || '', photo3: LP_PHOTOS[2] || '', photo4: LP_PHOTOS[3] || '',
     description: val('lpDesc'), contact: val('lpContact'), status:'Active', createdAt: new Date().toISOString() };
   postToSheet(data);
   EDITING_PROPERTY = null;
