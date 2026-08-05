@@ -346,6 +346,220 @@
       min-width: 100%;
     }
   }
+
+  /* Landlord / Owner Auth Modal */
+  .auth-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 23, 28, 0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .auth-overlay.open {
+    display: flex;
+  }
+
+  .auth-modal {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    width: 100%;
+    max-width: 380px;
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
+  .auth-close {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .auth-close:hover { color: var(--text-main); }
+
+  .auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .auth-tab {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0.25rem 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .auth-tab.on {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  .auth-form .form-group { margin-bottom: 0.9rem; }
+
+  .auth-lead {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+  }
+
+  .auth-error {
+    display: none;
+    font-size: 0.82rem;
+    color: #c53030;
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 0.9rem;
+  }
+
+  .auth-error.show { display: block; }
+
+  /* Extended listing form */
+  .form-subhead {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    margin: 1.1rem 0 0.6rem;
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .checkbox-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--badge-bg);
+    border: 1px solid var(--border-color);
+    padding: 0.45rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    color: var(--badge-text);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-pill input { accent-color: var(--primary); }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .photo-slot {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .photo-slot:hover { border-color: var(--primary); }
+
+  .photo-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .photo-plus {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+
+  .photo-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(20, 23, 28, 0.75);
+    color: #fff;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .photo-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* Listing card: gallery + feature badges */
+  .card-gallery { position: relative; width: 100%; height: 200px; background: #cbd5e0; }
+  .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+  .gallery-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+  .gallery-dot.on { background: #fff; }
+
+  .listing-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .feature-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    padding: 0.25rem 0.6rem;
+  }
 </style>
 </head>
 <body>
@@ -357,15 +571,67 @@
     <a href="#map-section">Map & Area</a>
     <a href="#faults">Faults</a>
     <a href="#payments">Payments</a>
-    <button type="button" class="admin-toggle-btn" onclick="toggleAdminPanel()">Admin Access</button>
+    <button type="button" class="admin-toggle-btn" id="authBtn" onclick="onAuthBtnClick()">Landlord / Owner Login</button>
+    <span id="sessionBar" style="display:none;align-items:center;gap:0.6rem;">
+      <span id="sessionName" style="color:#e2e8f0;font-size:0.9rem;font-weight:600;"></span>
+      <button type="button" class="admin-toggle-btn" onclick="togglePanel()">Landlord Panel</button>
+      <button type="button" class="admin-toggle-btn" onclick="logoutLandlord()">Log out</button>
+    </span>
   </nav>
 </header>
+
+<!-- Landlord / Owner Auth Modal -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <button type="button" class="auth-close" onclick="closeAuthModal()" aria-label="Close">✕</button>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab on" id="tabLoginBtn" onclick="switchAuthTab('login')">Log in</button>
+      <button type="button" class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <form id="loginForm" class="auth-form">
+      <p class="auth-lead">Sign in to manage your listings.</p>
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <p class="auth-error" id="loginError"></p>
+      <button type="submit" class="btn-submit" style="width:100%;">Log in</button>
+    </form>
+
+    <form id="registerForm" class="auth-form" style="display:none;">
+      <p class="auth-lead">Create a Landlord / Owner account to list properties.</p>
+      <div class="form-group">
+        <label for="regName">Full name</label>
+        <input type="text" id="regName" required autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="regPhone">Contact number</label>
+        <input type="tel" id="regPhone" required autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label for="regUsername">Choose a username</label>
+        <input type="text" id="regUsername" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Choose a password</label>
+        <input type="password" id="regPassword" required autocomplete="new-password" minlength="4">
+      </div>
+      <p class="auth-error" id="registerError"></p>
+      <button type="submit" class="btn-submit" style="width:100%;">Create account</button>
+    </form>
+  </div>
+</div>
 
 <main class="container">
   
   <!-- Listing Administrator Control Panel -->
-  <section class="admin-panel" id="adminPanel">
-    <span class="admin-badge">Listing Administrator Panel</span>
+  <section class="admin-panel" id="adminPanel" style="display:none;">
+    <span class="admin-badge">Landlord / Owner Panel</span>
     <h2 class="section-title" style="margin-bottom:0.75rem;">Add New Property Listing</h2>
     <form id="propertyForm">
       <div class="form-grid">
@@ -394,11 +660,75 @@
           <input type="number" id="bathsInput" value="1" min="0" required>
         </div>
         <div class="form-group">
-          <label for="imageInput">Upload Property Picture</label>
-          <input type="file" id="imageInput" accept="image/*" required>
+          <label for="sizeInput">Size (m²)</label>
+          <input type="number" id="sizeInput" min="0" step="0.5" placeholder="e.g. 24">
         </div>
       </div>
-      <button type="submit" class="btn-submit">Publish Listing as Administrator</button>
+
+      <h3 class="form-subhead">Utilities &amp; Access</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="wifiInput">Wi-Fi</label>
+          <select id="wifiInput">
+            <option value="">Select…</option>
+            <option value="Included in rent">Included in rent</option>
+            <option value="Available — extra cost">Available — extra cost</option>
+            <option value="Not available">Not available</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="parkingInput">Parking</label>
+          <select id="parkingInput">
+            <option value="">Select…</option>
+            <option value="No parking">No parking</option>
+            <option value="Open parking">Open parking</option>
+            <option value="Covered parking">Covered parking</option>
+            <option value="Garage">Garage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="waterInput">Water</label>
+          <select id="waterInput">
+            <option value="">Select…</option>
+            <option value="Municipal water included">Municipal water included</option>
+            <option value="Borehole water">Borehole water</option>
+            <option value="Water tank backup">Water tank backup</option>
+            <option value="Metered — pay separately">Metered — pay separately</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="electricityInput">Electricity</label>
+          <select id="electricityInput">
+            <option value="">Select…</option>
+            <option value="Included in rent">Included in rent</option>
+            <option value="Prepaid meter">Prepaid meter</option>
+            <option value="Metered — pay separately">Metered — pay separately</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 class="form-subhead">Additional Features</h3>
+      <div class="checkbox-group" id="extraFeatures">
+        <label class="checkbox-pill"><input type="checkbox" value="Furnished"> Furnished</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Fenced / secure property"> Fenced / secure property</label>
+        <label class="checkbox-pill"><input type="checkbox" value="24-hour security"> 24-hour security</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Backup power (inverter)"> Backup power (inverter)</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Pet friendly"> Pet friendly</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Near public transport"> Near public transport</label>
+      </div>
+
+      <h3 class="form-subhead">Photos</h3>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Upload Property Pictures <span style="font-weight:400;color:var(--text-muted);">(up to 6)</span></label>
+        <div class="photo-grid" id="photoGrid">
+          <div class="photo-slot" id="photoAddSlot" onclick="document.getElementById('imageInput').click()"><span class="photo-plus">+</span></div>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+        <p class="photo-hint" id="photoHint">Tap a square to add a photo. At least one photo is required.</p>
+      </div>
+
+      <p class="auth-error" id="publishError"></p>
+      <button type="submit" class="btn-submit">Publish Listing</button>
     </form>
   </section>
 
@@ -435,6 +765,12 @@
           <span class="feature-item"><strong>1</strong> Bath</span>
           <span class="feature-item">Private Kitchen</span>
         </div>
+        <div class="listing-features">
+          <span class="feature-badge">📶 Included in rent</span>
+          <span class="feature-badge">🚗 Open parking</span>
+          <span class="feature-badge">💧 Municipal water included</span>
+          <span class="feature-badge">⚡ Prepaid meter</span>
+        </div>
       </div>
     </article>
 
@@ -451,6 +787,12 @@
           <span class="feature-item"><strong>1</strong> Bed</span>
           <span class="feature-item"><strong>1</strong> Bath</span>
           <span class="feature-item">Private Kitchen</span>
+        </div>
+        <div class="listing-features">
+          <span class="feature-badge">📶 Available — extra cost</span>
+          <span class="feature-badge">🚗 Covered parking</span>
+          <span class="feature-badge">💧 Municipal water included</span>
+          <span class="feature-badge">✓ Fenced / secure property</span>
         </div>
       </div>
     </article>
@@ -500,61 +842,291 @@
     .bindPopup('<b>Maoka Residence</b><br>Olievenhoutbosch / Centurion')
     .openPopup();
 
-  // Toggle Admin Panel Visibility
-  function toggleAdminPanel() {
+  /* ================= Landlord / Owner Auth (client-side, localStorage) ================= */
+  const LANDLORDS_KEY = 'maoka_landlords';
+  const SESSION_KEY = 'maoka_landlord_session';
+
+  function getLandlords() {
+    try { return JSON.parse(localStorage.getItem(LANDLORDS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveLandlords(list) {
+    localStorage.setItem(LANDLORDS_KEY, JSON.stringify(list));
+  }
+  function getSession() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) { return null; }
+  }
+  function setSession(landlord) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ username: landlord.username, name: landlord.name }));
+  }
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function openAuthModal(tab) {
+    document.getElementById('authOverlay').classList.add('open');
+    switchAuthTab(tab || 'login');
+  }
+  function closeAuthModal() {
+    document.getElementById('authOverlay').classList.remove('open');
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('registerError').classList.remove('show');
+  }
+  function switchAuthTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tabLoginBtn').classList.toggle('on', isLogin);
+    document.getElementById('tabRegisterBtn').classList.toggle('on', !isLogin);
+    document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+  }
+
+  function onAuthBtnClick() {
+    openAuthModal('login');
+  }
+
+  function togglePanel() {
     const adminPanel = document.getElementById('adminPanel');
-    if (adminPanel.style.display === 'none') {
-      adminPanel.style.display = 'block';
+    adminPanel.style.display = (adminPanel.style.display === 'none' || !adminPanel.style.display) ? 'block' : 'none';
+  }
+
+  function logoutLandlord() {
+    localStorage.removeItem(SESSION_KEY);
+    document.getElementById('adminPanel').style.display = 'none';
+    refreshAuthUI();
+  }
+
+  function refreshAuthUI() {
+    const session = getSession();
+    const authBtn = document.getElementById('authBtn');
+    const sessionBar = document.getElementById('sessionBar');
+    if (session) {
+      authBtn.style.display = 'none';
+      sessionBar.style.display = 'flex';
+      document.getElementById('sessionName').textContent = 'Hi, ' + session.name;
     } else {
-      adminPanel.style.display = 'none';
+      authBtn.style.display = 'inline-block';
+      sessionBar.style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'none';
     }
   }
 
-  // Dynamic Image Upload & Property Publishing Handler (Admin)
+  document.getElementById('registerForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errEl = document.getElementById('registerError');
+    errEl.classList.remove('show');
+
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const username = document.getElementById('regUsername').value.trim().toLowerCase();
+    const password = document.getElementById('regPassword').value;
+
+    if (!name || !phone || !username || !password) {
+      errEl.textContent = 'Please complete every field.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    const landlords = getLandlords();
+    if (landlords.some(l => l.username === username)) {
+      errEl.textContent = 'That username is already taken. Try logging in instead.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    const passwordHash = await sha256Hex(password);
+    const landlord = { username, passwordHash, name, phone };
+    landlords.push(landlord);
+    saveLandlords(landlords);
+    setSession(landlord);
+    document.getElementById('registerForm').reset();
+    closeAuthModal();
+    refreshAuthUI();
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+
+    const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+    const passwordHash = await sha256Hex(password);
+
+    const landlords = getLandlords();
+    const landlord = landlords.find(l => l.username === username && l.passwordHash === passwordHash);
+    if (!landlord) {
+      errEl.textContent = 'Username or password is incorrect.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    setSession(landlord);
+    document.getElementById('loginForm').reset();
+    closeAuthModal();
+    refreshAuthUI();
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Close modal when clicking the dimmed backdrop
+  document.getElementById('authOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeAuthModal();
+  });
+
+  refreshAuthUI();
+
+  /* ================= Photo upload (multi, compressed) ================= */
+  const MAX_PHOTOS = 6;
+  let LISTING_PHOTOS = [];
+
+  function compressImageFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxW = 900;
+          const scale = Math.min(1, maxW / img.width);
+          const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderPhotoGrid() {
+    const grid = document.getElementById('photoGrid');
+    let html = '';
+    LISTING_PHOTOS.forEach((src, i) => {
+      html += `<div class="photo-slot"><img src="${src}"><span class="photo-remove" onclick="removeListingPhoto(${i})">✕</span></div>`;
+    });
+    if (LISTING_PHOTOS.length < MAX_PHOTOS) {
+      html += `<div class="photo-slot" id="photoAddSlot" onclick="document.getElementById('imageInput').click()"><span class="photo-plus">+</span></div>`;
+    }
+    grid.innerHTML = html;
+    const hint = document.getElementById('photoHint');
+    hint.textContent = LISTING_PHOTOS.length
+      ? `${LISTING_PHOTOS.length} of ${MAX_PHOTOS} photos added.`
+      : 'Tap a square to add a photo. At least one photo is required.';
+  }
+
+  function removeListingPhoto(idx) {
+    LISTING_PHOTOS.splice(idx, 1);
+    renderPhotoGrid();
+  }
+
+  document.getElementById('imageInput').addEventListener('change', async function (e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    const room = MAX_PHOTOS - LISTING_PHOTOS.length;
+    if (room <= 0) return;
+    const hint = document.getElementById('photoHint');
+    hint.textContent = 'Compressing photo(s)…';
+    for (const file of files.slice(0, room)) {
+      try {
+        const dataUrl = await compressImageFile(file);
+        LISTING_PHOTOS.push(dataUrl);
+      } catch (err) { /* skip unreadable file */ }
+    }
+    renderPhotoGrid();
+  });
+
+  /* ================= Publish listing (Landlord / Owner) ================= */
   const propertyForm = document.getElementById('propertyForm');
   const listingsContainer = document.getElementById('listingsContainer');
 
-  propertyForm.addEventListener('submit', function(e) {
+  propertyForm.addEventListener('submit', function (e) {
     e.preventDefault();
+
+    const session = getSession();
+    if (!session) {
+      closeAuthModal();
+      openAuthModal('login');
+      return;
+    }
+
+    const errEl = document.getElementById('publishError');
+    errEl.classList.remove('show');
+    if (!LISTING_PHOTOS.length) {
+      errEl.textContent = 'Please add at least one photo before publishing.';
+      errEl.classList.add('show');
+      return;
+    }
 
     const address = document.getElementById('addressInput').value;
     const price = document.getElementById('priceInput').value;
     const status = document.getElementById('statusInput').value;
     const beds = document.getElementById('bedsInput').value;
     const baths = document.getElementById('bathsInput').value;
-    const imageFile = document.getElementById('imageInput').files[0];
+    const size = document.getElementById('sizeInput').value;
+    const wifi = document.getElementById('wifiInput').value;
+    const parking = document.getElementById('parkingInput').value;
+    const water = document.getElementById('waterInput').value;
+    const electricity = document.getElementById('electricityInput').value;
+    const extras = Array.from(document.querySelectorAll('#extraFeatures input:checked')).map(cb => cb.value);
 
-    if (imageFile) {
-      const reader = new FileReader();
+    const badgeDefs = [
+      wifi && (wifi === 'Not available' ? '📶 No Wi-Fi' : '📶 ' + wifi),
+      parking && '🚗 ' + parking,
+      water && '💧 ' + water,
+      electricity && '⚡ ' + electricity,
+      size && '📐 ' + size + ' m²',
+      ...extras.map(x => '✓ ' + x)
+    ].filter(Boolean);
 
-      reader.onload = function(event) {
-        const imageUrl = event.target.result;
+    const badgesHTML = badgeDefs.map(b => `<span class="feature-badge">${b}</span>`).join('');
 
-        const cardHTML = `
-          <article class="card">
-            <div class="card-img-wrapper">
-              <span class="tag">${status}</span>
-              <img src="${imageUrl}" alt="${address}">
-            </div>
-            <div class="card-content">
-              <div class="price">R ${Number(price).toLocaleString()} <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">/ mo</span></div>
-              <div class="address">${address}</div>
-              <div class="features">
-                <span class="feature-item"><strong>${beds}</strong> Bed</span>
-                <span class="feature-item"><strong>${baths}</strong> Bath</span>
-              </div>
-            </div>
-          </article>
-        `;
+    const galleryImgs = LISTING_PHOTOS.map((src, i) => `<img src="${src}" style="display:${i === 0 ? 'block' : 'none'}" data-idx="${i}">`).join('');
+    const galleryDots = LISTING_PHOTOS.length > 1
+      ? `<div class="gallery-dots">${LISTING_PHOTOS.map((_, i) => `<button type="button" class="gallery-dot${i === 0 ? ' on' : ''}" onclick="switchGalleryPhoto(this, ${i})"></button>`).join('')}</div>`
+      : '';
 
-        listingsContainer.insertAdjacentHTML('afterbegin', cardHTML);
-        propertyForm.reset();
-      };
+    const cardHTML = `
+      <article class="card">
+        <div class="card-gallery">
+          <span class="tag">${status}</span>
+          ${galleryImgs}
+          ${galleryDots}
+        </div>
+        <div class="card-content">
+          <div class="price">R ${Number(price).toLocaleString()} <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">/ mo</span></div>
+          <div class="address">${address}</div>
+          <div class="features">
+            <span class="feature-item"><strong>${beds}</strong> Bed</span>
+            <span class="feature-item"><strong>${baths}</strong> Bath</span>
+          </div>
+          ${badgesHTML ? `<div class="listing-features">${badgesHTML}</div>` : ''}
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem;">Listed by ${session.name}</div>
+        </div>
+      </article>
+    `;
 
-      reader.readAsDataURL(imageFile);
-    }
+    listingsContainer.insertAdjacentHTML('afterbegin', cardHTML);
+    propertyForm.reset();
+    LISTING_PHOTOS = [];
+    renderPhotoGrid();
   });
+
+  function switchGalleryPhoto(dotEl, idx) {
+    const gallery = dotEl.closest('.card-gallery');
+    gallery.querySelectorAll('img').forEach(img => {
+      img.style.display = (Number(img.dataset.idx) === idx) ? 'block' : 'none';
+    });
+    gallery.querySelectorAll('.gallery-dot').forEach((d, i) => d.classList.toggle('on', i === idx));
+  }
+
+  renderPhotoGrid();
 </script>
 
 </body>
+
 </html>
