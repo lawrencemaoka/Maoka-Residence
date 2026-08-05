@@ -1,10 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maoka Residence · POPIA Compliant & Encrypted Portal</title>
+<title>Maoka Residence · Smart Resident</title>
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14171C">
+<meta name="description" content="Maoka Residence smart residential app — browse and list properties, apply with tenant vetting, and view the map location.">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,23 +25,36 @@
     --card-bg: #ffffff;
     --primary: #2b6cb0;
     --primary-hover: #2c5282;
+    --admin-dark: #1a202c;
     --text-main: #1a202c;
     --text-muted: #718096;
     --border-color: #e2e8f0;
+    --badge-bg: #edf2f7;
+    --badge-text: #2d3748;
     --radius: 12px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
     line-height: 1.5;
-    user-select: none; /* Anti-copy deterrence */
-    -webkit-user-select: none;
+    overflow-x: hidden;
   }
 
+  /* Header & Navigation */
   header {
     background-color: #14171C;
     color: #fff;
@@ -48,8 +66,29 @@
     top: 0;
     z-index: 1000;
   }
-  header .logo { font-size: 1.25rem; font-weight: 700; }
-  header nav { display: flex; align-items: center; gap: 1rem; }
+
+  header .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  header nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  header nav a {
+    color: #a0aec0;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  header nav a:hover {
+    color: #fff;
+  }
 
   .admin-toggle-btn {
     background-color: transparent;
@@ -59,34 +98,29 @@
     border-radius: 6px;
     font-size: 0.85rem;
     cursor: pointer;
-  }
-  .admin-toggle-btn:hover { background-color: #2d3748; color: #fff; }
-
-  .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-  .section-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
-
-  /* POPIA Consent & Privacy Styling */
-  .popia-banner {
-    background: #ebf8ff;
-    border: 1px solid #bee3f8;
-    border-left: 4px solid var(--primary);
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    font-size: 0.85rem;
-    color: #2b6cb0;
+    transition: all 0.2s;
   }
 
-  .popia-box {
-    background: #edf2f7;
-    padding: 0.8rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    margin: 1rem 0;
-    border-left: 4px solid var(--primary);
+  .admin-toggle-btn:hover {
+    background-color: #2d3748;
+    color: #fff;
+  }
+
+  /* Main Container */
+  .container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
     color: var(--text-main);
   }
 
+  /* Admin Control Panel */
   .admin-panel {
     background: var(--card-bg);
     border-left: 4px solid var(--primary);
@@ -94,6 +128,19 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
+    display: block; /* Can be toggled via JS */
+  }
+
+  .admin-badge {
+    display: inline-block;
+    background: #ebf8ff;
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
   }
 
   .form-grid {
@@ -102,13 +149,25 @@
     gap: 1rem;
     margin-bottom: 1rem;
   }
-  .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
-  .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
   .form-group input, .form-group select {
     padding: 0.6rem;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.95rem;
+    outline: none;
   }
 
   .btn-submit {
@@ -119,49 +178,726 @@
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-  }
-  .btn-danger {
-    background-color: #e53e3e;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
+    transition: background 0.2s;
   }
 
+  .btn-submit:hover {
+    background-color: var(--primary-hover);
+  }
+
+  /* Search & Filter Bar */
+  .filter-bar {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .filter-bar input, .filter-bar select {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    outline: none;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  /* Listings Grid */
   .listings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
     gap: 1.5rem;
     margin-bottom: 3rem;
   }
 
+  /* Property Listing Card */
   .card {
     background: var(--card-bg);
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .card-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background-color: #cbd5e0;
+  }
+
+  .card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(20, 23, 28, 0.85);
+    color: #fff;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .card-content {
     padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
   }
-  .price { font-size: 1.35rem; font-weight: 700; }
-  .address { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem; }
 
-  #map { width: 100%; height: 320px; border-radius: 8px; margin-bottom: 2rem; }
+  .price {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+  }
 
-  /* Auth Overlay */
+  .address {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .features {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* Map & Areas Section */
+  .map-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 3rem;
+  }
+
+  #map {
+    width: 100%;
+    height: 380px;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    z-index: 1;
+  }
+
+  .poi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 1rem;
+  }
+
+  .poi-card {
+    background: var(--bg-color);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+
+  .poi-card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .poi-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 720px) {
+    .container {
+      margin: 1.25rem auto;
+      padding: 0 1rem;
+    }
+
+    .admin-panel, .filter-bar, .map-section {
+      padding: 1.1rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.85rem 1rem;
+    }
+
+    header .logo {
+      font-size: 1.1rem;
+    }
+
+    header nav {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    header nav a {
+      font-size: 0.9rem;
+    }
+
+    #sessionBar {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 0.5rem !important;
+    }
+
+    #sessionName {
+      width: 100%;
+      font-size: 0.85rem !important;
+    }
+
+    .admin-toggle-btn {
+      padding: 0.55rem 0.85rem;
+      font-size: 0.82rem;
+    }
+
+    .filter-bar {
+      gap: 0.7rem;
+    }
+
+    .filter-bar input, .filter-bar select, #clearFiltersBtn {
+      width: 100%;
+      min-width: 100%;
+      flex: 1 1 100% !important;
+    }
+
+    .listings-grid {
+      gap: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .price {
+      font-size: 1.2rem;
+    }
+
+    /* Modals: use nearly the full screen, safely scrollable */
+    .auth-overlay {
+      padding: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .auth-modal {
+      max-width: 100%;
+      max-height: calc(100vh - 1.5rem);
+      padding: 1.5rem 1.1rem 1.25rem;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .form-grid {
+      gap: 0.8rem;
+    }
+
+    .checkbox-pill {
+      font-size: 0.82rem;
+      padding: 0.5rem 0.7rem;
+    }
+
+    .wizard-nav {
+      flex-wrap: wrap;
+    }
+
+    .wizard-nav .btn-submit, .btn-ghost-nav {
+      flex: 1 1 auto;
+      min-height: 44px;
+    }
+
+    .btn-submit, .app-actions button {
+      min-height: 42px;
+    }
+
+    .app-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .app-actions button {
+      width: 100%;
+    }
+
+    .application-row .app-top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    #map {
+      height: 260px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .auth-modal {
+      padding: 1.3rem 0.9rem 1.1rem;
+    }
+
+    .step-progress {
+      font-size: 0.7rem;
+    }
+
+    h2.section-title {
+      font-size: 1rem;
+    }
+  }
+
+  /* Landlord / Owner Auth Modal */
   .auth-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(20, 23, 28, 0.7);
-    z-index: 2000; align-items: center; justify-content: center; padding: 1.5rem;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 23, 28, 0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
   }
-  .auth-overlay.open { display: flex; }
-  .auth-modal {
-    background: var(--card-bg); border-radius: var(--radius);
-    width: 100%; max-width: 420px; padding: 1.75rem; position: relative;
-  }
-  .auth-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; }
 
-  footer { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem; }
+  .auth-overlay.open {
+    display: flex;
+  }
+
+  .auth-modal {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    width: 100%;
+    max-width: 380px;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
+  .auth-close {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .auth-close:hover { color: var(--text-main); }
+
+  .auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .auth-tab {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0.25rem 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .auth-tab.on {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  .auth-form .form-group { margin-bottom: 0.9rem; }
+
+  .auth-lead {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+  }
+
+  .auth-error {
+    display: none;
+    font-size: 0.82rem;
+    color: #c53030;
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 0.9rem;
+  }
+
+  .auth-error.show { display: block; }
+
+  /* Extended listing form */
+  .form-subhead {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    margin: 1.1rem 0 0.6rem;
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .checkbox-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--badge-bg);
+    border: 1px solid var(--border-color);
+    padding: 0.45rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    color: var(--badge-text);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-pill input { accent-color: var(--primary); }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(84px, 100%), 1fr));
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .photo-slot {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .photo-slot:hover { border-color: var(--primary); }
+
+  .photo-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .photo-plus {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+
+  .photo-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(20, 23, 28, 0.75);
+    color: #fff;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .photo-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* Listing card: gallery + feature badges */
+  .card-gallery { position: relative; width: 100%; height: 200px; background: #cbd5e0; }
+  .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+  .gallery-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+  .gallery-dot.on { background: #fff; }
+
+  .listing-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .feature-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    padding: 0.25rem 0.6rem;
+  }
+
+  /* Applications / vetting queue */
+  .status-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+  }
+  .status-pending { background: #fefcbf; color: #744210; }
+  .status-approved { background: #c6f6d5; color: #22543d; }
+  .status-declined { background: #fed7d7; color: #822727; }
+
+  .application-row {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.9rem;
+  }
+  .application-row .app-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+  .application-row .app-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+    gap: 0.4rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    margin-bottom: 0.6rem;
+  }
+  .application-row .app-detail-grid b { color: var(--text-muted); font-weight: 600; display:block; font-size: 0.72rem; text-transform: uppercase; }
+  .app-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .app-actions button {
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .app-actions .approve-btn { border-color: #38a169; color: #22543d; }
+  .app-actions .decline-btn { border-color: #e53e3e; color: #822727; }
+
+  /* Multi-step vetting wizard */
+  .step-progress {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+  .wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+  }
+  .wizard-nav .btn-submit { flex: 0 0 auto; padding: 0.7rem 1.4rem; }
+  .btn-ghost-nav {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.7rem 1.1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  #applyReviewBox { font-size: 0.85rem; }
+  #applyReviewBox .rev-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color); }
+  #applyReviewBox .rev-row:last-child { border-bottom: none; }
+  #applyReviewBox .rev-row b { color: var(--text-muted); font-weight: 600; }
+
+  /* Lease contract & welcome pack */
+  .contract-box {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .contract-box h4 { font-size: 0.85rem; margin: 0.9rem 0 0.3rem; color: var(--primary); }
+  .contract-box h4:first-child { margin-top: 0; }
+  .contract-box p { margin: 0 0 0.5rem; }
+
+  .read-progress-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0.5rem 0 0;
+  }
+  .read-progress-hint.done {
+    color: #22543d;
+    font-weight: 600;
+  }
+
+  .checkbox-pill:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
+  .track-app-row {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .welcome-pack-section {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.8rem;
+  }
+  .welcome-pack-section h4 { font-size: 0.85rem; color: var(--primary); margin-bottom: 0.4rem; }
+  .welcome-pack-section p { font-size: 0.85rem; margin: 0 0 0.3rem; }
+
+  /* POPIA notice & data controls */
+  .popia-box {
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 8px;
+    padding: 0.8rem 0.9rem;
+    margin-top: 0.9rem;
+  }
+  .popia-box p {
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: #2c5282;
+    margin: 0;
+  }
+  .popia-box a { color: var(--primary); font-weight: 600; }
+
+  .popia-strip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.78rem;
+    color: #2c5282;
+    margin-bottom: 1rem;
+  }
+  .popia-strip a { color: var(--primary); font-weight: 600; }
+
+  .masked-id-wrap { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .reveal-id-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  .data-rights-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+  .data-rights-actions button {
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .data-rights-actions .danger-btn { border-color: #e53e3e; color: #822727; }
+
+  footer.site-footer {
+    text-align: center;
+    padding: 2rem 1rem 2.5rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+  footer.site-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+  @media print {
+    header, .auth-close, .wizard-nav, #signBlock, .filter-bar, .admin-panel, footer { display: none !important; }
+    .auth-overlay { position: static !important; background: none !important; display: block !important; }
+    .auth-modal { box-shadow: none !important; max-height: none !important; overflow: visible !important; }
+  }
 </style>
 </head>
 <body>
@@ -169,367 +905,1941 @@
 <header>
   <div class="logo">Maoka Residence</div>
   <nav>
-    <button type="button" class="admin-toggle-btn" id="authBtn" onclick="openAuthModal('login')">Landlord Login</button>
+    <a href="#listings">Listings</a>
+    <a href="#map-section">Map & Area</a>
+    <button type="button" class="admin-toggle-btn" onclick="openTrackModal()">My Application</button>
+    <button type="button" class="admin-toggle-btn" id="authBtn" onclick="onAuthBtnClick()">Landlord / Owner Login</button>
     <span id="sessionBar" style="display:none;align-items:center;gap:0.6rem;">
       <span id="sessionName" style="color:#e2e8f0;font-size:0.9rem;font-weight:600;"></span>
       <button type="button" class="admin-toggle-btn" onclick="togglePanel()">Landlord Panel</button>
+      <button type="button" class="admin-toggle-btn" onclick="toggleApplicationsPanel()">Applications</button>
       <button type="button" class="admin-toggle-btn" onclick="logoutLandlord()">Log out</button>
     </span>
   </nav>
 </header>
 
-<!-- Auth Modal (with Explicit POPIA Consent) -->
+<!-- Landlord / Owner Auth Modal -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
-    <button type="button" class="auth-close" onclick="closeAuthModal()">✕</button>
-    <h3 id="modalTitle" style="margin-bottom: 1rem;">Landlord Login</h3>
+    <button type="button" class="auth-close" onclick="closeAuthModal()" aria-label="Close">✕</button>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab on" id="tabLoginBtn" onclick="switchAuthTab('login')">Log in</button>
+      <button type="button" class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
+    </div>
 
-    <!-- Login Form -->
-    <form id="loginForm">
-      <div class="form-group" style="margin-bottom:0.9rem;">
-        <label>Username</label>
+    <form id="loginForm" class="auth-form">
+      <p class="auth-lead">Sign in to manage your listings.</p>
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
         <input type="text" id="loginUsername" required autocomplete="username">
       </div>
-      <div class="form-group" style="margin-bottom:0.9rem;">
-        <label>Encryption Key / Password</label>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
         <input type="password" id="loginPassword" required autocomplete="current-password">
       </div>
-      <button type="submit" class="btn-submit" style="width:100%;">Log in & Decrypt Data</button>
-      <p style="margin-top:0.75rem;font-size:0.8rem;text-align:center;">
-        Need an account? <a href="#" onclick="switchAuthMode('register'); return false;">Register with POPIA consent</a>
-      </p>
+      <p class="auth-error" id="loginError"></p>
+      <button type="submit" class="btn-submit" style="width:100%;">Log in</button>
     </form>
 
-    <!-- Register Form -->
-    <form id="registerForm" style="display:none;">
-      <div class="form-group" style="margin-bottom:0.9rem;">
-        <label>Full Name</label>
-        <input type="text" id="regName" required>
+    <form id="registerForm" class="auth-form" style="display:none;">
+      <p class="auth-lead">Create a Landlord / Owner account to list properties.</p>
+      <div class="form-group">
+        <label for="regName">Full name</label>
+        <input type="text" id="regName" required autocomplete="name">
       </div>
-      <div class="form-group" style="margin-bottom:0.9rem;">
-        <label>Phone Number</label>
-        <input type="tel" id="regPhone" required>
+      <div class="form-group">
+        <label for="regPhone">Contact number</label>
+        <input type="tel" id="regPhone" required autocomplete="tel">
       </div>
-      <div class="form-group" style="margin-bottom:0.9rem;">
-        <label>Username</label>
-        <input type="text" id="regUsername" required>
+      <div class="form-group">
+        <label for="regUsername">Choose a username</label>
+        <input type="text" id="regUsername" required autocomplete="username">
       </div>
-      <div class="form-group" style="margin-bottom:0.9rem;">
-        <label>Encryption Key / Password (Min 8 characters)</label>
-        <input type="password" id="regPassword" required minlength="8">
+      <div class="form-group">
+        <label for="regPassword">Choose a password</label>
+        <input type="password" id="regPassword" required autocomplete="new-password" minlength="4">
       </div>
-
-      <!-- POPIA Mandatory Clause -->
-      <div class="popia-box">
-        <label style="display:flex; gap: 0.5rem; align-items:flex-start; cursor:pointer;">
-          <input type="checkbox" id="popiaConsent" required style="margin-top: 3px;">
-          <span>I explicitly consent to Maoka Residence processing my encrypted credentials under the <strong>Protection of Personal Information Act (POPIA)</strong> for property listing management.</span>
-        </label>
-      </div>
-
-      <button type="submit" class="btn-submit" style="width:100%;">Create Account</button>
-      <p style="margin-top:0.75rem;font-size:0.8rem;text-align:center;">
-        Already registered? <a href="#" onclick="switchAuthMode('login'); return false;">Log in</a>
-      </p>
+      <p class="auth-error" id="registerError"></p>
+      <button type="submit" class="btn-submit" style="width:100%;">Create account</button>
     </form>
   </div>
 </div>
 
-<main class="container">
+<!-- Tenant Vetting / Application Modal -->
+<div class="auth-overlay" id="applyOverlay">
+  <div class="auth-modal" style="max-width:480px;">
+    <button type="button" class="auth-close" onclick="closeApplyModal()" aria-label="Close">✕</button>
+    <span class="admin-badge">Vetting Application</span>
+    <h2 class="section-title" style="margin:0.4rem 0 0.25rem;">Apply for this property</h2>
+    <p class="auth-lead" id="applyListingLabel" style="margin-bottom:0.6rem;"></p>
+    <p class="step-progress" id="applyStepProgress">Step 1 of 5 — Your details</p>
 
-  <!-- POPIA Information & Security Notice -->
-  <div class="popia-banner">
-    <strong>🔒 POPIA & Privacy Protected:</strong> All personal details stored locally in this browser are encrypted using standard <strong>AES-GCM 256-bit encryption</strong> via Web Crypto APIs. Unencrypted sensitive data is never stored in browser memory.
+    <form id="applyForm" class="auth-form">
+
+      <div class="apply-step" id="applyStep1">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appName">Full legal name &amp; surname</label>
+            <input type="text" id="appName" required autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label for="appIdNumber">RSA ID number / Passport number <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+            <input type="text" id="appIdNumber" maxlength="20" placeholder="13-digit SA ID or passport no.">
+          </div>
+          <div class="form-group">
+            <label for="appPhone">Phone</label>
+            <input type="tel" id="appPhone" required autocomplete="tel">
+          </div>
+          <div class="form-group">
+            <label for="appEmail">Email (optional)</label>
+            <input type="email" id="appEmail" autocomplete="email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="appCurrentAddress">Current residential address</label>
+          <input type="text" id="appCurrentAddress" required placeholder="Where do you live now?">
+        </div>
+      </div>
+
+      <div class="apply-step" id="applyStep2" style="display:none;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appEmploymentType">Employment status</label>
+            <select id="appEmploymentType" required>
+              <option value="">Select…</option>
+              <option value="Employed">Employed</option>
+              <option value="Self-employed">Self-employed</option>
+              <option value="Student">Student</option>
+              <option value="Unemployed">Unemployed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="appContractType">Employment contract type</label>
+            <select id="appContractType">
+              <option value="">Select…</option>
+              <option value="Permanent">Permanent</option>
+              <option value="Temporary / Fixed contract">Temporary / Fixed contract</option>
+              <option value="Probation">Probation</option>
+              <option value="Not applicable">Not applicable</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="appEmployer">Employer / company name</label>
+            <input type="text" id="appEmployer" placeholder="e.g. Shoprite, self-employed">
+          </div>
+          <div class="form-group">
+            <label for="appJobTitle">Job title / occupation</label>
+            <input type="text" id="appJobTitle" placeholder="e.g. Cashier, Driver">
+          </div>
+          <div class="form-group">
+            <label for="appIncome">Net monthly income (R) <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+            <input type="number" id="appIncome" min="0" placeholder="e.g. 9000">
+          </div>
+        </div>
+        <h3 class="form-subhead">Reference check contact (optional)</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appEmployerContactName">Manager / HR name</label>
+            <input type="text" id="appEmployerContactName">
+          </div>
+          <div class="form-group">
+            <label for="appEmployerContactPhone">Manager / HR phone</label>
+            <input type="tel" id="appEmployerContactPhone">
+          </div>
+        </div>
+      </div>
+
+      <div class="apply-step" id="applyStep3" style="display:none;">
+        <h3 class="form-subhead" style="margin-top:0;">Next of kin (emergency contact)</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appKinName">Full name &amp; surname</label>
+            <input type="text" id="appKinName" required>
+          </div>
+          <div class="form-group">
+            <label for="appKinRelationship">Relationship</label>
+            <select id="appKinRelationship" required>
+              <option value="">Select…</option>
+              <option value="Parent">Parent</option>
+              <option value="Sibling">Sibling</option>
+              <option value="Spouse">Spouse</option>
+              <option value="Friend">Friend</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="appKinPhone">Contact number</label>
+            <input type="tel" id="appKinPhone" required>
+          </div>
+          <div class="form-group">
+            <label for="appKinAddress">Physical address</label>
+            <input type="text" id="appKinAddress">
+          </div>
+        </div>
+      </div>
+
+      <div class="apply-step" id="applyStep4" style="display:none;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appReasonMoving">Reason for moving</label>
+            <input type="text" id="appReasonMoving" placeholder="e.g. closer to work">
+          </div>
+          <div class="form-group">
+            <label for="appMoveInDate">Desired move-in date</label>
+            <input type="date" id="appMoveInDate">
+          </div>
+          <div class="form-group">
+            <label for="appOccupants">Number of intended occupants</label>
+            <input type="number" id="appOccupants" min="1" value="1">
+          </div>
+        </div>
+        <h3 class="form-subhead">Previous landlord reference (optional)</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appPrevLandlordName">Previous landlord name</label>
+            <input type="text" id="appPrevLandlordName">
+          </div>
+          <div class="form-group">
+            <label for="appPrevLandlordPhone">Previous landlord phone</label>
+            <input type="tel" id="appPrevLandlordPhone">
+          </div>
+        </div>
+        <h3 class="form-subhead">Supporting documents</h3>
+        <p class="photo-hint" style="margin-top:-0.3rem;margin-bottom:0.5rem;">This demo doesn't store files — just note what you have ready. The landlord will request the actual documents directly (ID copy, and 3 months' payslips or bank statements).</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appDocId">ID copy filename</label>
+            <input type="text" id="appDocId" placeholder="e.g. ID_copy.pdf">
+          </div>
+          <div class="form-group">
+            <label for="appDocIncome">Payslip / bank statement filename(s)</label>
+            <input type="text" id="appDocIncome" placeholder="e.g. payslip_june.pdf, payslip_july.pdf">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.4rem;">
+          <label for="appNotes">Anything else the landlord should know? (optional)</label>
+          <input type="text" id="appNotes">
+        </div>
+      </div>
+
+      <div class="apply-step" id="applyStep5" style="display:none;">
+        <h3 class="form-subhead" style="margin-top:0;">Review &amp; submit</h3>
+        <div id="applyReviewBox" class="application-row" style="background:#fff;"></div>
+
+        <div class="popia-box">
+          <p><b>How your information is used.</b> The details above are used only to assess this application (vetting, affordability, and reference checks) for <span id="applyPopiaAddress">this property</span>. They're stored on this device and shared with the property's landlord — not sold, and not shared with anyone else. You can view, download, or ask to delete this application at any time via "My Application." <a href="#" onclick="openPopiaModal();return false;">Read the full Privacy &amp; POPIA Notice</a>.</p>
+        </div>
+
+        <label class="checkbox-pill" style="width:100%;margin-top:0.7rem;">
+          <input type="checkbox" id="appConsent" required>
+          I consent to the landlord processing my personal information as described above, and to them verifying my employment, income and identity as part of this application.
+        </label>
+      </div>
+
+      <p class="auth-error" id="applyError"></p>
+
+      <div class="wizard-nav">
+        <button type="button" class="btn-ghost-nav" id="applyBackBtn" onclick="applyStepBack()" style="visibility:hidden;">← Back</button>
+        <button type="button" class="btn-submit" id="applyNextBtn" onclick="applyStepNext()">Next →</button>
+        <button type="submit" class="btn-submit" id="applySubmitBtn" style="display:none;">Submit for vetting</button>
+      </div>
+    </form>
+
+    <div id="applySuccess" style="display:none;text-align:center;padding:0.5rem 0;">
+      <p style="font-weight:700;margin-bottom:0.4rem;">Application submitted ✓</p>
+      <p class="auth-lead" style="margin-bottom:0.6rem;">The landlord will review your details and be in touch. Save this reference to check your status later:</p>
+      <p style="font-weight:700;font-size:1.1rem;margin-bottom:1rem;color:var(--primary);" id="applyRefCode"></p>
+      <a id="applyWhatsappLink" class="btn-submit" style="display:inline-block;text-decoration:none;" href="#" target="_blank" rel="noopener">Message landlord on WhatsApp</a>
+    </div>
   </div>
+</div>
 
-  <!-- Landlord Control Panel -->
+<!-- My Application (tenant self-service lookup) -->
+<div class="auth-overlay" id="trackOverlay">
+  <div class="auth-modal" style="max-width:480px;">
+    <button type="button" class="auth-close" onclick="closeTrackModal()" aria-label="Close">✕</button>
+    <span class="admin-badge">My Application</span>
+    <h2 class="section-title" style="margin:0.4rem 0 0.25rem;">Check your application status</h2>
+
+    <div id="trackLookup">
+      <p class="auth-lead">Enter the phone number or ID number you applied with, or your reference code.</p>
+      <div class="form-group">
+        <label for="trackQuery">Phone, ID number, or reference code</label>
+        <input type="text" id="trackQuery" placeholder="e.g. 0821234567 or A-172...">
+      </div>
+      <p class="auth-error" id="trackError"></p>
+      <button type="button" class="btn-submit" style="width:100%;" onclick="lookupApplications()">Find my application</button>
+      <div class="popia-strip" style="margin-top:1rem;margin-bottom:0;">🔒 Once you find your application, you can download a copy of your data or request it be deleted. <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></div>
+    </div>
+
+    <div id="trackResults" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Lease Contract, Signature & Welcome Pack -->
+<div class="auth-overlay" id="leaseOverlay">
+  <div class="auth-modal" style="max-width:560px;max-height:88vh;overflow-y:auto;">
+    <button type="button" class="auth-close" onclick="closeLeaseModal()" aria-label="Close">✕</button>
+    <span class="admin-badge" id="leaseBadge">Lease Contract</span>
+    <h2 class="section-title" style="margin:0.4rem 0 0.9rem;" id="leaseHeading">Review your lease</h2>
+
+    <div id="leaseContractView">
+      <div id="integrityWarning" style="display:none;margin-bottom:0.9rem;padding:0.7rem 0.9rem;background:#fed7d7;border:1px solid #feb2b2;border-radius:8px;color:#822727;font-weight:600;font-size:0.82rem;">⚠️ This lease's core terms don't match the hash generated when it was created — it may have been edited since. Contact the other party before relying on it.</div>
+      <div class="contract-box" id="contractText"></div>
+      <p class="read-progress-hint" id="readProgressHint">👇 Scroll to the bottom to read the full terms &amp; conditions</p>
+
+      <div id="signBlock" style="margin-top:1.1rem;">
+        <h3 class="form-subhead" style="margin-top:0;">Digital signature</h3>
+        <label class="checkbox-pill" id="readConfirmLabel" style="width:100%;opacity:0.5;">
+          <input type="checkbox" id="readConfirmCheckbox" disabled>
+          I have read and agree to the full lease terms &amp; conditions above
+        </label>
+        <p class="auth-lead" style="margin-top:0.7rem;">Type your full legal name below. Typing it and submitting acts as your digital signature on this lease.</p>
+        <div class="form-group">
+          <label for="signName">Type your full legal name to sign</label>
+          <input type="text" id="signName" placeholder="Must match the name on your application">
+        </div>
+        <p class="auth-error" id="signError"></p>
+        <button type="button" class="btn-submit" style="width:100%;" onclick="signLease()">Sign lease</button>
+      </div>
+
+      <div id="signedNotice" style="display:none;margin-top:1.1rem;padding:0.8rem 1rem;background:#c6f6d5;border-radius:8px;color:#22543d;font-weight:600;font-size:0.9rem;"></div>
+
+      <div id="rentLedgerSection" style="display:none;margin-top:1.2rem;"></div>
+
+      <button type="button" class="app-actions" style="border:1px solid var(--border-color);background:#fff;padding:0.5rem 0.9rem;border-radius:6px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:1rem;" onclick="window.print()">🖨️ Print / save as PDF</button>
+    </div>
+
+    <div id="welcomePackView" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Privacy & POPIA Notice -->
+<div class="auth-overlay" id="popiaOverlay">
+  <div class="auth-modal" style="max-width:560px;">
+    <button type="button" class="auth-close" onclick="closePopiaModal()" aria-label="Close">✕</button>
+    <span class="admin-badge">Privacy Notice</span>
+    <h2 class="section-title" style="margin:0.4rem 0 0.9rem;">Privacy &amp; POPIA Notice</h2>
+    <div class="contract-box" style="max-height:60vh;">
+      <h4>Who processes your information</h4>
+      <p>When you apply for a property on this app, your personal information is processed by the landlord who owns that listing (the "responsible party" under the Protection of Personal Information Act 4 of 2013, "POPIA"), for the purpose of assessing your rental application.</p>
+
+      <h4>What we collect &amp; why</h4>
+      <p>Identity details (name, ID/passport number), contact details, current address, employment and income information, next-of-kin details, and move-in preferences — collected solely to assess your suitability as a tenant, verify your identity and ability to pay rent, and to prepare a lease if approved. We only ask for the filenames of supporting documents (ID copy, payslips); this demo does not upload or store the documents themselves.</p>
+
+      <h4>Where it's stored</h4>
+      <p>This application currently stores data in your browser's local storage on your own device, and in the landlord's browser once they view your application — not on a central server. It is not sold, and is not shared with any third party beyond the landlord you applied to.</p>
+
+      <h4>How long we keep it</h4>
+      <p>Rejected applications are automatically removed from local storage after 90 days. Approved applications and signed leases are kept for as long as reasonably needed for the tenancy and any legal recordkeeping requirement. You can request deletion at any time (see below).</p>
+
+      <h4>Your rights under POPIA</h4>
+      <p>You have the right to know what information is held about you, to request a copy of it, to request correction of inaccurate information, and to request its deletion (subject to any legal requirement to retain it). Use "My Application" to look up your application by phone, ID number, or reference code, then download or delete your data directly.</p>
+
+      <h4>Consent</h4>
+      <p>By ticking the consent box when applying, you agree to the landlord processing your information as described here, including verifying your employment, income, and identity, and conducting a reasonable affordability/background check.</p>
+
+      <h4>Complaints</h4>
+      <p>If you believe your information has been mishandled, you may raise this with the landlord directly, or with South Africa's Information Regulator (inforegulator.org.za).</p>
+
+      <h4>Known limitation</h4>
+      <p>This is a lightweight demo application without a central server. While we minimise what's collected, apply access controls in the interface, and give you deletion rights, information stored in browser local storage is not encrypted at rest. Please avoid using shared or public devices when applying, and use "My Application" to delete your data once your tenancy question is resolved.</p>
+    </div>
+  </div>
+</div>
+
+<main class="container">
+  
+  <!-- Listing Administrator Control Panel -->
   <section class="admin-panel" id="adminPanel" style="display:none;">
-    <h2 class="section-title">Add Property Listing</h2>
-    
+    <span class="admin-badge">Landlord / Owner Panel</span>
+    <h2 class="section-title" style="margin-bottom:0.75rem;">Add New Property Listing</h2>
+    <div class="popia-strip">🔒 Listing photos and applicant data are stored locally on this device only. Use a trusted device and log out when you're done. <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></div>
     <form id="propertyForm">
       <div class="form-grid">
         <div class="form-group">
-          <label>Property Type</label>
+          <label for="typeInput">Property Type</label>
           <select id="typeInput" required>
-            <option value="Bachelor Unit">Bachelor Unit</option>
             <option value="Room">Room</option>
+            <option value="Bachelor">Bachelor Unit</option>
             <option value="Apartment">Apartment</option>
+            <option value="Townhouse">Townhouse</option>
+            <option value="House">House</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Address / Description</label>
+          <label for="addressInput">Address / Unit Details</label>
           <input type="text" id="addressInput" placeholder="e.g. Unit 104, Olievenhoutbosch" required>
         </div>
         <div class="form-group">
-          <label>Monthly Rent (ZAR / R)</label>
-          <input type="number" id="priceInput" placeholder="2800" required>
+          <label for="priceInput">Monthly Rent (ZAR / R)</label>
+          <input type="number" id="priceInput" placeholder="e.g. 2800" required>
         </div>
         <div class="form-group">
-          <label>Available From Date</label>
-          <input type="date" id="availableFromInput" required>
+          <label for="statusInput">Status</label>
+          <select id="statusInput">
+            <option value="Available">Available</option>
+            <option value="Leased">Leased</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="bedsInput">Bedrooms</label>
+          <input type="number" id="bedsInput" value="1" min="0" required>
+        </div>
+        <div class="form-group">
+          <label for="bathsInput">Bathrooms</label>
+          <input type="number" id="bathsInput" value="1" min="0" required>
+        </div>
+        <div class="form-group">
+          <label for="sizeInput">Size (m²)</label>
+          <input type="number" id="sizeInput" min="0" step="0.5" placeholder="e.g. 24">
         </div>
       </div>
-      <button type="submit" class="btn-submit">Publish Encrypted Listing</button>
+
+      <h3 class="form-subhead">Utilities &amp; Access</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="wifiInput">Wi-Fi</label>
+          <select id="wifiInput">
+            <option value="">Select…</option>
+            <option value="Included in rent">Included in rent</option>
+            <option value="Available — extra cost">Available — extra cost</option>
+            <option value="Not available">Not available</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="parkingInput">Parking</label>
+          <select id="parkingInput">
+            <option value="">Select…</option>
+            <option value="No parking">No parking</option>
+            <option value="Open parking">Open parking</option>
+            <option value="Covered parking">Covered parking</option>
+            <option value="Garage">Garage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="waterInput">Water</label>
+          <select id="waterInput">
+            <option value="">Select…</option>
+            <option value="Municipal water included">Municipal water included</option>
+            <option value="Borehole water">Borehole water</option>
+            <option value="Water tank backup">Water tank backup</option>
+            <option value="Metered — pay separately">Metered — pay separately</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="electricityInput">Electricity</label>
+          <select id="electricityInput">
+            <option value="">Select…</option>
+            <option value="Included in rent">Included in rent</option>
+            <option value="Prepaid meter">Prepaid meter</option>
+            <option value="Metered — pay separately">Metered — pay separately</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 class="form-subhead">Additional Features</h3>
+      <div class="checkbox-group" id="extraFeatures">
+        <label class="checkbox-pill"><input type="checkbox" value="Furnished"> Furnished</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Gated community / controlled access"> Gated community / controlled access</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Fenced / secure property"> Fenced / secure property</label>
+        <label class="checkbox-pill"><input type="checkbox" value="24-hour security"> 24-hour security</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Backup power (inverter)"> Backup power (inverter)</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Pet friendly"> Pet friendly</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Near public transport"> Near public transport</label>
+      </div>
+
+      <h3 class="form-subhead">Photos</h3>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Upload Property Pictures <span style="font-weight:400;color:var(--text-muted);">(up to 6)</span></label>
+        <div class="photo-grid" id="photoGrid">
+          <div class="photo-slot" id="photoAddSlot" onclick="document.getElementById('imageInput').click()"><span class="photo-plus">+</span></div>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+        <p class="photo-hint" id="photoHint">Tap a square to add a photo. At least one photo is required.</p>
+      </div>
+
+      <p class="auth-error" id="publishError"></p>
+      <button type="submit" class="btn-submit">Publish Listing</button>
     </form>
 
-    <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+    <h3 class="form-subhead" style="margin-top:2rem;">My Listings</h3>
+    <p class="auth-lead" style="margin-bottom:0.7rem;">Delist a property to hide it from public search without losing its data, or delete it permanently.</p>
+    <div id="myListings"></div>
+  </section>
 
-    <!-- POPIA Data Subject Rights Section -->
-    <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">POPIA Privacy & Data Rights</h3>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-      Under POPIA, you have the absolute right to view or permanently erase your personal data from local storage.
-    </p>
-    <div style="display:flex; gap: 0.75rem;">
-      <button type="button" class="btn-submit" style="background-color:#4a5568;" onclick="downloadMyData()">Export My Data (JSON)</button>
-      <button type="button" class="btn-danger" onclick="deleteMyData()">Delete All My Data (Right to be Forgotten)</button>
+  <!-- Tenant Applications / Vetting Queue (Landlord view) -->
+  <section class="admin-panel" id="applicationsPanel" style="display:none;">
+    <span class="admin-badge">Tenant Vetting Queue</span>
+    <h2 class="section-title" style="margin-bottom:0.5rem;">Applications for your properties</h2>
+    <p class="auth-lead" style="margin-bottom:0.7rem;">Review each applicant's details, then approve or reject. Approving doesn't sign a lease — it just clears them to move forward.</p>
+    <div class="popia-strip">🔒 ID numbers are masked by default — tap "Show" only when you genuinely need to verify identity. This data is stored on this device only; rejected applications are auto-removed after 90 days. <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></div>
+    <div id="applicationsList"></div>
+    <div class="data-rights-actions">
+      <button type="button" class="danger-btn" onclick="clearAllApplicantData()">🗑️ Erase all applicant data on this device</button>
     </div>
   </section>
 
+  <!-- Search / Filters -->
+  <section class="filter-bar">
+    <input type="text" id="searchInput" placeholder="Search address, street, or unit...">
+    <select id="filterAvailability">
+      <option value="">Any availability</option>
+      <option value="Available">Available</option>
+      <option value="Leased">Leased</option>
+      <option value="Maintenance">Maintenance</option>
+    </select>
+    <select id="filterWifi">
+      <option value="">Any Wi-Fi</option>
+      <option value="has">Has Wi-Fi</option>
+      <option value="Included in rent">Included in rent</option>
+      <option value="Available — extra cost">Available — extra cost</option>
+    </select>
+    <select id="filterParking">
+      <option value="">Any parking</option>
+      <option value="has">Has parking</option>
+      <option value="Open parking">Open parking</option>
+      <option value="Covered parking">Covered parking</option>
+      <option value="Garage">Garage</option>
+    </select>
+    <select id="filterWater">
+      <option value="">Any water</option>
+      <option value="Municipal water included">Municipal water included</option>
+      <option value="Borehole water">Borehole water</option>
+      <option value="Water tank backup">Water tank backup</option>
+    </select>
+    <select id="filterElectricity">
+      <option value="">Any electricity</option>
+      <option value="Included in rent">Included in rent</option>
+      <option value="Prepaid meter">Prepaid meter</option>
+    </select>
+    <select id="filterMaxRent">
+      <option value="">Max rent (ZAR)</option>
+      <option value="2000">Up to R 2,000 / mo</option>
+      <option value="3500">Up to R 3,500 / mo</option>
+      <option value="5000">Up to R 5,000 / mo</option>
+      <option value="8000">Up to R 8,000 / mo</option>
+    </select>
+    <button type="button" class="admin-toggle-btn" id="clearFiltersBtn" style="border-color:var(--border-color);color:var(--text-muted);flex:0 0 auto;" onclick="clearFilters()">Clear filters</button>
+  </section>
+  <p id="resultsSummary" class="auth-lead" style="margin:-1rem 0 1.5rem;"></p>
+
   <!-- Listings Grid -->
-  <h2 class="section-title">Available Listings</h2>
+  <h2 class="section-title" id="listings">Properties</h2>
   <section class="listings-grid" id="listingsContainer"></section>
 
-  <!-- Map Section -->
-  <h2 class="section-title">Location & Area</h2>
-  <div id="map"></div>
+  <!-- Map & Points of Interest -->
+  <section class="map-section" id="map-section">
+    <h2 class="section-title">Location & Nearby Highlights</h2>
+    <div id="map"></div>
+
+    <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);">Points of Interest Around</h3>
+    <div class="poi-grid">
+      <div class="poi-card">
+        <h4>🛒 Shopping Centers</h4>
+        <p>Centurion Mall, Mall@Reds, Eco Boulevard, Forest Hill City</p>
+      </div>
+      <div class="poi-card">
+        <h4>🚆 Transport Links</h4>
+        <p>Centurion Gautrain Station, N1 / N14 / R55 Highway Connections</p>
+      </div>
+      <div class="poi-card">
+        <h4>🌳 Leisure & Parks</h4>
+        <p>Irene Farm, Rietvlei Nature Reserve, SuperSport Park</p>
+      </div>
+      <div class="poi-card">
+        <h4>🏫 Education & Services</h4>
+        <p>Local schools, clinics, and municipal service centers</p>
+      </div>
+    </div>
+  </section>
 
 </main>
 
-<footer>
-  <p>Maoka Residence · Fully Encrypted & POPIA Compliant Architecture</p>
+<footer class="site-footer">
+  <p>Maoka Residence — Smart Resident · <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></p>
 </footer>
 
+<!-- Leaflet JS for Map Integration -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-  /* =========================================================================
-     1. ANTI-COPY & INSPECTION DETERRENCE (CLIENT PROTECTION)
-     ========================================================================= */
-  document.addEventListener('contextmenu', e => e.preventDefault()); // Block right-click
-  document.addEventListener('keydown', e => {
-    // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (View Source)
-    if (
-      e.key === 'F12' || 
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'u')
-    ) {
-      e.preventDefault();
-    }
+  // Initialize Map
+  const map = L.map('map').setView([-25.8825, 28.1633], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Add Property Marker
+  L.marker([-25.8825, 28.1633]).addTo(map)
+    .bindPopup('<b>Maoka Residence</b><br>Olievenhoutbosch / Centurion')
+    .openPopup();
+
+  /* ================= Landlord / Owner Auth (client-side, localStorage) ================= */
+  const POPIA_NOTICE_VERSION = '2026-08-v1';
+  function openPopiaModal() { document.getElementById('popiaOverlay').classList.add('open'); }
+  function closePopiaModal() { document.getElementById('popiaOverlay').classList.remove('open'); }
+  document.getElementById('popiaOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closePopiaModal();
   });
 
-  /* =========================================================================
-     2. AES-GCM ENCRYPTION & DECRYPTION ENGINE (WEB CRYPTO API)
-     ========================================================================= */
-  async function getKey(password, salt) {
-    const enc = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey(
-      "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
-    );
-    return crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt: enc.encode(salt), iterations: 100000, hash: "SHA-256" },
-      keyMaterial,
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["encrypt", "decrypt"]
-    );
+  const LANDLORDS_KEY = 'maoka_landlords';
+  const SESSION_KEY = 'maoka_landlord_session';
+
+  function getLandlords() {
+    try { return JSON.parse(localStorage.getItem(LANDLORDS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveLandlords(list) {
+    localStorage.setItem(LANDLORDS_KEY, JSON.stringify(list));
+  }
+  function getSession() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) { return null; }
+  }
+  function setSession(landlord) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ username: landlord.username, name: landlord.name }));
+  }
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  async function encryptData(data, password) {
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const key = await getKey(password, salt);
-    const enc = new TextEncoder();
-
-    const ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      enc.encode(JSON.stringify(data))
-    );
-
-    return {
-      ciphertext: btoa(String.fromCharCode(...new Uint8Array(ciphertext))),
-      salt: btoa(String.fromCharCode(...salt)),
-      iv: btoa(String.fromCharCode(...iv))
-    };
-  }
-
-  async function decryptData(encryptedObj, password) {
-    try {
-      const salt = new Uint8Array(atob(encryptedObj.salt).split("").map(c => c.charCodeAt(0)));
-      const iv = new Uint8Array(atob(encryptedObj.iv).split("").map(c => c.charCodeAt(0)));
-      const ciphertext = new Uint8Array(atob(encryptedObj.ciphertext).split("").map(c => c.charCodeAt(0)));
-
-      const key = await getKey(password, salt);
-      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
-      const dec = new TextDecoder();
-      return JSON.parse(dec.decode(decrypted));
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /* =========================================================================
-     3. POPIA COMPLIANT AUTH & ENCRYPTED STORAGE MANAGEMENT
-     ========================================================================= */
-  const USERS_KEY = 'maoka_encrypted_users';
-  const LISTINGS_KEY = 'maoka_encrypted_listings';
-  let CURRENT_SESSION = null; // Holds temporary decrypted active session memory
-
-  function openAuthModal(mode) {
+  function openAuthModal(tab) {
     document.getElementById('authOverlay').classList.add('open');
-    switchAuthMode(mode || 'login');
+    switchAuthTab(tab || 'login');
   }
-  function closeAuthModal() { document.getElementById('authOverlay').classList.remove('open'); }
-  function switchAuthMode(mode) {
-    const isLogin = mode === 'login';
-    document.getElementById('modalTitle').textContent = isLogin ? 'Landlord Login' : 'Landlord Registration (POPIA)';
+  function closeAuthModal() {
+    document.getElementById('authOverlay').classList.remove('open');
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('registerError').classList.remove('show');
+  }
+  function switchAuthTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tabLoginBtn').classList.toggle('on', isLogin);
+    document.getElementById('tabRegisterBtn').classList.toggle('on', !isLogin);
     document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
     document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
   }
 
-  // Registration Handler
-  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  function onAuthBtnClick() {
+    openAuthModal('login');
+  }
+
+  function togglePanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    document.getElementById('applicationsPanel').style.display = 'none';
+    const willShow = (adminPanel.style.display === 'none' || !adminPanel.style.display);
+    adminPanel.style.display = willShow ? 'block' : 'none';
+    if (willShow) renderMyListings();
+  }
+
+  function logoutLandlord() {
+    localStorage.removeItem(SESSION_KEY);
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('applicationsPanel').style.display = 'none';
+    refreshAuthUI();
+  }
+
+  function refreshAuthUI() {
+    const session = getSession();
+    const authBtn = document.getElementById('authBtn');
+    const sessionBar = document.getElementById('sessionBar');
+    if (session) {
+      authBtn.style.display = 'none';
+      sessionBar.style.display = 'flex';
+      document.getElementById('sessionName').textContent = 'Hi, ' + session.name;
+    } else {
+      authBtn.style.display = 'inline-block';
+      sessionBar.style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('applicationsPanel').style.display = 'none';
+    }
+  }
+
+  document.getElementById('registerForm').addEventListener('submit', async function (e) {
     e.preventDefault();
+    const errEl = document.getElementById('registerError');
+    errEl.classList.remove('show');
+
     const name = document.getElementById('regName').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
     const username = document.getElementById('regUsername').value.trim().toLowerCase();
     const password = document.getElementById('regPassword').value;
-    const consent = document.getElementById('popiaConsent').checked;
 
-    if (!consent) return alert('POPIA Consent is required to process your account.');
+    if (!name || !phone || !username || !password) {
+      errEl.textContent = 'Please complete every field.';
+      errEl.classList.add('show');
+      return;
+    }
 
-    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-    if (users.some(u => u.username === username)) return alert('Username already taken!');
+    const landlords = getLandlords();
+    if (landlords.some(l => l.username === username)) {
+      errEl.textContent = 'That username is already taken. Try logging in instead.';
+      errEl.classList.add('show');
+      return;
+    }
 
-    // Encrypt sensitive user data locally
-    const encryptedPayload = await encryptData({ name, phone, username, consentDate: new Date().toISOString() }, password);
-    
-    users.push({ username, payload: encryptedPayload });
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-    alert('Account created securely! Your data is encrypted.');
-    switchAuthMode('login');
+    const passwordHash = await sha256Hex(password);
+    const landlord = { username, passwordHash, name, phone };
+    landlords.push(landlord);
+    saveLandlords(landlords);
+    setSession(landlord);
+    document.getElementById('registerForm').reset();
+    closeAuthModal();
+    refreshAuthUI();
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
   });
 
-  // Login Handler
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
+    const errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+
     const username = document.getElementById('loginUsername').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
+    const passwordHash = await sha256Hex(password);
 
-    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-    const record = users.find(u => u.username === username);
+    const landlords = getLandlords();
+    const landlord = landlords.find(l => l.username === username && l.passwordHash === passwordHash);
+    if (!landlord) {
+      errEl.textContent = 'Username or password is incorrect.';
+      errEl.classList.add('show');
+      return;
+    }
 
-    if (!record) return alert('Invalid username or password.');
-
-    const decryptedUser = await decryptData(record.payload, password);
-    if (!decryptedUser) return alert('Invalid username or encryption password.');
-
-    CURRENT_SESSION = { ...decryptedUser, password };
+    setSession(landlord);
+    document.getElementById('loginForm').reset();
     closeAuthModal();
-    refreshUI();
+    refreshAuthUI();
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
   });
 
-  function logoutLandlord() {
-    CURRENT_SESSION = null;
-    refreshUI();
+  // Close modal when clicking the dimmed backdrop
+  document.getElementById('authOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeAuthModal();
+  });
+
+  refreshAuthUI();
+
+  /* ================= Photo upload (multi, compressed) ================= */
+  const MAX_PHOTOS = 6;
+  let LISTING_PHOTOS = [];
+
+  function compressImageFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxW = 900;
+          const scale = Math.min(1, maxW / img.width);
+          const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
-  function refreshUI() {
-    const sessionBar = document.getElementById('sessionBar');
-    const authBtn = document.getElementById('authBtn');
-    const adminPanel = document.getElementById('adminPanel');
+  function renderPhotoGrid() {
+    const grid = document.getElementById('photoGrid');
+    let html = '';
+    LISTING_PHOTOS.forEach((src, i) => {
+      html += `<div class="photo-slot"><img src="${src}"><span class="photo-remove" onclick="removeListingPhoto(${i})">✕</span></div>`;
+    });
+    if (LISTING_PHOTOS.length < MAX_PHOTOS) {
+      html += `<div class="photo-slot" id="photoAddSlot" onclick="document.getElementById('imageInput').click()"><span class="photo-plus">+</span></div>`;
+    }
+    grid.innerHTML = html;
+    const hint = document.getElementById('photoHint');
+    hint.textContent = LISTING_PHOTOS.length
+      ? `${LISTING_PHOTOS.length} of ${MAX_PHOTOS} photos added.`
+      : 'Tap a square to add a photo. At least one photo is required.';
+  }
 
-    if (CURRENT_SESSION) {
-      authBtn.style.display = 'none';
-      sessionBar.style.display = 'flex';
-      document.getElementById('sessionName').textContent = 'Hi, ' + CURRENT_SESSION.name;
-      adminPanel.style.display = 'block';
-    } else {
-      authBtn.style.display = 'inline-block';
-      sessionBar.style.display = 'none';
-      adminPanel.style.display = 'none';
+  function removeListingPhoto(idx) {
+    LISTING_PHOTOS.splice(idx, 1);
+    renderPhotoGrid();
+  }
+
+  document.getElementById('imageInput').addEventListener('change', async function (e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    const room = MAX_PHOTOS - LISTING_PHOTOS.length;
+    if (room <= 0) return;
+    const hint = document.getElementById('photoHint');
+    hint.textContent = 'Compressing photo(s)…';
+    for (const file of files.slice(0, room)) {
+      try {
+        const dataUrl = await compressImageFile(file);
+        LISTING_PHOTOS.push(dataUrl);
+      } catch (err) { /* skip unreadable file */ }
+    }
+    renderPhotoGrid();
+  });
+
+  /* ================= Listings data model (persisted) ================= */
+  const LISTINGS_KEY = 'maoka_listings';
+  const APPLICATIONS_KEY = 'maoka_applications';
+  const LAST_APPLICANT_KEY = 'maoka_last_applicant';
+
+  function seedListings() {
+    return [
+      {
+        id: 'L-seed-1', type: 'Bachelor', status: 'Available', delisted: false, price: 2800,
+        address: 'Bachelor Unit — Private Kitchen & Wardrobe',
+        beds: 1, baths: 1, size: '',
+        wifi: 'Included in rent', parking: 'Open parking', water: 'Municipal water included', electricity: 'Prepaid meter',
+        extras: ['Gated community / controlled access'], photos: ['https://via.placeholder.com/400x250/2b6cb0/ffffff?text=Bachelor+Unit+A'],
+        ownerUsername: 'demo', ownerName: 'Maoka Residence', ownerPhone: '0731730521'
+      },
+      {
+        id: 'L-seed-2', type: 'Bachelor', status: 'Leased', delisted: false, price: 3200,
+        address: 'Bachelor Unit — Olievenhoutbosch',
+        beds: 1, baths: 1, size: '',
+        wifi: 'Available — extra cost', parking: 'Covered parking', water: 'Municipal water included', electricity: '',
+        extras: ['Fenced / secure property', 'Gated community / controlled access'], photos: ['https://via.placeholder.com/400x250/2c5282/ffffff?text=Bachelor+Unit+B'],
+        ownerUsername: 'demo', ownerName: 'Maoka Residence', ownerPhone: '0731730521'
+      }
+    ];
+  }
+
+  function getListings() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(LISTINGS_KEY));
+      if (Array.isArray(stored) && stored.length) return stored;
+    } catch (e) {}
+    const seeded = seedListings();
+    saveListings(seeded);
+    return seeded;
+  }
+  function saveListings(list) { localStorage.setItem(LISTINGS_KEY, JSON.stringify(list)); }
+
+  function getApplications() {
+    try { return JSON.parse(localStorage.getItem(APPLICATIONS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveApplications(list) { localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(list)); }
+
+  const REJECTED_RETENTION_DAYS = 90;
+  function purgeStaleApplications() {
+    const apps = getApplications();
+    const cutoff = Date.now() - REJECTED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    const kept = apps.filter(a => {
+      if (a.status !== 'Rejected') return true;
+      const ts = new Date(a.submittedAt).getTime();
+      return !ts || ts > cutoff;
+    });
+    if (kept.length !== apps.length) {
+      const removedIds = apps.filter(a => !kept.includes(a)).map(a => a.id);
+      saveApplications(kept);
+      const remainingLeases = getLeases().filter(l => !removedIds.includes(l.applicationId));
+      const removedLeaseIds = getLeases().filter(l => removedIds.includes(l.applicationId)).map(l => l.id);
+      saveLeases(remainingLeases);
+      if (removedLeaseIds.length) saveLedger(getLedger().filter(e => !removedLeaseIds.includes(e.leaseId)));
     }
   }
 
-  function togglePanel() {
-    const p = document.getElementById('adminPanel');
-    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  function listingBadges(l) {
+    return [
+      l.wifi && (l.wifi === 'Not available' ? '📶 No Wi-Fi' : '📶 ' + l.wifi),
+      l.parking && '🚗 ' + l.parking,
+      l.water && '💧 ' + l.water,
+      l.electricity && '⚡ ' + l.electricity,
+      l.size && '📐 ' + l.size + ' m²',
+      ...(l.extras || []).map(x => '✓ ' + x)
+    ].filter(Boolean);
   }
 
-  /* =========================================================================
-     4. POPIA DATA SUBJECT RIGHTS (EXPORT & DELETE)
-     ========================================================================= */
-  function downloadMyData() {
-    if (!CURRENT_SESSION) return;
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(CURRENT_SESSION, null, 2));
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", `POPIA_Data_Export_${CURRENT_SESSION.username}.json`);
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    dlAnchor.remove();
+  function renderListings(list) {
+    const listings = list || getListings();
+    const container = document.getElementById('listingsContainer');
+
+    if (!listings.length) {
+      container.innerHTML = '<p class="auth-lead" style="grid-column:1/-1;">No properties match those filters. Try clearing a filter or widening your search.</p>';
+      return;
+    }
+
+    container.innerHTML = listings.map(l => {
+      const photos = l.photos && l.photos.length ? l.photos : ['https://via.placeholder.com/400x250/cbd5e0/1a202c?text=No+Photo'];
+      const galleryImgs = photos.map((src, i) => `<img src="${src}" style="display:${i === 0 ? 'block' : 'none'}" data-idx="${i}">`).join('');
+      const galleryDots = photos.length > 1
+        ? `<div class="gallery-dots">${photos.map((_, i) => `<button type="button" class="gallery-dot${i === 0 ? ' on' : ''}" onclick="switchGalleryPhoto(this, ${i})"></button>`).join('')}</div>`
+        : '';
+      const badgesHTML = listingBadges(l).map(b => `<span class="feature-badge">${b}</span>`).join('');
+      const applyBtn = l.status === 'Available'
+        ? `<button type="button" class="btn-submit" style="width:100%;margin-top:0.75rem;" onclick="openApplyModal('${l.id}')">Apply for vetting</button>`
+        : `<button type="button" class="btn-submit" style="width:100%;margin-top:0.75rem;background:#a0aec0;cursor:not-allowed;" disabled>${l.status === 'Leased' ? 'Currently leased' : 'Not accepting applications'}</button>`;
+
+      return `
+        <article class="card">
+          <div class="card-gallery">
+            <span class="tag">${l.status}</span>
+            ${galleryImgs}
+            ${galleryDots}
+          </div>
+          <div class="card-content">
+            <div class="price">R ${Number(l.price).toLocaleString()} <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">/ mo</span></div>
+            ${l.type ? `<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--primary);margin-bottom:0.15rem;">${l.type}</div>` : ''}
+            <div class="address">${l.address}</div>
+            <div class="features">
+              <span class="feature-item"><strong>${l.beds}</strong> Bed</span>
+              <span class="feature-item"><strong>${l.baths}</strong> Bath</span>
+            </div>
+            ${badgesHTML ? `<div class="listing-features">${badgesHTML}</div>` : ''}
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem;">Listed by ${l.ownerName}</div>
+            ${applyBtn}
+          </div>
+        </article>`;
+    }).join('');
   }
 
-  function deleteMyData() {
-    if (!CURRENT_SESSION) return;
-    if (!confirm('POPIA Right to be Forgotten: Are you sure you want to permanently erase your account and encrypted data?')) return;
-
-    let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-    users = users.filter(u => u.username !== CURRENT_SESSION.username);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-    logoutLandlord();
-    alert('Your personal information has been permanently deleted.');
+  function switchGalleryPhoto(dotEl, idx) {
+    const gallery = dotEl.closest('.card-gallery');
+    gallery.querySelectorAll('img').forEach(img => {
+      img.style.display = (Number(img.dataset.idx) === idx) ? 'block' : 'none';
+    });
+    gallery.querySelectorAll('.gallery-dot').forEach((d, i) => d.classList.toggle('on', i === idx));
   }
 
-  /* =========================================================================
-     5. LISTINGS MANAGEMENT & MAP INITIALIZATION
-     ========================================================================= */
-  document.getElementById('propertyForm').addEventListener('submit', (e) => {
+  /* ================= My Listings (landlord: delist / relist / delete) ================= */
+  function renderMyListings() {
+    const session = getSession();
+    const el = document.getElementById('myListings');
+    if (!session || !el) return;
+
+    const mine = getListings().filter(l => l.ownerUsername === session.username);
+    if (!mine.length) {
+      el.innerHTML = '<p class="auth-lead">You haven\'t listed a property yet — use the form above.</p>';
+      return;
+    }
+
+    el.innerHTML = mine.map(l => {
+      const photo = l.photos && l.photos[0] ? l.photos[0] : 'https://via.placeholder.com/120x90/cbd5e0/1a202c?text=No+Photo';
+      const statusLabel = l.delisted ? 'Delisted' : l.status;
+      const statusClass = l.delisted ? 'status-declined' : (l.status === 'Available' ? 'status-approved' : 'status-pending');
+      return `
+        <div class="track-app-row">
+          <div class="app-top">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <img src="${photo}" style="width:56px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0">
+              <div>
+                <b>${l.address}</b>
+                <div style="font-size:0.8rem;color:var(--text-muted);">${l.type || ''} · R ${Number(l.price).toLocaleString()}/mo</div>
+              </div>
+            </div>
+            <span class="status-pill ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="data-rights-actions" style="margin-top:0.6rem;">
+            ${l.delisted
+              ? `<button type="button" onclick="relistListing('${l.id}')">↩️ Re-list</button>`
+              : `<button type="button" onclick="delistListing('${l.id}')">🚫 Delist</button>`}
+            <button type="button" class="danger-btn" onclick="deleteListing('${l.id}')">🗑️ Delete permanently</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function delistListing(id) {
+    const listings = getListings();
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+    listing.delisted = true;
+    saveListings(listings);
+    renderMyListings();
+    applyFilters();
+  }
+
+  function relistListing(id) {
+    const listings = getListings();
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+    listing.delisted = false;
+    saveListings(listings);
+    renderMyListings();
+    applyFilters();
+  }
+
+  function deleteListing(id) {
+    const listings = getListings();
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+    const hasApplications = getApplications().some(a => a.listingId === id);
+    const warning = hasApplications
+      ? 'This property has applications on file. Deleting it will remove the listing, but existing applications and any signed lease will still be kept for your records. Continue?'
+      : `Permanently delete "${listing.address}"? This cannot be undone.`;
+    if (!confirm(warning)) return;
+    saveListings(listings.filter(l => l.id !== id));
+    renderMyListings();
+    applyFilters();
+  }
+
+  /* ================= Search & filter ================= */
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const availability = document.getElementById('filterAvailability').value;
+    const wifi = document.getElementById('filterWifi').value;
+    const parking = document.getElementById('filterParking').value;
+    const water = document.getElementById('filterWater').value;
+    const electricity = document.getElementById('filterElectricity').value;
+    const maxRent = document.getElementById('filterMaxRent').value;
+
+    const filtered = getListings().filter(l => {
+      if (l.delisted) return false;
+      if (q && !l.address.toLowerCase().includes(q)) return false;
+      if (availability && l.status !== availability) return false;
+      if (wifi) {
+        if (wifi === 'has') { if (!l.wifi || l.wifi === 'Not available') return false; }
+        else if (l.wifi !== wifi) return false;
+      }
+      if (parking) {
+        if (parking === 'has') { if (!l.parking || l.parking === 'No parking') return false; }
+        else if (l.parking !== parking) return false;
+      }
+      if (water && l.water !== water) return false;
+      if (electricity && l.electricity !== electricity) return false;
+      if (maxRent && Number(l.price) > Number(maxRent)) return false;
+      return true;
+    });
+
+    renderListings(filtered);
+
+    const total = getListings().filter(l => !l.delisted).length;
+    const summary = document.getElementById('resultsSummary');
+    const anyFilterActive = q || availability || wifi || parking || water || electricity || maxRent;
+    summary.textContent = anyFilterActive
+      ? `Showing ${filtered.length} of ${total} propert${total === 1 ? 'y' : 'ies'}.`
+      : `${total} propert${total === 1 ? 'y' : 'ies'} listed.`;
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterAvailability').value = '';
+    document.getElementById('filterWifi').value = '';
+    document.getElementById('filterParking').value = '';
+    document.getElementById('filterWater').value = '';
+    document.getElementById('filterElectricity').value = '';
+    document.getElementById('filterMaxRent').value = '';
+    applyFilters();
+  }
+
+  ['filterAvailability', 'filterWifi', 'filterParking', 'filterWater', 'filterElectricity', 'filterMaxRent'].forEach(id => {
+    document.getElementById(id).addEventListener('change', applyFilters);
+  });
+  document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+  /* ================= Publish listing (Landlord / Owner) ================= */
+  const propertyForm = document.getElementById('propertyForm');
+
+  propertyForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    const listings = JSON.parse(localStorage.getItem(LISTINGS_KEY) || '[]');
-    
+
+    const session = getSession();
+    if (!session) {
+      closeAuthModal();
+      openAuthModal('login');
+      return;
+    }
+
+    const errEl = document.getElementById('publishError');
+    errEl.classList.remove('show');
+    if (!LISTING_PHOTOS.length) {
+      errEl.textContent = 'Please add at least one photo before publishing.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    const landlords = getLandlords();
+    const ownerRecord = landlords.find(l => l.username === session.username);
+
     const listing = {
       id: 'L-' + Date.now(),
       type: document.getElementById('typeInput').value,
       address: document.getElementById('addressInput').value,
       price: document.getElementById('priceInput').value,
-      availableFrom: document.getElementById('availableFromInput').value
+      status: document.getElementById('statusInput').value,
+      delisted: false,
+      beds: document.getElementById('bedsInput').value,
+      baths: document.getElementById('bathsInput').value,
+      size: document.getElementById('sizeInput').value,
+      wifi: document.getElementById('wifiInput').value,
+      parking: document.getElementById('parkingInput').value,
+      water: document.getElementById('waterInput').value,
+      electricity: document.getElementById('electricityInput').value,
+      extras: Array.from(document.querySelectorAll('#extraFeatures input:checked')).map(cb => cb.value),
+      photos: LISTING_PHOTOS.slice(),
+      ownerUsername: session.username,
+      ownerName: session.name,
+      ownerPhone: ownerRecord ? ownerRecord.phone : ''
     };
 
+    const listings = getListings();
     listings.unshift(listing);
-    localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
-    document.getElementById('propertyForm').reset();
-    renderListings();
+    saveListings(listings);
+    applyFilters();
+    renderMyListings();
+
+    propertyForm.reset();
+    LISTING_PHOTOS = [];
+    renderPhotoGrid();
+    document.getElementById('listings').scrollIntoView({ behavior: 'smooth' });
   });
 
-  function renderListings() {
-    const listings = JSON.parse(localStorage.getItem(LISTINGS_KEY) || '[]');
-    const container = document.getElementById('listingsContainer');
-    
-    if (!listings.length) {
-      container.innerHTML = '<p style="color:var(--text-muted);">No property listings found.</p>';
+  renderPhotoGrid();
+  applyFilters();
+  purgeStaleApplications();
+
+  /* ================= Tenant vetting / application (multi-step wizard) ================= */
+  let CURRENT_APPLY_LISTING = null;
+  let APPLY_STEP = 1;
+  const APPLY_TOTAL_STEPS = 5;
+  const APPLY_STEP_LABELS = ['Your details', 'Employment', 'Next of kin', 'Move-in & documents', 'Review & submit'];
+
+  function openApplyModal(listingId) {
+    const listing = getListings().find(l => l.id === listingId);
+    if (!listing) return;
+    CURRENT_APPLY_LISTING = listing;
+    document.getElementById('applyListingLabel').textContent = listing.address + ' — R ' + Number(listing.price).toLocaleString() + ' / mo';
+    document.getElementById('applyPopiaAddress').textContent = listing.address;
+    document.getElementById('applyForm').style.display = 'block';
+    document.getElementById('applySuccess').style.display = 'none';
+    document.getElementById('applyError').classList.remove('show');
+    prefillApplyForm();
+    goToApplyStep(1);
+    document.getElementById('applyOverlay').classList.add('open');
+  }
+  function closeApplyModal() {
+    document.getElementById('applyOverlay').classList.remove('open');
+  }
+
+  function goToApplyStep(step) {
+    APPLY_STEP = step;
+    for (let i = 1; i <= APPLY_TOTAL_STEPS; i++) {
+      document.getElementById('applyStep' + i).style.display = (i === step) ? 'block' : 'none';
+    }
+    document.getElementById('applyStepProgress').textContent = `Step ${step} of ${APPLY_TOTAL_STEPS} — ${APPLY_STEP_LABELS[step - 1]}`;
+    document.getElementById('applyBackBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
+    document.getElementById('applyNextBtn').style.display = step === APPLY_TOTAL_STEPS ? 'none' : 'inline-flex';
+    document.getElementById('applySubmitBtn').style.display = step === APPLY_TOTAL_STEPS ? 'inline-flex' : 'none';
+    document.getElementById('applyError').classList.remove('show');
+    if (step === APPLY_TOTAL_STEPS) buildApplyReview();
+  }
+
+  function stepIsValid(step) {
+    const stepEl = document.getElementById('applyStep' + step);
+    const required = stepEl.querySelectorAll('[required]');
+    for (const el of required) {
+      if (!el.value || (el.type === 'checkbox' && !el.checked)) return false;
+    }
+    return true;
+  }
+
+  function applyStepNext() {
+    const errEl = document.getElementById('applyError');
+    if (!stepIsValid(APPLY_STEP)) {
+      errEl.textContent = 'Please complete the required fields before continuing.';
+      errEl.classList.add('show');
+      return;
+    }
+    errEl.classList.remove('show');
+    if (APPLY_STEP < APPLY_TOTAL_STEPS) goToApplyStep(APPLY_STEP + 1);
+  }
+  function applyStepBack() {
+    if (APPLY_STEP > 1) goToApplyStep(APPLY_STEP - 1);
+  }
+
+  function buildApplyReview() {
+    const v = id => document.getElementById(id).value;
+    const rows = [
+      ['Applicant', v('appName')],
+      ['ID / Passport', v('appIdNumber')],
+      ['Phone', v('appPhone')],
+      ['Employment', v('appEmploymentType') + (v('appEmployer') ? ' — ' + v('appEmployer') : '')],
+      ['Net monthly income', v('appIncome') ? 'R ' + Number(v('appIncome')).toLocaleString() : '—'],
+      ['Next of kin', v('appKinName') + (v('appKinPhone') ? ' — ' + v('appKinPhone') : '')],
+      ['Desired move-in', v('appMoveInDate') || '—'],
+      ['Occupants', v('appOccupants') || '1']
+    ];
+    document.getElementById('applyReviewBox').innerHTML = rows.map(r =>
+      `<div class="rev-row"><b>${r[0]}</b><span>${r[1] || '—'}</span></div>`
+    ).join('');
+  }
+
+  function prefillApplyForm() {
+    try {
+      const last = JSON.parse(localStorage.getItem(LAST_APPLICANT_KEY));
+      if (!last) return;
+      document.getElementById('appName').value = last.name || '';
+      document.getElementById('appIdNumber').value = last.idNumber || '';
+      document.getElementById('appPhone').value = last.phone || '';
+      document.getElementById('appEmail').value = last.email || '';
+      document.getElementById('appCurrentAddress').value = last.currentAddress || '';
+      document.getElementById('appEmploymentType').value = last.employmentType || '';
+      document.getElementById('appContractType').value = last.contractType || '';
+      document.getElementById('appEmployer').value = last.employer || '';
+      document.getElementById('appJobTitle').value = last.jobTitle || '';
+      document.getElementById('appEmployerContactName').value = last.employerContactName || '';
+      document.getElementById('appEmployerContactPhone').value = last.employerContactPhone || '';
+      document.getElementById('appKinName').value = last.kinName || '';
+      document.getElementById('appKinRelationship').value = last.kinRelationship || '';
+      document.getElementById('appKinPhone').value = last.kinPhone || '';
+      document.getElementById('appKinAddress').value = last.kinAddress || '';
+    } catch (e) {}
+  }
+
+  document.getElementById('applyForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const errEl = document.getElementById('applyError');
+    errEl.classList.remove('show');
+
+    if (!document.getElementById('appConsent').checked) {
+      errEl.textContent = 'Please confirm consent to the vetting check before submitting.';
+      errEl.classList.add('show');
       return;
     }
 
-    container.innerHTML = listings.map(l => `
-      <article class="card">
-        <div class="price">R ${Number(l.price).toLocaleString()} <span style="font-size:0.8rem;color:var(--text-muted);">/ mo</span></div>
-        <div class="address">${l.address}</div>
-        <div style="font-size:0.8rem;color:var(--primary);font-weight:600;margin-top:0.5rem;">
-          📅 Available: ${l.availableFrom || 'Immediately'}
+    const applicant = {
+      name: document.getElementById('appName').value.trim(),
+      idNumber: document.getElementById('appIdNumber').value.trim(),
+      phone: document.getElementById('appPhone').value.trim(),
+      email: document.getElementById('appEmail').value.trim(),
+      currentAddress: document.getElementById('appCurrentAddress').value.trim(),
+      employmentType: document.getElementById('appEmploymentType').value,
+      contractType: document.getElementById('appContractType').value,
+      employer: document.getElementById('appEmployer').value.trim(),
+      jobTitle: document.getElementById('appJobTitle').value.trim(),
+      income: document.getElementById('appIncome').value,
+      employerContactName: document.getElementById('appEmployerContactName').value.trim(),
+      employerContactPhone: document.getElementById('appEmployerContactPhone').value.trim(),
+      kinName: document.getElementById('appKinName').value.trim(),
+      kinRelationship: document.getElementById('appKinRelationship').value,
+      kinPhone: document.getElementById('appKinPhone').value.trim(),
+      kinAddress: document.getElementById('appKinAddress').value.trim(),
+      reasonMoving: document.getElementById('appReasonMoving').value.trim(),
+      moveInDate: document.getElementById('appMoveInDate').value,
+      occupants: document.getElementById('appOccupants').value || '1',
+      prevLandlordName: document.getElementById('appPrevLandlordName').value.trim(),
+      prevLandlordPhone: document.getElementById('appPrevLandlordPhone').value.trim(),
+      docId: document.getElementById('appDocId').value.trim(),
+      docIncome: document.getElementById('appDocIncome').value.trim(),
+      notes: document.getElementById('appNotes').value.trim()
+    };
+
+    const application = {
+      id: 'A-' + Date.now(),
+      listingId: CURRENT_APPLY_LISTING.id,
+      listingAddress: CURRENT_APPLY_LISTING.address,
+      ownerUsername: CURRENT_APPLY_LISTING.ownerUsername,
+      applicant,
+      status: 'Pending',
+      submittedAt: new Date().toISOString(),
+      consent: { given: true, at: new Date().toISOString(), noticeVersion: POPIA_NOTICE_VERSION }
+    };
+
+    const applications = getApplications();
+    applications.unshift(application);
+    saveApplications(applications);
+    localStorage.setItem(LAST_APPLICANT_KEY, JSON.stringify(applicant));
+
+    document.getElementById('applyForm').style.display = 'none';
+    document.getElementById('applySuccess').style.display = 'block';
+    document.getElementById('applyRefCode').textContent = application.id;
+
+    const ownerPhone = (CURRENT_APPLY_LISTING.ownerPhone || '').replace(/\D/g, '');
+    const waPhone = ownerPhone ? (ownerPhone.startsWith('0') ? '27' + ownerPhone.slice(1) : ownerPhone) : '';
+    const waMsg = encodeURIComponent(`Hi, I'm ${applicant.name}. I've just submitted a vetting application (Ref ${application.id}) for: ${CURRENT_APPLY_LISTING.address} (R ${Number(CURRENT_APPLY_LISTING.price).toLocaleString()}/mo).`);
+    const waLink = document.getElementById('applyWhatsappLink');
+    if (waPhone) {
+      waLink.href = 'https://wa.me/' + waPhone + '?text=' + waMsg;
+      waLink.style.display = 'inline-block';
+    } else {
+      waLink.style.display = 'none';
+    }
+
+    document.getElementById('applyForm').reset();
+  });
+
+  document.getElementById('applyOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeApplyModal();
+  });
+
+  /* ================= Applications / vetting queue (Landlord view) ================= */
+  function toggleApplicationsPanel() {
+    const panel = document.getElementById('applicationsPanel');
+    document.getElementById('adminPanel').style.display = 'none';
+    const willShow = (panel.style.display === 'none' || !panel.style.display);
+    panel.style.display = willShow ? 'block' : 'none';
+    if (willShow) renderApplicationsList();
+  }
+
+  function clearAllApplicantData() {
+    const session = getSession();
+    if (!session) return;
+    const myListingIds = getListings().filter(l => l.ownerUsername === session.username).map(l => l.id);
+    const myApps = getApplications().filter(a => myListingIds.includes(a.listingId) || a.ownerUsername === session.username);
+    if (!myApps.length) { alert('There is no applicant data to erase.'); return; }
+    const sure = confirm(`This will permanently delete all ${myApps.length} application(s) and any related lease records for your properties from this device. This cannot be undone. Continue?`);
+    if (!sure) return;
+
+    const myAppIds = myApps.map(a => a.id);
+    const remainingApps = getApplications().filter(a => !myAppIds.includes(a.id));
+    saveApplications(remainingApps);
+    const removedLeaseIds = getLeases().filter(l => myAppIds.includes(l.applicationId)).map(l => l.id);
+    const remainingLeases = getLeases().filter(l => !myAppIds.includes(l.applicationId));
+    saveLeases(remainingLeases);
+    if (removedLeaseIds.length) saveLedger(getLedger().filter(e => !removedLeaseIds.includes(e.leaseId)));
+    renderApplicationsList();
+    alert('Applicant data erased from this device.');
+  }
+
+  function maskId(idNumber) {
+    if (!idNumber) return '—';
+    const digits = idNumber.trim();
+    if (digits.length <= 4) return '•'.repeat(digits.length);
+    return '•'.repeat(digits.length - 4) + digits.slice(-4);
+  }
+
+  function toggleIdReveal(btn, fullId) {
+    const span = btn.previousElementSibling;
+    const revealed = btn.getAttribute('data-revealed') === '1';
+    if (revealed) {
+      span.textContent = maskId(fullId);
+      btn.textContent = 'Show';
+      btn.setAttribute('data-revealed', '0');
+    } else {
+      span.textContent = fullId;
+      btn.textContent = 'Hide';
+      btn.setAttribute('data-revealed', '1');
+    }
+  }
+
+  function renderApplicationsList() {
+    purgeStaleApplications();
+    const session = getSession();
+    const listEl = document.getElementById('applicationsList');
+    if (!session) { listEl.innerHTML = ''; return; }
+
+    const myListingIds = getListings().filter(l => l.ownerUsername === session.username).map(l => l.id);
+    const apps = getApplications().filter(a => myListingIds.includes(a.listingId) || a.ownerUsername === session.username);
+
+    if (!apps.length) {
+      listEl.innerHTML = '<p class="auth-lead">No applications yet. Once someone applies to one of your listings, their vetting details will show up here.</p>';
+      return;
+    }
+
+    listEl.innerHTML = apps.map(a => {
+      const statusClass = a.status === 'Approved' ? 'status-approved' : a.status === 'Rejected' ? 'status-declined' : 'status-pending';
+      const d = new Date(a.submittedAt);
+      const submitted = isNaN(d) ? '' : d.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' });
+      const lease = getLeases().find(l => l.applicationId === a.id);
+      let leaseLine = '';
+      if (a.status === 'Approved') {
+        leaseLine = lease && lease.status === 'Signed'
+          ? `<div style="font-size:0.82rem;color:#22543d;font-weight:600;margin-bottom:0.6rem;">✓ Lease signed ${new Date(lease.signedAt).toLocaleDateString('en-ZA')}</div>`
+          : `<div style="font-size:0.82rem;color:#744210;font-weight:600;margin-bottom:0.6rem;">Lease generated — awaiting tenant signature</div>`;
+      }
+      const idAttr = (a.applicant.idNumber || '').replace(/"/g, '');
+      return `
+        <div class="application-row">
+          <div class="app-top">
+            <div>
+              <b style="font-size:0.95rem;">${a.applicant.name}</b>
+              <div style="font-size:0.8rem;color:var(--text-muted);">${a.listingAddress} · Ref ${a.id}</div>
+            </div>
+            <span class="status-pill ${statusClass}">${a.status}</span>
+          </div>
+          <div class="app-detail-grid">
+            <div><b>ID / Passport</b><span class="masked-id-wrap"><span>${maskId(a.applicant.idNumber)}</span>${a.applicant.idNumber ? `<button type="button" class="reveal-id-btn" data-revealed="0" onclick="toggleIdReveal(this,'${idAttr}')">Show</button>` : ''}</span></div>
+            <div><b>Phone</b>${a.applicant.phone || '—'}</div>
+            <div><b>Email</b>${a.applicant.email || '—'}</div>
+            <div><b>Current address</b>${a.applicant.currentAddress || '—'}</div>
+            <div><b>Employment</b>${a.applicant.employmentType || '—'}${a.applicant.contractType ? ' (' + a.applicant.contractType + ')' : ''}</div>
+            <div><b>Employer</b>${a.applicant.employer || '—'}${a.applicant.jobTitle ? ' — ' + a.applicant.jobTitle : ''}</div>
+            <div><b>Net income</b>${a.applicant.income ? 'R ' + Number(a.applicant.income).toLocaleString() : '—'}</div>
+            <div><b>Employer contact</b>${a.applicant.employerContactName || '—'}${a.applicant.employerContactPhone ? ' · ' + a.applicant.employerContactPhone : ''}</div>
+            <div><b>Next of kin</b>${a.applicant.kinName || '—'}${a.applicant.kinRelationship ? ' (' + a.applicant.kinRelationship + ')' : ''}</div>
+            <div><b>Kin phone</b>${a.applicant.kinPhone || '—'}</div>
+            <div><b>Move-in date</b>${a.applicant.moveInDate || '—'}</div>
+            <div><b>Occupants</b>${a.applicant.occupants || '—'}</div>
+            <div><b>Reason for moving</b>${a.applicant.reasonMoving || '—'}</div>
+            <div><b>Previous landlord</b>${a.applicant.prevLandlordName || '—'}${a.applicant.prevLandlordPhone ? ' · ' + a.applicant.prevLandlordPhone : ''}</div>
+            <div><b>Documents noted</b>${[a.applicant.docId, a.applicant.docIncome].filter(Boolean).join(', ') || '—'}</div>
+            <div><b>Submitted</b>${submitted}</div>
+          </div>
+          ${a.applicant.notes ? `<div style="font-size:0.85rem;margin-bottom:0.6rem;"><b style="color:var(--text-muted);font-weight:600;">Note:</b> ${a.applicant.notes}</div>` : ''}
+          ${leaseLine}
+          <div class="app-actions">
+            <button type="button" class="approve-btn" onclick="setApplicationStatus('${a.id}','Approved')">Approve</button>
+            <button type="button" class="decline-btn" onclick="setApplicationStatus('${a.id}','Rejected')">Reject</button>
+            ${a.status !== 'Pending' ? `<button type="button" onclick="setApplicationStatus('${a.id}','Pending')">Reset to pending</button>` : ''}
+            ${lease ? `<button type="button" onclick="openLeaseModal('${a.id}','landlord')">View contract</button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function setApplicationStatus(appId, status) {
+    const apps = getApplications();
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+    app.status = status;
+    saveApplications(apps);
+    if (status === 'Approved') generateLeaseForApplication(app);
+    renderApplicationsList();
+  }
+
+  /* ================= Digital lease contract ================= */
+  const LEASES_KEY = 'maoka_leases';
+  function getLeases() {
+    try { return JSON.parse(localStorage.getItem(LEASES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveLeases(list) { localStorage.setItem(LEASES_KEY, JSON.stringify(list)); }
+
+  function updateLease(lease) {
+    const leases = getLeases();
+    const idx = leases.findIndex(l => l.id === lease.id);
+    if (idx > -1) { leases[idx] = lease; saveLeases(leases); }
+  }
+
+  async function computeLeaseHash(lease) {
+    const encoder = new TextEncoder();
+    const dataString = JSON.stringify({
+      tenant: lease.tenantName,
+      property: lease.address,
+      rent: lease.rent,
+      commence: lease.startDate,
+      landlord: lease.ownerName
+    });
+    const data = encoder.encode(dataString);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.substring(0, 16).toUpperCase();
+  }
+
+  function leaseRefCode(lease) {
+    const d = new Date(lease.createdAt || Date.now());
+    const pad = n => String(n).padStart(2, '0');
+    const datePart = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+    const shortId = lease.id.replace(/\D/g, '').slice(-4);
+    return `LEASE-${datePart}-${shortId}`;
+  }
+
+  function generateLeaseForApplication(app) {
+    const existing = getLeases().find(l => l.applicationId === app.id);
+    if (existing) return existing;
+    const listing = getListings().find(l => l.id === app.listingId);
+    const rentVal = listing ? listing.price : '';
+    const lease = {
+      id: 'LS-' + Date.now(),
+      applicationId: app.id,
+      listingId: app.listingId,
+      listingType: listing ? listing.type : '',
+      tenantName: app.applicant.name,
+      tenantIdNumber: app.applicant.idNumber,
+      tenantPhone: app.applicant.phone,
+      tenantPermanentAddress: app.applicant.currentAddress,
+      kinName: app.applicant.kinName,
+      kinPhone: app.applicant.kinPhone,
+      employmentType: app.applicant.employmentType,
+      contractType: app.applicant.contractType,
+      employer: app.applicant.employer,
+      occupants: app.applicant.occupants,
+      address: app.listingAddress,
+      rent: rentVal,
+      deposit: rentVal,
+      ownerName: listing ? listing.ownerName : '',
+      ownerPhone: listing ? listing.ownerPhone : '',
+      startDate: app.applicant.moveInDate || '',
+      status: 'Awaiting signature',
+      createdAt: new Date().toISOString(),
+      signedAt: null,
+      signatureName: null
+    };
+    lease.ref = leaseRefCode(lease);
+    const leases = getLeases();
+    leases.unshift(lease);
+    saveLeases(leases);
+    return lease;
+  }
+
+  function buildContractText(lease, listing) {
+    const rentNum = Number(lease.rent || (listing ? listing.price : 0));
+    const depositNum = Number(lease.deposit || lease.rent || (listing ? listing.price : 0));
+    const rent = rentNum.toLocaleString();
+    const deposit = depositNum.toLocaleString();
+
+    // 2-month instalment plan
+    const half1 = Math.ceil(depositNum / 2);
+    const half2 = depositNum - half1;
+
+    // 3-month instalment plan
+    const third1 = Math.ceil(depositNum / 3);
+    const third2 = Math.ceil((depositNum - third1) / 2);
+    const third3 = depositNum - third1 - third2;
+
+    const firstDueApprox = (rentNum + third1).toLocaleString();
+    const generated = new Date(lease.createdAt || Date.now()).toLocaleDateString('en-ZA', { day: '2-digit', month: 'long', year: 'numeric' });
+    const start = lease.startDate ? new Date(lease.startDate).toLocaleDateString('en-ZA', { day: '2-digit', month: 'long', year: 'numeric' }) : 'the agreed move-in date';
+    const isRoomType = listing && (listing.type === 'Room' || listing.type === 'Bachelor');
+    const isGated = listing && (listing.extras || []).some(x => /gated|controlled access/i.test(x));
+    const hasAccessFeature = isGated || (listing && (listing.parking && listing.parking !== 'No parking' || (listing.extras || []).some(x => /secur|fenc/i.test(x))));
+
+    return `
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.9rem;">Ref: ${lease.ref || leaseRefCode(lease)} &nbsp;·&nbsp; Generated: ${generated}${lease.integrityHash ? ' &nbsp;·&nbsp; Document ID: ' + lease.integrityHash : ''}</p>
+
+      <h4 style="margin-top:0;">Parties</h4>
+      <p>
+        <b>Landlord:</b> ${lease.ownerName || 'the Landlord'}${lease.ownerPhone ? ' — ' + lease.ownerPhone : ''}<br>
+        <b>Tenant:</b> ${lease.tenantName}${lease.tenantIdNumber ? ' (ID/Passport: ' + lease.tenantIdNumber + ')' : ''}${lease.tenantPhone ? ' — ' + lease.tenantPhone : ''}<br>
+        <b>Property:</b> ${lease.address}${isGated ? ' (within a gated area / controlled-access complex)' : ''}<br>
+        ${lease.tenantPermanentAddress ? `<b>Tenant's permanent address:</b> ${lease.tenantPermanentAddress}<br>` : ''}
+        ${lease.kinName ? `<b>Next of kin:</b> ${lease.kinName}${lease.kinPhone ? ' — ' + lease.kinPhone : ''}<br>` : ''}
+        ${lease.employmentType ? `<b>Employment:</b> ${lease.employmentType}${lease.contractType ? ' (' + lease.contractType + ')' : ''}${lease.employer ? ' — ' + lease.employer : ''}<br>` : ''}
+        <b>Commencement:</b> ${start} (month-to-month)
+      </p>
+
+      <h4>1. Premises</h4>
+      <p>The Landlord lets to the Tenant, who accepts, the residential premises at <b>${lease.address}</b> ("the Premises"), for residential use only.${isGated ? ' The Premises is situated within a gated area with controlled access; see Clause ' + (hasAccessFeature ? '11' : '') + ' for the Tenant\'s access obligations.' : ''}</p>
+      ${isRoomType ? `<p>Meaning of this room type: the Premises is let for occupation by <b>${lease.occupants || '1'} person(s) only</b> as declared on application. It is not let for additional occupants beyond that number, and no further person may move in, whether as a partner, relative, or friend, without the Landlord's prior written consent.</p>` : ''}
+
+      <h4>2–3. Documentation</h4>
+      <p>The Tenant's identity and vetting information (as consented to during the application process) is held by the Landlord for emergency-contact purposes and in the event of a breach requiring legal action. The permanent address recorded above will be used for any legal notices.</p>
+
+      <h4>4. Lease Term and Termination</h4>
+      <p>This lease commences on ${start} and continues month-to-month. Either party may terminate by giving one (1) full calendar month's written notice.</p>
+
+      <h4>5–6. Rent, Deposit and Initial Payment</h4>
+      <p>Monthly rent: <b>R ${rent}</b>, payable in advance on or before the last day of the preceding month.</p>
+      <p>Security deposit: <b>R ${deposit}</b> (equivalent to one month's rent). Rather than one lump sum before move-in, the deposit is payable in instalments over 2 to 3 months, alongside the rent for those months, as agreed with the Landlord at signing:</p>
+      <ul style="margin:0 0 0.6rem 1.1rem;padding:0;">
+        <li><b>2-month plan:</b> R ${half1.toLocaleString()} + R ${half2.toLocaleString()}</li>
+        <li><b>3-month plan:</b> R ${third1.toLocaleString()} + R ${third2.toLocaleString()} + R ${third3.toLocaleString()}</li>
+      </ul>
+      <p>Example using the 3-month plan: amount due on signing is first month's rent R ${rent} + first deposit instalment R ${third1.toLocaleString()} = <b>R ${firstDueApprox}</b>, with the remaining two deposit instalments added to rent in the following two months. The deposit remains refundable (less lawful deductions for damage) within a reasonable period of the final move-out inspection, in line with the Rental Housing Act. Payment details to be provided directly by the Landlord.</p>
+      <p><b>Clause 5A — Late payment:</b> Rent not received in full by the 2nd day of the month it is due will attract interest of 2% on the outstanding balance for that month, calculated and added to the amount owing.</p>
+
+      <h4>7. Utilities and Services</h4>
+      <p>Electricity: ${listing && listing.electricity ? listing.electricity : 'as agreed with the Landlord'}. Water: ${listing && listing.water ? listing.water : 'as agreed with the Landlord'}. Wi-Fi: ${listing && listing.wifi ? listing.wifi : 'as agreed with the Landlord'}. Parking: ${listing && listing.parking ? listing.parking : 'as agreed with the Landlord'}. Where a utility is separately metered or prepaid, the Tenant is responsible for its ongoing cost. Refuse removal is the Tenant's responsibility unless the Landlord states otherwise.</p>
+
+      <h4>8. Tenant Obligations and Property Rules</h4>
+      <p>The Tenant must keep the Premises clean and sanitary, and ensure doors/gates remain secured. Prohibited unless agreed in writing: ${listing && (listing.extras || []).some(x => /pet/i.test(x)) ? 'pets are permitted subject to the Landlord\'s house rules' : 'pets'}; commercial or illegal activities; tampering with any meter. Noise must be kept to a reasonable volume at all times, and strictly quiet between 22:00 and 07:00. Repeated noise complaints constitute a breach. No open flames, paraffin stoves, or gas heaters indoors; electrical sockets and extension cords must not be overloaded.${listing && (listing.extras || []).some(x => /secur/i.test(x)) ? ' The Tenant consents to CCTV/security monitoring in common areas for security purposes.' : ''}</p>
+
+      <h4>9. Occupancy, Subletting and Guests</h4>
+      <p>Only the registered Tenant (and any additional occupants declared on application) may occupy the Premises. Subletting or assignment is prohibited without the Landlord's prior written consent. Visitors are welcome as day guests; occasional overnight stays are permitted, but a visitor may not move in, keep belongings at the Premises, or use the address as their own. Any stay exceeding thirty (30) consecutive days, or a pattern of continuous overnight stays, will be treated as unauthorised occupation and is a material breach entitling the Landlord to terminate this Agreement.</p>
+
+      <h4>10. Maintenance, Repairs and Entry</h4>
+      <p>All defects must be reported immediately to the Landlord${lease.ownerPhone ? ' at ' + lease.ownerPhone : ''}. The Landlord may enter with 24 hours' notice for inspections or repairs (immediately in emergencies). No drilling, painting, or structural changes without the Landlord's written consent.</p>
+
+      ${hasAccessFeature ? `<h4>11. Access Control</h4>
+      <p>${isGated ? 'The Premises is located within a gated area / controlled-access complex. ' : ''}The Tenant must comply with the access procedure the Landlord specifies (gate register, access card/sticker, or similar), and any associated cost or deposit for access devices as advised by the Landlord. Unauthorised duplication or sharing of access credentials with non-residents is prohibited.</p>` : ''}
+
+      <h4>${hasAccessFeature ? '12' : '11'}. Breach and Legal</h4>
+      <p>Failure to pay rent, or breach of the house rules in this Agreement, constitutes a material breach. Should either Party breach a material term and fail to remedy it within a reasonable period of written notice, the aggrieved Party may cancel this Agreement and claim any damages suffered. The defaulting party is liable for legal costs reasonably incurred in enforcing this Agreement.</p>
+
+      <h4>${hasAccessFeature ? '13' : '12'}. Liability, Indemnity &amp; General</h4>
+      <p>The Tenant is responsible for their own household contents insurance. The Landlord is not liable for loss of or damage to the Tenant's possessions except where caused by the Landlord's negligence. This Agreement, together with the Tenant's vetting application, records the whole agreement between the Parties, and any variation must be in writing and signed by both Parties. The Parties consent to the jurisdiction of the Magistrate's Court for any dispute arising from this Agreement.</p>
+
+      <h4>${hasAccessFeature ? '14' : '13'}. Tenant Declaration</h4>
+      <p>By signing this Agreement the Tenant declares that they are able to comply with the house rules in this Agreement, and that they are able to pay the monthly rent of R ${rent} and all other amounts due under this lease, in full and on time.</p>
+
+      <h4>POPIA Consent</h4>
+      <p>The Tenant confirms their consent, already given during the application process, to the Landlord collecting and storing their personal information (including identity, contact, employment, and next-of-kin details) solely for the administration of this lease.</p>
+
+      <h4>Signatures</h4>
+      <p>By typing their full legal name below and clicking "Sign lease," the Tenant confirms they have read, understood, and agree to be bound by all the terms above, and that this constitutes their digital signature to this Agreement.</p>
+    `;
+  }
+
+  async function openLeaseModal(applicationId, mode) {
+    const app = getApplications().find(a => a.id === applicationId);
+    if (!app) return;
+    const lease = generateLeaseForApplication(app);
+    const listing = getListings().find(l => l.id === app.listingId);
+
+    // Integrity check: verify (or establish) this lease's tamper-evidence hash
+    const integrityWarning = document.getElementById('integrityWarning');
+    integrityWarning.style.display = 'none';
+    try {
+      if (!lease.integrityHash) {
+        lease.integrityHash = await computeLeaseHash(lease);
+        updateLease(lease);
+      } else {
+        const recomputed = await computeLeaseHash(lease);
+        if (recomputed !== lease.integrityHash) integrityWarning.style.display = 'block';
+      }
+    } catch (e) { /* Web Crypto unavailable — skip integrity check silently */ }
+
+    document.getElementById('leaseBadge').textContent = mode === 'landlord' ? 'Lease Contract (Landlord view)' : 'Lease Contract';
+    document.getElementById('leaseHeading').textContent = lease.address;
+    document.getElementById('contractText').innerHTML = buildContractText(lease, listing);
+    document.getElementById('leaseContractView').style.display = 'block';
+    document.getElementById('welcomePackView').style.display = 'none';
+
+    const signBlock = document.getElementById('signBlock');
+    const signedNotice = document.getElementById('signedNotice');
+    document.getElementById('signError').classList.remove('show');
+    document.getElementById('signName').value = '';
+    resetReadGate();
+
+    const ledgerSection = document.getElementById('rentLedgerSection');
+    ledgerSection.style.display = 'none';
+    ledgerSection.innerHTML = '';
+
+    if (lease.status === 'Signed') {
+      signBlock.style.display = 'none';
+      document.getElementById('readProgressHint').style.display = 'none';
+      signedNotice.style.display = 'block';
+      signedNotice.textContent = `✓ Signed by ${lease.signatureName} on ${new Date(lease.signedAt).toLocaleDateString('en-ZA')}.`;
+      if (mode !== 'landlord') {
+        renderWelcomePack(lease, listing, true);
+      } else {
+        ledgerSection.style.display = 'block';
+        renderRentLedgerSection(lease);
+      }
+    } else if (mode === 'landlord') {
+      signBlock.style.display = 'none';
+      document.getElementById('readProgressHint').style.display = 'none';
+      signedNotice.style.display = 'none';
+    } else {
+      signBlock.style.display = 'block';
+      signedNotice.style.display = 'none';
+      CURRENT_LEASE_ID = lease.id;
+      CURRENT_LEASE_APPLICATION = app;
+      // Give the contract box a moment to render before checking whether it needs scrolling
+      setTimeout(checkReadProgress, 50);
+    }
+
+    document.getElementById('leaseOverlay').classList.add('open');
+  }
+  function closeLeaseModal() {
+    document.getElementById('leaseOverlay').classList.remove('open');
+  }
+
+  function resetReadGate() {
+    const box = document.getElementById('contractText');
+    const checkbox = document.getElementById('readConfirmCheckbox');
+    const label = document.getElementById('readConfirmLabel');
+    const hint = document.getElementById('readProgressHint');
+    box.scrollTop = 0;
+    checkbox.checked = false;
+    checkbox.disabled = true;
+    label.style.opacity = '0.5';
+    hint.style.display = '';
+    hint.textContent = '👇 Scroll to the bottom to read the full terms & conditions';
+    hint.classList.remove('done');
+  }
+
+  function checkReadProgress() {
+    const box = document.getElementById('contractText');
+    const checkbox = document.getElementById('readConfirmCheckbox');
+    const label = document.getElementById('readConfirmLabel');
+    const hint = document.getElementById('readProgressHint');
+    const reachedEnd = box.scrollTop + box.clientHeight >= box.scrollHeight - 12;
+    if (reachedEnd) {
+      checkbox.disabled = false;
+      label.style.opacity = '1';
+      hint.textContent = '✓ You\'ve reached the end of the lease terms';
+      hint.classList.add('done');
+    }
+  }
+  document.getElementById('contractText').addEventListener('scroll', checkReadProgress);
+
+  let CURRENT_LEASE_ID = null;
+  let CURRENT_LEASE_APPLICATION = null;
+
+  function signLease() {
+    const typed = document.getElementById('signName').value.trim();
+    const errEl = document.getElementById('signError');
+    errEl.classList.remove('show');
+
+    if (!document.getElementById('readConfirmCheckbox').checked) {
+      errEl.textContent = 'Please scroll through and confirm you\'ve read the full lease terms before signing.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    if (!typed) {
+      errEl.textContent = 'Please type your full legal name to sign.';
+      errEl.classList.add('show');
+      return;
+    }
+    const expected = (CURRENT_LEASE_APPLICATION.applicant.name || '').trim().toLowerCase();
+    if (typed.toLowerCase() !== expected) {
+      errEl.textContent = 'That name doesn\'t match the applicant name on file. Please type it exactly as on your application.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    const leases = getLeases();
+    const lease = leases.find(l => l.id === CURRENT_LEASE_ID);
+    if (!lease) return;
+    lease.status = 'Signed';
+    lease.signedAt = new Date().toISOString();
+    lease.signatureName = typed;
+    saveLeases(leases);
+
+    document.getElementById('signBlock').style.display = 'none';
+    document.getElementById('signedNotice').style.display = 'block';
+    document.getElementById('signedNotice').textContent = `✓ Signed by ${lease.signatureName} on ${new Date(lease.signedAt).toLocaleDateString('en-ZA')}.`;
+
+    const listing = getListings().find(l => l.id === lease.listingId);
+    renderWelcomePack(lease, listing, true);
+    renderApplicationsList();
+  }
+
+  function renderWelcomePack(lease, listing, autoShow) {
+    const wp = document.getElementById('welcomePackView');
+    const isGated = listing && (listing.extras || []).some(x => /gated|controlled access/i.test(x));
+    wp.innerHTML = `
+      <h3 class="form-subhead" style="margin-top:1.2rem;">Welcome Pack</h3>
+      <div class="welcome-pack-section">
+        <h4>🏠 Your new home</h4>
+        <p>${lease.address}${isGated ? ' — a gated area with controlled access' : ''}. Move-in date: ${lease.startDate || 'to be confirmed with your landlord'}.</p>
+      </div>
+      <div class="welcome-pack-section">
+        <h4>💳 Payment instructions</h4>
+        <p>Rent of R ${Number(listing ? listing.price : lease.rent || 0).toLocaleString()} is due on or before the 1st of each month. Your deposit (equivalent to one month's rent) is payable in instalments over 2–3 months alongside your rent, as agreed with your landlord — not all at once. Contact your landlord for banking / payment details and the exact schedule.</p>
+      </div>
+      <div class="welcome-pack-section">
+        <h4>🛠️ Reporting a fault</h4>
+        <p>Message your landlord directly to report any maintenance issue: ${lease.ownerName || 'your landlord'}${lease.ownerPhone ? ' — ' + lease.ownerPhone : ''}.</p>
+      </div>
+      <div class="welcome-pack-section">
+        <h4>🔑 Utilities &amp; access</h4>
+        <p>Wi-Fi: ${listing && listing.wifi ? listing.wifi : 'confirm with landlord'}<br>
+        Parking: ${listing && listing.parking ? listing.parking : 'confirm with landlord'}<br>
+        Water: ${listing && listing.water ? listing.water : 'confirm with landlord'}<br>
+        Electricity: ${listing && listing.electricity ? listing.electricity : 'confirm with landlord'}${isGated ? '<br>Gate access: this property is in a gated area — ask your landlord how to register for entry (gate register, access card, or sticker).' : ''}</p>
+      </div>
+      <div class="welcome-pack-section">
+        <h4>📞 Emergency contact</h4>
+        <p>${lease.ownerName || 'Landlord'}${lease.ownerPhone ? ' — ' + lease.ownerPhone : ''}</p>
+      </div>
+    `;
+    if (autoShow) wp.style.display = 'block';
+  }
+
+  document.getElementById('leaseOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeLeaseModal();
+  });
+
+  /* ================= Rent Ledger (landlord view, signed leases only) ================= */
+  const LEDGER_KEY = 'maoka_rent_ledger';
+  function getLedger() {
+    try { return JSON.parse(localStorage.getItem(LEDGER_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveLedger(list) { localStorage.setItem(LEDGER_KEY, JSON.stringify(list)); }
+
+  // Clause 5A: rent due by the 2nd of the month; 2% interest on the outstanding balance if late.
+  function calculateRentLedger(rentAmount, paymentDateStr, dueDateDay = 2) {
+    const paymentDate = new Date(paymentDateStr);
+    const currentMonth = paymentDate.getMonth();
+    const currentYear = paymentDate.getFullYear();
+    const deadline = new Date(currentYear, currentMonth, dueDateDay, 23, 59, 59);
+
+    const isLate = paymentDate > deadline;
+    const interestAmount = isLate ? rentAmount * 0.02 : 0;
+
+    return {
+      baseRent: rentAmount,
+      isLate: isLate,
+      interestAccrued: interestAmount,
+      totalDue: rentAmount + interestAmount
+    };
+  }
+
+  function renderRentLedgerSection(lease) {
+    const el = document.getElementById('rentLedgerSection');
+    const today = new Date().toISOString().slice(0, 10);
+    el.innerHTML = `
+      <h3 class="form-subhead" style="margin-top:0;">Rent Ledger</h3>
+      <p class="auth-lead" style="margin-bottom:0.7rem;">Log each rent payment as it comes in. Payments received after the 2nd of the month automatically accrue 2% interest, per Clause 5A.</p>
+      <div class="form-grid" style="margin-bottom:0.6rem;">
+        <div class="form-group">
+          <label for="ledgerDateInput">Payment received on</label>
+          <input type="date" id="ledgerDateInput" value="${today}">
         </div>
-      </article>
+        <div class="form-group">
+          <label for="ledgerAmountInput">Amount received (R)</label>
+          <input type="number" id="ledgerAmountInput" min="0" value="${lease.rent || 0}">
+        </div>
+      </div>
+      <button type="button" class="btn-submit" style="width:100%;" onclick="logRentPayment('${lease.id}')">Log payment</button>
+      <p class="auth-error" id="ledgerError"></p>
+      <div id="ledgerEntries" style="margin-top:0.9rem;"></div>
+    `;
+    renderLedgerEntries(lease.id);
+  }
+
+  function renderLedgerEntries(leaseId) {
+    const entries = getLedger().filter(e => e.leaseId === leaseId).sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+    const el = document.getElementById('ledgerEntries');
+    if (!el) return;
+    if (!entries.length) {
+      el.innerHTML = '<p class="auth-lead">No payments logged yet.</p>';
+      return;
+    }
+    el.innerHTML = entries.map(e => `
+      <div class="track-app-row">
+        <div class="app-top">
+          <div>
+            <b>${new Date(e.paymentDate).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })}</b>
+            <div style="font-size:0.8rem;color:var(--text-muted);">Rent R ${Number(e.baseRent).toLocaleString()}${e.isLate ? ' + interest R ' + Number(e.interestAccrued).toFixed(2) : ''}</div>
+          </div>
+          <span class="status-pill ${e.isLate ? 'status-declined' : 'status-approved'}">${e.isLate ? 'Late' : 'On time'}</span>
+        </div>
+        <div style="font-size:0.85rem;font-weight:600;">Total due: R ${Number(e.totalDue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+      </div>
     `).join('');
   }
 
-  // Initialize Map
-  const map = L.map('map').setView([-25.8825, 28.1633], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-  L.marker([-25.8825, 28.1633]).addTo(map).bindPopup('<b>Maoka Residence</b><br>Olievenhoutbosch').openPopup();
+  function logRentPayment(leaseId) {
+    const dateVal = document.getElementById('ledgerDateInput').value;
+    const amountVal = document.getElementById('ledgerAmountInput').value;
+    const errEl = document.getElementById('ledgerError');
+    errEl.classList.remove('show');
 
-  // Initial Execution
-  renderListings();
+    if (!dateVal || !amountVal) {
+      errEl.textContent = 'Please enter both a payment date and amount.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    const result = calculateRentLedger(Number(amountVal), dateVal);
+    const entry = {
+      id: 'PMT-' + Date.now(),
+      leaseId,
+      paymentDate: dateVal,
+      baseRent: result.baseRent,
+      isLate: result.isLate,
+      interestAccrued: result.interestAccrued,
+      totalDue: result.totalDue,
+      loggedAt: new Date().toISOString()
+    };
+
+    const ledger = getLedger();
+    ledger.push(entry);
+    saveLedger(ledger);
+    renderLedgerEntries(leaseId);
+  }
+
+  /* ================= My Application (tenant self-service tracking) ================= */
+  function openTrackModal() {
+    document.getElementById('trackQuery').value = '';
+    document.getElementById('trackError').classList.remove('show');
+    document.getElementById('trackLookup').style.display = 'block';
+    document.getElementById('trackResults').style.display = 'none';
+    document.getElementById('trackOverlay').classList.add('open');
+  }
+  function closeTrackModal() {
+    document.getElementById('trackOverlay').classList.remove('open');
+  }
+
+  function lookupApplications() {
+    const q = document.getElementById('trackQuery').value.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    const errEl = document.getElementById('trackError');
+    errEl.classList.remove('show');
+
+    if (!q) {
+      errEl.textContent = 'Please enter a phone number, ID number, or reference code.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    const matches = getApplications().filter(a => {
+      const idNum = (a.applicant.idNumber || '').toLowerCase();
+      const phone = (a.applicant.phone || '').replace(/\D/g, '');
+      const ref = a.id.toLowerCase();
+      return ref === q || idNum === q || (qDigits && phone === qDigits) || (qDigits && phone.endsWith(qDigits));
+    });
+
+    if (!matches.length) {
+      errEl.textContent = 'No application found for that phone number, ID number, or reference code.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    document.getElementById('trackLookup').style.display = 'none';
+    const resultsEl = document.getElementById('trackResults');
+    resultsEl.style.display = 'block';
+    resultsEl.innerHTML = matches.map(a => {
+      const statusClass = a.status === 'Approved' ? 'status-approved' : a.status === 'Rejected' ? 'status-declined' : 'status-pending';
+      const lease = getLeases().find(l => l.applicationId === a.id);
+      let actionBtn = '';
+      if (a.status === 'Approved' && lease) {
+        actionBtn = lease.status === 'Signed'
+          ? `<button type="button" class="btn-submit" style="width:100%;margin-top:0.6rem;" onclick="closeTrackModal();openLeaseModal('${a.id}','tenant')">View signed lease &amp; Welcome Pack</button>`
+          : `<button type="button" class="btn-submit" style="width:100%;margin-top:0.6rem;" onclick="closeTrackModal();openLeaseModal('${a.id}','tenant')">Review &amp; sign lease</button>`;
+      }
+      return `
+        <div class="track-app-row">
+          <div class="app-top">
+            <div>
+              <b>${a.listingAddress}</b>
+              <div style="font-size:0.8rem;color:var(--text-muted);">Ref ${a.id}</div>
+            </div>
+            <span class="status-pill ${statusClass}">${a.status}</span>
+          </div>
+          <p class="auth-lead" style="margin:0.4rem 0 0;">
+            ${a.status === 'Pending' ? 'Your application is still being reviewed by the landlord.' : ''}
+            ${a.status === 'Rejected' ? 'This application was not successful this time.' : ''}
+            ${a.status === 'Approved' && !lease ? 'Approved! Your lease is being prepared.' : ''}
+          </p>
+          ${actionBtn}
+          <div class="data-rights-actions">
+            <button type="button" onclick="downloadApplicationData('${a.id}')">⬇️ Download my data</button>
+            <button type="button" class="danger-btn" onclick="deleteMyApplication('${a.id}')">🗑️ Delete my application</button>
+          </div>
+        </div>`;
+    }).join('') + `<button type="button" class="btn-ghost-nav" style="width:100%;margin-top:0.8rem;" onclick="openTrackModal()">Search again</button>`;
+  }
+
+  function downloadApplicationData(appId) {
+    const app = getApplications().find(a => a.id === appId);
+    if (!app) return;
+    const lease = getLeases().find(l => l.applicationId === appId);
+    const ledgerEntries = lease ? getLedger().filter(e => e.leaseId === lease.id) : [];
+    const payload = JSON.stringify({ application: app, lease: lease || null, rentLedger: ledgerEntries }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `my-application-${appId}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function deleteMyApplication(appId) {
+    const sure = confirm('This will permanently delete this application (and any related lease record) from this device. This cannot be undone. Continue?');
+    if (!sure) return;
+    const remainingApps = getApplications().filter(a => a.id !== appId);
+    saveApplications(remainingApps);
+    const removedLeaseIds = getLeases().filter(l => l.applicationId === appId).map(l => l.id);
+    const remainingLeases = getLeases().filter(l => l.applicationId !== appId);
+    saveLeases(remainingLeases);
+    if (removedLeaseIds.length) saveLedger(getLedger().filter(e => !removedLeaseIds.includes(e.leaseId)));
+    closeTrackModal();
+    alert('Your application data has been deleted from this device.');
+  }
+
+  document.getElementById('trackOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeTrackModal();
+  });
 </script>
+
 </body>
+
+
 </html>
