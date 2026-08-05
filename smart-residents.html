@@ -41,11 +41,16 @@
     padding: 0;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
     line-height: 1.5;
+    overflow-x: hidden;
   }
 
   /* Header & Navigation */
@@ -139,7 +144,7 @@
 
   .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
     gap: 1rem;
     margin-bottom: 1rem;
   }
@@ -205,7 +210,7 @@
   /* Listings Grid */
   .listings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
     gap: 1.5rem;
     margin-bottom: 3rem;
   }
@@ -307,7 +312,7 @@
 
   .poi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 1rem;
   }
 
@@ -329,21 +334,147 @@
     color: var(--text-muted);
   }
 
+  @media (max-width: 720px) {
+    .container {
+      margin: 1.25rem auto;
+      padding: 0 1rem;
+    }
+
+    .admin-panel, .filter-bar, .map-section {
+      padding: 1.1rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+    }
+  }
+
   @media (max-width: 600px) {
     header {
       flex-direction: column;
-      gap: 0.8rem;
       align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.85rem 1rem;
+    }
+
+    header .logo {
+      font-size: 1.1rem;
     }
 
     header nav {
+      width: 100%;
       flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    header nav a {
+      font-size: 0.9rem;
+    }
+
+    #sessionBar {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 0.5rem !important;
+    }
+
+    #sessionName {
+      width: 100%;
+      font-size: 0.85rem !important;
+    }
+
+    .admin-toggle-btn {
+      padding: 0.55rem 0.85rem;
+      font-size: 0.82rem;
+    }
+
+    .filter-bar {
+      gap: 0.7rem;
+    }
+
+    .filter-bar input, .filter-bar select, #clearFiltersBtn {
+      width: 100%;
+      min-width: 100%;
+      flex: 1 1 100% !important;
+    }
+
+    .listings-grid {
+      gap: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .price {
+      font-size: 1.2rem;
+    }
+
+    /* Modals: use nearly the full screen, safely scrollable */
+    .auth-overlay {
+      padding: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .auth-modal {
+      max-width: 100%;
+      max-height: calc(100vh - 1.5rem);
+      padding: 1.5rem 1.1rem 1.25rem;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .form-grid {
       gap: 0.8rem;
     }
 
-    .filter-bar input, .filter-bar select {
+    .checkbox-pill {
+      font-size: 0.82rem;
+      padding: 0.5rem 0.7rem;
+    }
+
+    .wizard-nav {
+      flex-wrap: wrap;
+    }
+
+    .wizard-nav .btn-submit, .btn-ghost-nav {
+      flex: 1 1 auto;
+      min-height: 44px;
+    }
+
+    .btn-submit, .app-actions button {
+      min-height: 42px;
+    }
+
+    .app-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .app-actions button {
       width: 100%;
-      min-width: 100%;
+    }
+
+    .application-row .app-top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    #map {
+      height: 260px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .auth-modal {
+      padding: 1.3rem 0.9rem 1.1rem;
+    }
+
+    .step-progress {
+      font-size: 0.7rem;
+    }
+
+    h2.section-title {
+      font-size: 1rem;
     }
   }
 
@@ -370,6 +501,9 @@
     box-shadow: var(--shadow-hover);
     width: 100%;
     max-width: 380px;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 1.75rem 1.5rem 1.5rem;
   }
 
@@ -467,7 +601,7 @@
 
   .photo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(84px, 100%), 1fr));
     gap: 0.6rem;
     margin-top: 0.4rem;
   }
@@ -591,7 +725,7 @@
   }
   .application-row .app-detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
     gap: 0.4rem 1rem;
     font-size: 0.85rem;
     color: var(--text-main);
@@ -658,6 +792,21 @@
   .contract-box h4:first-child { margin-top: 0; }
   .contract-box p { margin: 0 0 0.5rem; }
 
+  .read-progress-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0.5rem 0 0;
+  }
+  .read-progress-hint.done {
+    color: #22543d;
+    font-weight: 600;
+  }
+
+  .checkbox-pill:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
   .track-app-row {
     background: var(--bg-color);
     border: 1px solid var(--border-color);
@@ -675,6 +824,73 @@
   }
   .welcome-pack-section h4 { font-size: 0.85rem; color: var(--primary); margin-bottom: 0.4rem; }
   .welcome-pack-section p { font-size: 0.85rem; margin: 0 0 0.3rem; }
+
+  /* POPIA notice & data controls */
+  .popia-box {
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 8px;
+    padding: 0.8rem 0.9rem;
+    margin-top: 0.9rem;
+  }
+  .popia-box p {
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: #2c5282;
+    margin: 0;
+  }
+  .popia-box a { color: var(--primary); font-weight: 600; }
+
+  .popia-strip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.78rem;
+    color: #2c5282;
+    margin-bottom: 1rem;
+  }
+  .popia-strip a { color: var(--primary); font-weight: 600; }
+
+  .masked-id-wrap { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .reveal-id-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  .data-rights-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+  .data-rights-actions button {
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .data-rights-actions .danger-btn { border-color: #e53e3e; color: #822727; }
+
+  footer.site-footer {
+    text-align: center;
+    padding: 2rem 1rem 2.5rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+  footer.site-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
 
   @media print {
     header, .auth-close, .wizard-nav, #signBlock, .filter-bar, .admin-panel, footer { display: none !important; }
@@ -766,8 +982,8 @@
             <input type="text" id="appName" required autocomplete="name">
           </div>
           <div class="form-group">
-            <label for="appIdNumber">RSA ID number / Passport number</label>
-            <input type="text" id="appIdNumber" required maxlength="20" placeholder="13-digit SA ID or passport no.">
+            <label for="appIdNumber">RSA ID number / Passport number <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+            <input type="text" id="appIdNumber" maxlength="20" placeholder="13-digit SA ID or passport no.">
           </div>
           <div class="form-group">
             <label for="appPhone">Phone</label>
@@ -815,8 +1031,8 @@
             <input type="text" id="appJobTitle" placeholder="e.g. Cashier, Driver">
           </div>
           <div class="form-group">
-            <label for="appIncome">Net monthly income (R)</label>
-            <input type="number" id="appIncome" required min="0" placeholder="e.g. 9000">
+            <label for="appIncome">Net monthly income (R) <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+            <input type="number" id="appIncome" min="0" placeholder="e.g. 9000">
           </div>
         </div>
         <h3 class="form-subhead">Reference check contact (optional)</h3>
@@ -908,9 +1124,14 @@
       <div class="apply-step" id="applyStep5" style="display:none;">
         <h3 class="form-subhead" style="margin-top:0;">Review &amp; submit</h3>
         <div id="applyReviewBox" class="application-row" style="background:#fff;"></div>
-        <label class="checkbox-pill" style="width:100%;margin-top:0.9rem;">
+
+        <div class="popia-box">
+          <p><b>How your information is used.</b> The details above are used only to assess this application (vetting, affordability, and reference checks) for <span id="applyPopiaAddress">this property</span>. They're stored on this device and shared with the property's landlord — not sold, and not shared with anyone else. You can view, download, or ask to delete this application at any time via "My Application." <a href="#" onclick="openPopiaModal();return false;">Read the full Privacy &amp; POPIA Notice</a>.</p>
+        </div>
+
+        <label class="checkbox-pill" style="width:100%;margin-top:0.7rem;">
           <input type="checkbox" id="appConsent" required>
-          I consent to the landlord verifying my employment, income and identity, and running an affordability / background check as part of this application.
+          I consent to the landlord processing my personal information as described above, and to them verifying my employment, income and identity as part of this application.
         </label>
       </div>
 
@@ -947,6 +1168,7 @@
       </div>
       <p class="auth-error" id="trackError"></p>
       <button type="button" class="btn-submit" style="width:100%;" onclick="lookupApplications()">Find my application</button>
+      <div class="popia-strip" style="margin-top:1rem;margin-bottom:0;">🔒 Once you find your application, you can download a copy of your data or request it be deleted. <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></div>
     </div>
 
     <div id="trackResults" style="display:none;"></div>
@@ -962,10 +1184,15 @@
 
     <div id="leaseContractView">
       <div class="contract-box" id="contractText"></div>
+      <p class="read-progress-hint" id="readProgressHint">👇 Scroll to the bottom to read the full terms &amp; conditions</p>
 
       <div id="signBlock" style="margin-top:1.1rem;">
         <h3 class="form-subhead" style="margin-top:0;">Digital signature</h3>
-        <p class="auth-lead">Type your full legal name below. Typing it and submitting acts as your digital signature on this lease.</p>
+        <label class="checkbox-pill" id="readConfirmLabel" style="width:100%;opacity:0.5;">
+          <input type="checkbox" id="readConfirmCheckbox" disabled>
+          I have read and agree to the full lease terms &amp; conditions above
+        </label>
+        <p class="auth-lead" style="margin-top:0.7rem;">Type your full legal name below. Typing it and submitting acts as your digital signature on this lease.</p>
         <div class="form-group">
           <label for="signName">Type your full legal name to sign</label>
           <input type="text" id="signName" placeholder="Must match the name on your application">
@@ -983,12 +1210,47 @@
   </div>
 </div>
 
+<!-- Privacy & POPIA Notice -->
+<div class="auth-overlay" id="popiaOverlay">
+  <div class="auth-modal" style="max-width:560px;">
+    <button type="button" class="auth-close" onclick="closePopiaModal()" aria-label="Close">✕</button>
+    <span class="admin-badge">Privacy Notice</span>
+    <h2 class="section-title" style="margin:0.4rem 0 0.9rem;">Privacy &amp; POPIA Notice</h2>
+    <div class="contract-box" style="max-height:60vh;">
+      <h4>Who processes your information</h4>
+      <p>When you apply for a property on this app, your personal information is processed by the landlord who owns that listing (the "responsible party" under the Protection of Personal Information Act 4 of 2013, "POPIA"), for the purpose of assessing your rental application.</p>
+
+      <h4>What we collect &amp; why</h4>
+      <p>Identity details (name, ID/passport number), contact details, current address, employment and income information, next-of-kin details, and move-in preferences — collected solely to assess your suitability as a tenant, verify your identity and ability to pay rent, and to prepare a lease if approved. We only ask for the filenames of supporting documents (ID copy, payslips); this demo does not upload or store the documents themselves.</p>
+
+      <h4>Where it's stored</h4>
+      <p>This application currently stores data in your browser's local storage on your own device, and in the landlord's browser once they view your application — not on a central server. It is not sold, and is not shared with any third party beyond the landlord you applied to.</p>
+
+      <h4>How long we keep it</h4>
+      <p>Rejected applications are automatically removed from local storage after 90 days. Approved applications and signed leases are kept for as long as reasonably needed for the tenancy and any legal recordkeeping requirement. You can request deletion at any time (see below).</p>
+
+      <h4>Your rights under POPIA</h4>
+      <p>You have the right to know what information is held about you, to request a copy of it, to request correction of inaccurate information, and to request its deletion (subject to any legal requirement to retain it). Use "My Application" to look up your application by phone, ID number, or reference code, then download or delete your data directly.</p>
+
+      <h4>Consent</h4>
+      <p>By ticking the consent box when applying, you agree to the landlord processing your information as described here, including verifying your employment, income, and identity, and conducting a reasonable affordability/background check.</p>
+
+      <h4>Complaints</h4>
+      <p>If you believe your information has been mishandled, you may raise this with the landlord directly, or with South Africa's Information Regulator (inforegulator.org.za).</p>
+
+      <h4>Known limitation</h4>
+      <p>This is a lightweight demo application without a central server. While we minimise what's collected, apply access controls in the interface, and give you deletion rights, information stored in browser local storage is not encrypted at rest. Please avoid using shared or public devices when applying, and use "My Application" to delete your data once your tenancy question is resolved.</p>
+    </div>
+  </div>
+</div>
+
 <main class="container">
   
   <!-- Listing Administrator Control Panel -->
   <section class="admin-panel" id="adminPanel" style="display:none;">
     <span class="admin-badge">Landlord / Owner Panel</span>
     <h2 class="section-title" style="margin-bottom:0.75rem;">Add New Property Listing</h2>
+    <div class="popia-strip">🔒 Listing photos and applicant data are stored locally on this device only. Use a trusted device and log out when you're done. <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></div>
     <form id="propertyForm">
       <div class="form-grid">
         <div class="form-group">
@@ -1092,8 +1354,12 @@
   <section class="admin-panel" id="applicationsPanel" style="display:none;">
     <span class="admin-badge">Tenant Vetting Queue</span>
     <h2 class="section-title" style="margin-bottom:0.5rem;">Applications for your properties</h2>
-    <p class="auth-lead" style="margin-bottom:1rem;">Review each applicant's details, then approve or decline. Approving doesn't sign a lease — it just clears them to move forward.</p>
+    <p class="auth-lead" style="margin-bottom:0.7rem;">Review each applicant's details, then approve or reject. Approving doesn't sign a lease — it just clears them to move forward.</p>
+    <div class="popia-strip">🔒 ID numbers are masked by default — tap "Show" only when you genuinely need to verify identity. This data is stored on this device only; rejected applications are auto-removed after 90 days. <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></div>
     <div id="applicationsList"></div>
+    <div class="data-rights-actions">
+      <button type="button" class="danger-btn" onclick="clearAllApplicantData()">🗑️ Erase all applicant data on this device</button>
+    </div>
   </section>
 
   <!-- Search / Filters -->
@@ -1172,6 +1438,10 @@
 
 </main>
 
+<footer class="site-footer">
+  <p>Maoka Residence — Smart Resident · <a href="#" onclick="openPopiaModal();return false;">Privacy &amp; POPIA Notice</a></p>
+</footer>
+
 <!-- Leaflet JS for Map Integration -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
@@ -1189,6 +1459,13 @@
     .openPopup();
 
   /* ================= Landlord / Owner Auth (client-side, localStorage) ================= */
+  const POPIA_NOTICE_VERSION = '2026-08-v1';
+  function openPopiaModal() { document.getElementById('popiaOverlay').classList.add('open'); }
+  function closePopiaModal() { document.getElementById('popiaOverlay').classList.remove('open'); }
+  document.getElementById('popiaOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closePopiaModal();
+  });
+
   const LANDLORDS_KEY = 'maoka_landlords';
   const SESSION_KEY = 'maoka_landlord_session';
 
@@ -1431,6 +1708,23 @@
   }
   function saveApplications(list) { localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(list)); }
 
+  const REJECTED_RETENTION_DAYS = 90;
+  function purgeStaleApplications() {
+    const apps = getApplications();
+    const cutoff = Date.now() - REJECTED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    const kept = apps.filter(a => {
+      if (a.status !== 'Rejected') return true;
+      const ts = new Date(a.submittedAt).getTime();
+      return !ts || ts > cutoff;
+    });
+    if (kept.length !== apps.length) {
+      const removedIds = apps.filter(a => !kept.includes(a)).map(a => a.id);
+      saveApplications(kept);
+      const leases = getLeases().filter(l => !removedIds.includes(l.applicationId));
+      saveLeases(leases);
+    }
+  }
+
   function listingBadges(l) {
     return [
       l.wifi && (l.wifi === 'Not available' ? '📶 No Wi-Fi' : '📶 ' + l.wifi),
@@ -1601,6 +1895,7 @@
 
   renderPhotoGrid();
   applyFilters();
+  purgeStaleApplications();
 
   /* ================= Tenant vetting / application (multi-step wizard) ================= */
   let CURRENT_APPLY_LISTING = null;
@@ -1613,6 +1908,7 @@
     if (!listing) return;
     CURRENT_APPLY_LISTING = listing;
     document.getElementById('applyListingLabel').textContent = listing.address + ' — R ' + Number(listing.price).toLocaleString() + ' / mo';
+    document.getElementById('applyPopiaAddress').textContent = listing.address;
     document.getElementById('applyForm').style.display = 'block';
     document.getElementById('applySuccess').style.display = 'none';
     document.getElementById('applyError').classList.remove('show');
@@ -1744,7 +2040,8 @@
       ownerUsername: CURRENT_APPLY_LISTING.ownerUsername,
       applicant,
       status: 'Pending',
-      submittedAt: new Date().toISOString()
+      submittedAt: new Date().toISOString(),
+      consent: { given: true, at: new Date().toISOString(), noticeVersion: POPIA_NOTICE_VERSION }
     };
 
     const applications = getApplications();
@@ -1783,7 +2080,47 @@
     if (willShow) renderApplicationsList();
   }
 
+  function clearAllApplicantData() {
+    const session = getSession();
+    if (!session) return;
+    const myListingIds = getListings().filter(l => l.ownerUsername === session.username).map(l => l.id);
+    const myApps = getApplications().filter(a => myListingIds.includes(a.listingId) || a.ownerUsername === session.username);
+    if (!myApps.length) { alert('There is no applicant data to erase.'); return; }
+    const sure = confirm(`This will permanently delete all ${myApps.length} application(s) and any related lease records for your properties from this device. This cannot be undone. Continue?`);
+    if (!sure) return;
+
+    const myAppIds = myApps.map(a => a.id);
+    const remainingApps = getApplications().filter(a => !myAppIds.includes(a.id));
+    saveApplications(remainingApps);
+    const remainingLeases = getLeases().filter(l => !myAppIds.includes(l.applicationId));
+    saveLeases(remainingLeases);
+    renderApplicationsList();
+    alert('Applicant data erased from this device.');
+  }
+
+  function maskId(idNumber) {
+    if (!idNumber) return '—';
+    const digits = idNumber.trim();
+    if (digits.length <= 4) return '•'.repeat(digits.length);
+    return '•'.repeat(digits.length - 4) + digits.slice(-4);
+  }
+
+  function toggleIdReveal(btn, fullId) {
+    const span = btn.previousElementSibling;
+    const revealed = btn.getAttribute('data-revealed') === '1';
+    if (revealed) {
+      span.textContent = maskId(fullId);
+      btn.textContent = 'Show';
+      btn.setAttribute('data-revealed', '0');
+    } else {
+      span.textContent = fullId;
+      btn.textContent = 'Hide';
+      btn.setAttribute('data-revealed', '1');
+    }
+  }
+
   function renderApplicationsList() {
+    purgeStaleApplications();
     const session = getSession();
     const listEl = document.getElementById('applicationsList');
     if (!session) { listEl.innerHTML = ''; return; }
@@ -1797,7 +2134,7 @@
     }
 
     listEl.innerHTML = apps.map(a => {
-      const statusClass = a.status === 'Approved' ? 'status-approved' : a.status === 'Declined' ? 'status-declined' : 'status-pending';
+      const statusClass = a.status === 'Approved' ? 'status-approved' : a.status === 'Rejected' ? 'status-declined' : 'status-pending';
       const d = new Date(a.submittedAt);
       const submitted = isNaN(d) ? '' : d.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' });
       const lease = getLeases().find(l => l.applicationId === a.id);
@@ -1807,6 +2144,7 @@
           ? `<div style="font-size:0.82rem;color:#22543d;font-weight:600;margin-bottom:0.6rem;">✓ Lease signed ${new Date(lease.signedAt).toLocaleDateString('en-ZA')}</div>`
           : `<div style="font-size:0.82rem;color:#744210;font-weight:600;margin-bottom:0.6rem;">Lease generated — awaiting tenant signature</div>`;
       }
+      const idAttr = (a.applicant.idNumber || '').replace(/"/g, '');
       return `
         <div class="application-row">
           <div class="app-top">
@@ -1817,7 +2155,7 @@
             <span class="status-pill ${statusClass}">${a.status}</span>
           </div>
           <div class="app-detail-grid">
-            <div><b>ID / Passport</b>${a.applicant.idNumber || '—'}</div>
+            <div><b>ID / Passport</b><span class="masked-id-wrap"><span>${maskId(a.applicant.idNumber)}</span>${a.applicant.idNumber ? `<button type="button" class="reveal-id-btn" data-revealed="0" onclick="toggleIdReveal(this,'${idAttr}')">Show</button>` : ''}</span></div>
             <div><b>Phone</b>${a.applicant.phone || '—'}</div>
             <div><b>Email</b>${a.applicant.email || '—'}</div>
             <div><b>Current address</b>${a.applicant.currentAddress || '—'}</div>
@@ -1838,7 +2176,7 @@
           ${leaseLine}
           <div class="app-actions">
             <button type="button" class="approve-btn" onclick="setApplicationStatus('${a.id}','Approved')">Approve</button>
-            <button type="button" class="decline-btn" onclick="setApplicationStatus('${a.id}','Declined')">Decline</button>
+            <button type="button" class="decline-btn" onclick="setApplicationStatus('${a.id}','Rejected')">Reject</button>
             ${a.status !== 'Pending' ? `<button type="button" onclick="setApplicationStatus('${a.id}','Pending')">Reset to pending</button>` : ''}
             ${lease ? `<button type="button" onclick="openLeaseModal('${a.id}','landlord')">View contract</button>` : ''}
           </div>
@@ -1894,21 +2232,61 @@
     const rent = Number(listing ? listing.price : lease.rent || 0).toLocaleString();
     return `
       <h4>1. Parties</h4>
-      <p>This lease agreement is between <b>${lease.ownerName || 'the Landlord'}</b> ("the Landlord") and <b>${lease.tenantName}</b>${lease.tenantIdNumber ? ' (ID/Passport ' + lease.tenantIdNumber + ')' : ''} ("the Tenant").</p>
-      <h4>2. Property</h4>
-      <p>${lease.address}.</p>
-      <h4>3. Rent</h4>
-      <p>Monthly rent is R ${rent}, payable in advance on or before the 1st of each month, via the payment method the Landlord provides.</p>
-      <h4>4. Term</h4>
-      <p>The tenancy begins on ${lease.startDate || 'the agreed move-in date'} and continues on a month-to-month basis unless otherwise agreed in writing.</p>
-      <h4>5. Utilities &amp; amenities</h4>
-      <p>Wi-Fi: ${listing && listing.wifi ? listing.wifi : 'as agreed'}. Parking: ${listing && listing.parking ? listing.parking : 'as agreed'}. Water: ${listing && listing.water ? listing.water : 'as agreed'}. Electricity: ${listing && listing.electricity ? listing.electricity : 'as agreed'}.</p>
-      <h4>6. Tenant's undertaking</h4>
-      <p>The Tenant confirms the details provided during vetting are true and correct, and consents to the Landlord relying on them in entering this agreement.</p>
-      <h4>7. Termination</h4>
-      <p>Either party may end this month-to-month tenancy with 20 business days' written notice, in line with the Rental Housing Act.</p>
-      <h4>8. General</h4>
-      <p>This is a simplified digital agreement for demonstration purposes. A full, signed hard-copy or formally executed lease should be completed before move-in.</p>
+      <p>This lease agreement ("the Agreement") is entered into between <b>${lease.ownerName || 'the Landlord'}</b> ("the Landlord") and <b>${lease.tenantName}</b>${lease.tenantIdNumber ? ' (ID/Passport ' + lease.tenantIdNumber + ')' : ''} ("the Tenant"), collectively "the Parties".</p>
+
+      <h4>2. The Property</h4>
+      <p>The Landlord lets to the Tenant, who accepts, the premises situated at: <b>${lease.address}</b> ("the Property"), for residential use only.</p>
+
+      <h4>3. Rent &amp; Payment</h4>
+      <p>Monthly rent is <b>R ${rent}</b>, payable in advance, in full, on or before the 1st day of each month, by the payment method the Landlord provides. Late payment may attract interest or a late-payment charge as permitted by law. Rent is not reduced by the Tenant's absence from the Property.</p>
+
+      <h4>4. Deposit</h4>
+      <p>Where a deposit is required, its amount and terms (including interest-bearing account placement, permitted deductions, and refund timelines under the Rental Housing Act) will be recorded separately and form part of this Agreement.</p>
+
+      <h4>5. Term &amp; Renewal</h4>
+      <p>The tenancy begins on ${lease.startDate || 'the agreed move-in date'} and continues on a month-to-month basis unless the Parties agree in writing to a fixed term. Continued occupation and payment of rent after the initial period constitutes renewal on the same terms unless varied in writing.</p>
+
+      <h4>6. Utilities &amp; Amenities</h4>
+      <p>Wi-Fi: ${listing && listing.wifi ? listing.wifi : 'as agreed'}. Parking: ${listing && listing.parking ? listing.parking : 'as agreed'}. Water: ${listing && listing.water ? listing.water : 'as agreed'}. Electricity: ${listing && listing.electricity ? listing.electricity : 'as agreed'}. Where a utility is separately metered or prepaid, the Tenant is responsible for its ongoing cost.</p>
+
+      <h4>7. Tenant's Obligations</h4>
+      <p>The Tenant must: pay rent and utility costs on time; keep the Property clean and in good order, fair wear and tear excepted; use the Property for lawful residential purposes only; not sublet, cede, or assign this Agreement without the Landlord's prior written consent; not make alterations without written consent; and allow the Landlord reasonable access for inspection or repairs on reasonable notice.</p>
+
+      <h4>8. Landlord's Obligations</h4>
+      <p>The Landlord must: deliver the Property in a habitable condition; maintain the structure and any fixed installations (subject to fair wear and tear); and ensure the Tenant's quiet and undisturbed enjoyment of the Property, except as reasonably required for inspection, maintenance, or emergency access.</p>
+
+      <h4>9. Maintenance &amp; Repairs</h4>
+      <p>The Tenant must promptly report any defect or damage to the Landlord. Repairs arising from normal wear and tear are the Landlord's responsibility; repairs arising from the Tenant's negligence, misuse, or that of their guests are the Tenant's responsibility and may be recovered from the Tenant or the deposit.</p>
+
+      <h4>10. Damage or Destruction of the Property</h4>
+      <p>Should the Property be damaged or destroyed through no fault of the Tenant to the extent that it becomes uninhabitable, this Agreement may be terminated by either Party on written notice, with rent apportioned to the date of vacation.</p>
+
+      <h4>11. Termination &amp; Notice</h4>
+      <p>Either Party may end a month-to-month tenancy by giving the other at least 20 business days' written notice, in line with the Rental Housing Act 50 of 1999. The Landlord may cancel this Agreement with immediate effect for material breach (including non-payment of rent) that remains unremedied after 7 days' written notice to remedy.</p>
+
+      <h4>12. Breach &amp; Remedies</h4>
+      <p>Should either Party breach a material term of this Agreement and fail to remedy it within 7 days of written notice, the aggrieved Party may cancel this Agreement and claim any damages suffered, in addition to any other legal remedy available.</p>
+
+      <h4>13. Liability &amp; Indemnity</h4>
+      <p>The Tenant is responsible for their own household contents insurance. The Landlord is not liable for loss of or damage to the Tenant's possessions except where caused by the Landlord's negligence. The Tenant indemnifies the Landlord against claims arising from the Tenant's, or their guests', acts or omissions on the Property.</p>
+
+      <h4>14. Landlord's Tacit Hypothec</h4>
+      <p>In the event of unpaid rent, the Landlord retains such legal security over the Tenant's movable property on the Property as is recognised under South African common law, exercised only in accordance with the law.</p>
+
+      <h4>15. Vetting &amp; Tenant's Declaration</h4>
+      <p>The Tenant confirms that the personal, employment, and reference details provided during the vetting process are true, complete, and correct, and consents to the Landlord relying on them in entering into this Agreement. Any material misrepresentation may entitle the Landlord to cancel this Agreement.</p>
+
+      <h4>16. Notices</h4>
+      <p>Notices under this Agreement may be given by hand, WhatsApp, SMS, or email to the contact details on file, and are deemed received the next business day.</p>
+
+      <h4>17. Jurisdiction</h4>
+      <p>The Parties consent to the jurisdiction of the Magistrate's Court in respect of any dispute arising from this Agreement.</p>
+
+      <h4>18. General</h4>
+      <p>This Agreement, together with the Tenant's vetting application, records the whole agreement between the Parties. No variation is valid unless in writing and signed by both Parties. If any clause is found unenforceable, the remaining clauses continue in force. This is a simplified digital agreement intended to record the essential terms; the Parties may formalise a full hard-copy lease before or at move-in.</p>
+
+      <h4>19. Signatures</h4>
+      <p>By typing their full legal name below and clicking "Sign lease," the Tenant confirms they have read, understood, and agree to be bound by all the terms above, and that this constitutes their digital signature to this Agreement.</p>
     `;
   }
 
@@ -1928,20 +2306,25 @@
     const signedNotice = document.getElementById('signedNotice');
     document.getElementById('signError').classList.remove('show');
     document.getElementById('signName').value = '';
+    resetReadGate();
 
     if (lease.status === 'Signed') {
       signBlock.style.display = 'none';
+      document.getElementById('readProgressHint').style.display = 'none';
       signedNotice.style.display = 'block';
       signedNotice.textContent = `✓ Signed by ${lease.signatureName} on ${new Date(lease.signedAt).toLocaleDateString('en-ZA')}.`;
       if (mode !== 'landlord') renderWelcomePack(lease, listing, true);
     } else if (mode === 'landlord') {
       signBlock.style.display = 'none';
+      document.getElementById('readProgressHint').style.display = 'none';
       signedNotice.style.display = 'none';
     } else {
       signBlock.style.display = 'block';
       signedNotice.style.display = 'none';
       CURRENT_LEASE_ID = lease.id;
       CURRENT_LEASE_APPLICATION = app;
+      // Give the contract box a moment to render before checking whether it needs scrolling
+      setTimeout(checkReadProgress, 50);
     }
 
     document.getElementById('leaseOverlay').classList.add('open');
@@ -1950,6 +2333,35 @@
     document.getElementById('leaseOverlay').classList.remove('open');
   }
 
+  function resetReadGate() {
+    const box = document.getElementById('contractText');
+    const checkbox = document.getElementById('readConfirmCheckbox');
+    const label = document.getElementById('readConfirmLabel');
+    const hint = document.getElementById('readProgressHint');
+    box.scrollTop = 0;
+    checkbox.checked = false;
+    checkbox.disabled = true;
+    label.style.opacity = '0.5';
+    hint.style.display = '';
+    hint.textContent = '👇 Scroll to the bottom to read the full terms & conditions';
+    hint.classList.remove('done');
+  }
+
+  function checkReadProgress() {
+    const box = document.getElementById('contractText');
+    const checkbox = document.getElementById('readConfirmCheckbox');
+    const label = document.getElementById('readConfirmLabel');
+    const hint = document.getElementById('readProgressHint');
+    const reachedEnd = box.scrollTop + box.clientHeight >= box.scrollHeight - 12;
+    if (reachedEnd) {
+      checkbox.disabled = false;
+      label.style.opacity = '1';
+      hint.textContent = '✓ You\'ve reached the end of the lease terms';
+      hint.classList.add('done');
+    }
+  }
+  document.getElementById('contractText').addEventListener('scroll', checkReadProgress);
+
   let CURRENT_LEASE_ID = null;
   let CURRENT_LEASE_APPLICATION = null;
 
@@ -1957,6 +2369,12 @@
     const typed = document.getElementById('signName').value.trim();
     const errEl = document.getElementById('signError');
     errEl.classList.remove('show');
+
+    if (!document.getElementById('readConfirmCheckbox').checked) {
+      errEl.textContent = 'Please scroll through and confirm you\'ve read the full lease terms before signing.';
+      errEl.classList.add('show');
+      return;
+    }
 
     if (!typed) {
       errEl.textContent = 'Please type your full legal name to sign.';
@@ -2063,7 +2481,7 @@
     const resultsEl = document.getElementById('trackResults');
     resultsEl.style.display = 'block';
     resultsEl.innerHTML = matches.map(a => {
-      const statusClass = a.status === 'Approved' ? 'status-approved' : a.status === 'Declined' ? 'status-declined' : 'status-pending';
+      const statusClass = a.status === 'Approved' ? 'status-approved' : a.status === 'Rejected' ? 'status-declined' : 'status-pending';
       const lease = getLeases().find(l => l.applicationId === a.id);
       let actionBtn = '';
       if (a.status === 'Approved' && lease) {
@@ -2082,12 +2500,43 @@
           </div>
           <p class="auth-lead" style="margin:0.4rem 0 0;">
             ${a.status === 'Pending' ? 'Your application is still being reviewed by the landlord.' : ''}
-            ${a.status === 'Declined' ? 'This application was not successful this time.' : ''}
+            ${a.status === 'Rejected' ? 'This application was not successful this time.' : ''}
             ${a.status === 'Approved' && !lease ? 'Approved! Your lease is being prepared.' : ''}
           </p>
           ${actionBtn}
+          <div class="data-rights-actions">
+            <button type="button" onclick="downloadApplicationData('${a.id}')">⬇️ Download my data</button>
+            <button type="button" class="danger-btn" onclick="deleteMyApplication('${a.id}')">🗑️ Delete my application</button>
+          </div>
         </div>`;
     }).join('') + `<button type="button" class="btn-ghost-nav" style="width:100%;margin-top:0.8rem;" onclick="openTrackModal()">Search again</button>`;
+  }
+
+  function downloadApplicationData(appId) {
+    const app = getApplications().find(a => a.id === appId);
+    if (!app) return;
+    const lease = getLeases().find(l => l.applicationId === appId);
+    const payload = JSON.stringify({ application: app, lease: lease || null }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `my-application-${appId}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function deleteMyApplication(appId) {
+    const sure = confirm('This will permanently delete this application (and any related lease record) from this device. This cannot be undone. Continue?');
+    if (!sure) return;
+    const remainingApps = getApplications().filter(a => a.id !== appId);
+    saveApplications(remainingApps);
+    const remainingLeases = getLeases().filter(l => l.applicationId !== appId);
+    saveLeases(remainingLeases);
+    closeTrackModal();
+    alert('Your application data has been deleted from this device.');
   }
 
   document.getElementById('trackOverlay').addEventListener('click', function (e) {
