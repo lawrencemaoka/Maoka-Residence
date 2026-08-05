@@ -22,8 +22,35 @@
     body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
 
     .container { max-width: 900px; margin: 0 auto; }
-    header { margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem; }
+    
+    /* Navigation Bar */
+    header { 
+      margin-bottom: 2rem; 
+      border-bottom: 2px solid var(--border); 
+      padding-bottom: 1rem; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
     h1 { color: var(--primary); font-size: 1.8rem; }
+    .nav-buttons { display: flex; gap: 0.5rem; }
+    .nav-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .nav-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
 
     .card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     h2 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--text); }
@@ -54,7 +81,7 @@
     .deposit-btn:hover { background: #6b46c1; }
 
     /* Listings Section */
-    .listing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .listing-grid { display: grid; grid-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .listing-card { border: 1px solid var(--border); border-radius: 6px; padding: 1rem; background: #fff; }
     .listing-card.occupied { opacity: 0.7; background: #edf2f7; }
 
@@ -94,34 +121,73 @@
     .alert-danger.show { display: block; }
 
     .welcome-pack-section { border: 1px dashed var(--primary); border-radius: 6px; padding: 1rem; background: #ebf8ff; font-size: 0.85rem; }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>Maoka Residence</h1>
-    <p class="auth-lead">POPIA Compliant Lease Portal</p>
+    <div>
+      <h1>Maoka Residence</h1>
+      <p class="auth-lead">POPIA Compliant Property Portal</p>
+    </div>
+    <!-- Restored Navigation Buttons -->
+    <div class="nav-buttons">
+      <button class="nav-btn active" id="btnTabListings" onclick="switchTab('listings')">📋 Property Listings</button>
+      <button class="nav-btn" id="btnTabAdd" onclick="switchTab('add-listing')">➕ Create New Listing</button>
+      <button class="nav-btn" id="btnTabVetting" onclick="switchTab('vetting')">🛡️ Landlord Vetting</button>
+    </div>
   </header>
 
   <div class="popia-notice">
     🔒 <b>POPIA Compliance Notice:</b> All applicant personal information (PII) is AES-GCM encrypted in compliance with the Protection of Personal Information Act 4 of 2013. Unencrypted raw data is never exposed in storage or DOM variables.
   </div>
 
-  <!-- Listings Directory -->
-  <div class="card">
-    <h2>Property Listings Status</h2>
-    <div id="listingsContainer" class="listing-grid"></div>
+  <!-- TAB 1: Listings Directory -->
+  <div id="tabingsSection" class="tab-section active">
+    <div class="card">
+      <h2>Active Property Status</h2>
+      <div id="listingsContainer" class="listing-grid"></div>
+    </div>
   </div>
 
-  <!-- Applications Admin -->
-  <div class="card">
-    <h2>Landlord Vetting Dashboard</h2>
-    <div id="applicationsList"></div>
+  <!-- TAB 2: Create / Manage Property Form -->
+  <div id="tabAddSection" class="tab-section">
+    <div class="card">
+      <h2>List a New Property Unit</h2>
+      <form id="newListingForm" onsubmit="createNewListing(event)">
+        <div class="form-group">
+          <label for="unitTitle">Unit Title</label>
+          <input type="text" id="unitTitle" placeholder="e.g. Deluxe Private Bachelor Unit" required />
+        </div>
+        <div class="form-group">
+          <label for="unitAddress">Property Details & Features</label>
+          <input type="text" id="unitAddress" placeholder="e.g. Private Kitchen & Built-in Wardrobe" required />
+        </div>
+        <div class="form-group">
+          <label for="unitStatus">Initial Status</label>
+          <select id="unitStatus">
+            <option value="Available">Available</option>
+            <option value="Occupied">Occupied / Unavailable</option>
+          </select>
+        </div>
+        <button type="submit" style="padding:0.6rem 1.2rem;">Publish Property Listing</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 3: Applications Admin -->
+  <div id="tabVettingSection" class="tab-section">
+    <div class="card">
+      <h2>Landlord Vetting Dashboard</h2>
+      <div id="applicationsList"></div>
+    </div>
   </div>
 </div>
 
-<!-- Lease Contract & Signature Modal -->
+<!-- Lease Contract Modal -->
 <div class="modal-overlay" id="leaseOverlay">
   <div class="modal-body">
     <div class="modal-header">
@@ -160,7 +226,29 @@
 </div>
 
 <script>
-  /* ================= Web Crypto API AES-GCM Encryption Engine ================= */
+  /* Navigation Switching */
+  function switchTab(tabName) {
+    document.getElementById('tabingsSection').classList.remove('active');
+    document.getElementById('tabAddSection').classList.remove('active');
+    document.getElementById('tabVettingSection').classList.remove('active');
+
+    document.getElementById('btnTabListings').classList.remove('active');
+    document.getElementById('btnTabAdd').classList.remove('active');
+    document.getElementById('btnTabVetting').classList.remove('active');
+
+    if (tabName === 'listings') {
+      document.getElementById('tabingsSection').classList.add('active');
+      document.getElementById('btnTabListings').classList.add('active');
+    } else if (tabName === 'add-listing') {
+      document.getElementById('tabAddSection').classList.add('active');
+      document.getElementById('btnTabAdd').classList.add('active');
+    } else if (tabName === 'vetting') {
+      document.getElementById('tabVettingSection').classList.add('active');
+      document.getElementById('btnTabVetting').classList.add('active');
+    }
+  }
+
+  /* Web Crypto API AES-GCM Engine */
   const SYSTEM_KEY_SEED = "MaokaResidence-POPIA-SecretKey-2026";
   let cryptoKeyCache = null;
 
@@ -215,16 +303,15 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  /* ================= Application Setup & Storage Initialization ================= */
+  /* Initialization & Storage */
   (async function initPortal() {
-    // Single consolidated listing (Removed 2800 & 3200 entries to prevent confusion)
     if (!localStorage.getItem('maoka_listings')) {
       localStorage.setItem('maoka_listings', JSON.stringify([{
         id: 'LST-BACHELOR-01',
         ownerUsername: 'landlord_admin',
         title: 'Private Bachelor Unit',
         address: 'Main Residence - Private Kitchen & Built-in Wardrobe',
-        status: 'Available' // 'Available' or 'Occupied'
+        status: 'Available'
       }]));
     }
 
@@ -232,7 +319,6 @@
       localStorage.setItem('maoka_session', JSON.stringify({ username: 'landlord_admin' }));
     }
 
-    // Seed initial encrypted applicant data for POPIA compliance proof
     if (!localStorage.getItem('maoka_applications')) {
       const encId = await encryptData("9201015000087");
       const encIncome = await encryptData("18000");
@@ -281,11 +367,16 @@
     return idStr.length > 6 ? idStr.slice(0, 3) + '•••••' + idStr.slice(-3) : '••••••';
   }
 
-  /* ================= Listing Rendering ================= */
+  /* Rendering Listings */
   function renderListings() {
     const container = document.getElementById('listingsContainer');
     const listings = getListings();
     
+    if(!listings.length) {
+      container.innerHTML = `<p class="auth-lead">No properties listed yet. Click 'Create New Listing' to add one.</p>`;
+      return;
+    }
+
     container.innerHTML = listings.map(l => `
       <div class="listing-card ${l.status === 'Occupied' ? 'occupied' : ''}">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
@@ -293,11 +384,57 @@
           <span class="status-pill ${l.status === 'Available' ? 'status-approved' : 'status-declined'}">${l.status}</span>
         </div>
         <p style="font-size:0.82rem; color:var(--text-muted);">${l.address}</p>
+        <div style="margin-top:0.8rem; display:flex; gap:0.5rem;">
+          <button type="button" style="font-size:0.75rem; padding:0.3rem 0.6rem;" onclick="toggleListingStatus('${l.id}')">Toggle Availability</button>
+          <button type="button" class="decline-btn" style="font-size:0.75rem; padding:0.3rem 0.6rem;" onclick="deleteListing('${l.id}')">Remove</button>
+        </div>
       </div>
     `).join('');
   }
 
-  /* ================= Application Vetting & POPIA Decryption ================= */
+  /* Property Listing Actions */
+  function createNewListing(event) {
+    event.preventDefault();
+    const title = document.getElementById('unitTitle').value.trim();
+    const address = document.getElementById('unitAddress').value.trim();
+    const status = document.getElementById('unitStatus').value;
+
+    const listings = getListings();
+    listings.push({
+      id: 'LST-' + Date.now(),
+      ownerUsername: 'landlord_admin',
+      title: title,
+      address: address,
+      status: status
+    });
+
+    saveListings(listings);
+    renderListings();
+    document.getElementById('newListingForm').reset();
+    switchTab('listings');
+    alert('New property listing created successfully!');
+  }
+
+  function toggleListingStatus(id) {
+    const listings = getListings();
+    const listing = listings.find(l => l.id === id);
+    if (listing) {
+      listing.status = listing.status === 'Available' ? 'Occupied' : 'Available';
+      saveListings(listings);
+      renderListings();
+    }
+  }
+
+  function deleteListing(id) {
+    if (confirm('Are you sure you want to remove this property listing?')) {
+      let listings = getListings();
+      listings = listings.filter(l => l.id !== id);
+      saveListings(listings);
+      renderListings();
+    }
+  }
+
+  /* Vetting List Decryption */
   async function renderApplicationsList() {
     const session = getSession();
     const listEl = document.getElementById('applicationsList');
@@ -325,7 +462,6 @@
       const submitted = isNaN(d) ? '' : d.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' });
       const lease = getLeases().find(l => l.applicationId === a.id);
       
-      // WhatsApp notification link for Landlord to send to Tenant
       let whatsappShareBtn = '';
       if (a.status === 'Approved' || a.status === 'Lease Active & Secured') {
         const cleanPhone = (rawPhone || '').replace(/\D/g, '');
@@ -392,7 +528,7 @@
     }
   }
 
-  /* ================= State & Deposit Logic ================= */
+  /* State & Deposit Logic */
   async function setApplicationStatus(appId, status) {
     const apps = getApplications();
     const app = apps.find(a => a.id === appId);
@@ -415,7 +551,6 @@
     app.status = 'Lease Active & Secured';
     saveApplications(apps);
 
-    // Update Property Listing to Occupied / Unavailable
     const listings = getListings();
     const listing = listings.find(l => l.id === app.listingId);
     if (listing) {
@@ -428,7 +563,7 @@
     alert('Deposit logged! Property listing has now been moved from Available to Occupied.');
   }
 
-  /* ================= Lease Generation & Digital Signatures ================= */
+  /* Lease Generation & Digital Signatures */
   const LEASES_KEY = 'maoka_leases';
 
   function getLeases() { try { return JSON.parse(localStorage.getItem(LEASES_KEY)) || []; } catch (e) { return []; } }
@@ -591,7 +726,6 @@
     await renderApplicationsList();
   }
 
-  /* ================= Check Deep Links / Hash Navigation ================= */
   window.addEventListener('load', () => {
     if (window.location.hash.startsWith('#lease-')) {
       const appId = window.location.hash.replace('#lease-', '');
