@@ -4,489 +4,271 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Maoka Residence · Smart Residential Portal</title>
-    <meta name="theme-color" content="#031B18">
-    <meta name="description" content="Maoka Residence smart residential app - browse listings, apply, report faults and give notice.">
+    <meta name="theme-color" content="#10233F">
+    <meta name="description" content="Maoka Residence — verified room, bachelor and unit listings at 7207 Isazi Street, Olievenhoutbosch Ext 36.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #70B200;
-            --primary-hover: #5a8f00;
-            --dark-bg: #031B18;
-            --light-bg: #f4f6f8;
-            --text-dark: #222222;
-            --text-muted: #666666;
-            --danger: #d9534f;
-            --card-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            --navy: #10233F;
+            --navy-2: #16324F;
+            --accent: #1F8A70;
+            --accent-dark: #166B57;
+            --bg: #F6F7F5;
+            --card: #FFFFFF;
+            --ink: #12202B;
+            --muted: #5B6B73;
+            --line: #E3E7E5;
+            --danger: #C64444;
+            --shadow: 0 12px 28px rgba(16,35,63,0.10), 0 2px 6px rgba(16,35,63,0.06);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         body {
-            background-color: var(--light-bg);
-            color: var(--text-dark);
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
             line-height: 1.6;
         }
+        .serif { font-family: 'Fraunces', Georgia, serif; }
+        .hidden { display: none !important; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-        header {
-            background-color: #ffffff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            flex-wrap: wrap;
-            gap: 0.75rem;
+        /* ---------------- topbar ---------------- */
+        .topbar { background: var(--navy); position: sticky; top: 0; z-index: 100; }
+        .topbar-inner {
+            max-width: 1200px; margin: 0 auto; padding: 0 5%;
+            height: 66px; display: flex; align-items: center; gap: 28px;
         }
-
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--dark-bg);
-            cursor: pointer;
+        .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-right: auto; }
+        .brand-mark {
+            width: 34px; height: 34px; border-radius: 9px; background: var(--accent);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-family: 'Fraunces', serif; font-weight: 700; font-size: 18px; flex-shrink: 0;
         }
-
-        .logo span {
-            color: var(--primary);
+        .brand-word { color: #fff; font-weight: 600; font-size: 16px; letter-spacing: 0.01em; }
+        .brand-word i { font-style: normal; color: #9FD8C8; font-weight: 400; margin-left: 4px; }
+        .topnav { display: flex; gap: 22px; }
+        .topnav a {
+            color: #C6D2DD; text-decoration: none; font-size: 14px; font-weight: 500;
+            cursor: pointer; padding: 22px 0; border-bottom: 2px solid transparent;
+            transition: color .18s ease, border-color .18s ease;
         }
+        .topnav a:hover, .topnav a.on { color: #fff; border-color: var(--accent); }
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+        .whoami { font-size: 12.5px; color: #C6D2DD; white-space: nowrap; }
+        @media (max-width: 760px) { .topnav { display: none; } }
 
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 1.6rem;
-            flex-wrap: wrap;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        nav a:hover {
-            color: var(--primary);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .whoami {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-        }
-
+        /* ---------------- buttons ---------------- */
         .btn {
-            padding: 0.6rem 1.4rem;
-            border-radius: 25px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
+            border: none; border-radius: 10px; padding: 11px 20px; font-weight: 600;
+            font-size: 14px; cursor: pointer; font-family: inherit; transition: filter .15s ease, transform .1s ease;
         }
+        .btn:active { transform: scale(.98); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { filter: brightness(1.06); }
+        .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35); }
+        .btn-ghost:hover { border-color: #fff; }
+        .btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+        .btn-outline:hover { background: rgba(31,138,112,0.08); }
+        .btn-small { padding: 8px 14px; font-size: 13px; }
+        .btn-block { width: 100%; }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: #ffffff;
+        /* ---------------- hero + search ---------------- */
+        .hero { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 3.2rem 5% 5.5rem; }
+        .hero-inner { max-width: 1200px; margin: 0 auto; }
+        .eyebrow { font-size: 12.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #9FD8C8; font-weight: 600; margin-bottom: 12px; }
+        .hero h1 { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(28px, 4.5vw, 44px); line-height: 1.12; max-width: 620px; }
+        .hero-sub { color: #C6D2DD; margin-top: 12px; max-width: 480px; font-size: 15.5px; }
+
+        .search-bar {
+            max-width: 1080px; margin: -2.6rem auto 0; background: var(--card);
+            border-radius: 16px; box-shadow: var(--shadow); padding: 14px;
+            display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 5;
         }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
+        .search-bar input, .search-bar select {
+            border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px;
+            font-size: 14px; font-family: inherit; background: #fff; color: var(--ink);
         }
+        .search-bar input[type="text"] { flex: 2 1 220px; }
+        .search-bar select { flex: 1 1 130px; }
+        .search-bar .btn { flex: 0 0 auto; }
 
-        .btn-outline {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            background: transparent;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 3rem 0 1.4rem; }
+        .section-head h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; }
+        .count-pill { font-size: 13px; color: var(--muted); }
 
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: #ffffff;
-        }
-
-        .btn-small {
-            padding: 0.4rem 1rem;
-            font-size: 0.8rem;
-        }
-
-        .hero {
-            background: linear-gradient(135deg, var(--dark-bg) 60%, #083c35 100%);
-            color: #ffffff;
-            padding: 3.5rem 5%;
-            border-bottom-left-radius: 25px;
-            border-bottom-right-radius: 25px;
-        }
-
-        .hero-content {
-            max-width: 650px;
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.8rem;
-            line-height: 1.2;
-        }
-
-        .hero p {
-            opacity: 0.9;
-            margin-bottom: 1.4rem;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .view-section {
-            display: none;
-        }
-
-        .active-view {
-            display: block !important;
-        }
-
-        .section-narrow {
-            max-width: 640px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .listings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 1.5rem;
-        }
-
-        .filters {
-            display: flex;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-            margin-top: 1.2rem;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1.1rem;
-            border-radius: 20px;
-            border: 1.5px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .filter-btn.on {
-            background: var(--primary);
-            color: #fff;
-        }
-
+        /* ---------------- listings grid / cards ---------------- */
+        .listings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.6rem; padding-bottom: 3rem; }
         .card {
-            background: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            flex-direction: column;
+            background: var(--card); border-radius: 16px; overflow: hidden;
+            box-shadow: var(--shadow); display: flex; flex-direction: column;
+            transition: transform .18s ease, box-shadow .18s ease;
         }
-
-        .card-img {
-            height: 180px;
-            background-color: #eee;
-            background-size: cover;
-            background-position: center;
+        .card:hover { transform: translateY(-3px); }
+        .card-media { position: relative; height: 190px; background: #E9EDEC; }
+        .card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .card-media .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: var(--muted); background: linear-gradient(135deg,#EAEFEC,#E1E7E3); }
+        .fav-btn {
+            position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(16,35,63,0.55); backdrop-filter: blur(2px); border: none; color: #fff;
+            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-
-        .card-img.ph {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.4rem;
+        .fav-btn.on { background: var(--danger); }
+        .type-tag {
+            position: absolute; top: 10px; left: 10px; background: rgba(16,35,63,0.78); color: #fff;
+            font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 5px 10px; border-radius: 999px;
         }
+        .card-body { padding: 1.15rem 1.25rem 1.3rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-price { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; color: var(--navy); }
+        .card-price span { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; color: var(--muted); }
+        .card-title { font-size: 14.5px; color: var(--ink); margin: 4px 0 2px; }
+        .card-title b { font-weight: 600; }
+        .card-loc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+        .card-meta { display: flex; gap: 14px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; margin-top: auto; }
+        .card-meta span { display: flex; align-items: center; gap: 5px; }
+        .card .btn { margin-top: 12px; }
 
-        .card-body {
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+        /* ---------------- generic panels / forms ---------------- */
+        .view-section { display: none; }
+        .active-view { display: block !important; }
+        .section-narrow { max-width: 640px; margin: 2.6rem auto; padding: 0 1.2rem; }
+        .panel {
+            background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+            padding: 1.8rem; margin-bottom: 1.6rem; box-shadow: var(--shadow);
         }
+        .panel h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin-bottom: 6px; }
+        .hint { color: var(--muted); font-size: 13.5px; }
 
-        .card-body h3 {
-            margin-bottom: 0.2rem;
-        }
-
-        .card-tag {
-            display: inline-block;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--primary);
-            margin-bottom: 0.3rem;
-        }
-
-        .card-price {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 0.5rem 0;
-        }
-
-        .card-meta {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            margin-bottom: 0.9rem;
-        }
-
-        .dashboard-panel {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--ink); }
         .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.7rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 0.95rem;
+            width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+            font-size: 14.5px; font-family: inherit; background: #fff;
         }
-
-        .error-message {
-            color: var(--danger);
-            font-size: 0.78rem;
-            margin-top: 0.3rem;
-            display: none;
-        }
-
-        .input-error {
-            border-color: var(--danger) !important;
-        }
-
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+        .error-message { color: var(--danger); font-size: 12.5px; margin-top: 4px; display: none; }
+        .input-error { border-color: var(--danger) !important; }
         .form-error {
-            background: #fdeceb;
-            color: var(--danger);
-            border: 1px solid #f3c8c5;
-            padding: 0.7rem 1rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            display: none;
+            background: #FBEAEA; color: var(--danger); border: 1px solid #F0C6C6;
+            padding: 0.7rem 1rem; border-radius: 10px; font-size: 13.5px; margin-bottom: 1rem; display: none;
         }
+        .popia-box { background: #EEF6F3; border: 1px solid #CFE6DD; padding: 0.8rem 1rem; border-radius: 10px; font-size: 12.5px; color: #1E5744; margin-bottom: 1rem; }
+        .popia-checkbox-group { display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 0.8rem; }
+        .popia-checkbox-group input { width: auto; margin-top: 2px; }
+        .upload-section { background: #F7FAF9; border: 2px dashed #B9DED2; padding: 1.1rem; border-radius: 12px; margin: 0.6rem 0 1rem; }
+        .upload-section h4 { font-size: 13.5px; color: var(--navy); margin-bottom: 6px; }
 
-        .popia-box {
-            background: #eef7e5;
-            border: 1px solid #d0e6b3;
-            padding: 0.8rem 1rem;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            color: #2b4700;
-            margin-bottom: 1rem;
-        }
+        .gate-box { text-align: center; padding: 2.6rem 1.5rem; }
+        .gate-box .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
 
-        .popia-checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            margin-top: 0.8rem;
-        }
+        .step-dot { flex: 1; height: 5px; border-radius: 99px; background: var(--line); transition: background .25s ease; }
+        .step-dot.on { background: var(--accent); }
+        .apply-step { display: none; }
+        .apply-step.on { display: block; }
 
-        .popia-checkbox-group input {
-            width: auto;
-            margin-top: 0.2rem;
-        }
-
-        .upload-section {
-            background-color: #f9fbf7;
-            border: 2px dashed #b8db90;
-            padding: 1.2rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .upload-section h4 {
-            font-size: 0.95rem;
-            color: var(--dark-bg);
-            margin-bottom: 0.5rem;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 480px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.2rem;
-        }
-
-        .modal-tab {
-            flex: 1;
-            padding: 0.6rem;
-            border-radius: 8px;
-            border: 1.5px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .modal-tab.on {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .announcement-box {
-            background: #eef7e5;
-            border-left: 4px solid var(--primary);
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-
-        .done-box {
-            text-align: center;
-            padding: 2rem 1rem;
-        }
-
+        .done-box { text-align: center; padding: 2rem 1rem; }
         .done-box .tick {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin: 0 auto 1rem;
+            width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #fff;
+            display: flex; align-items: center; justify-content: center; font-size: 1.7rem; margin: 0 auto 1rem;
         }
-
         .ref-pill {
-            display: inline-block;
-            margin: 0.8rem 0;
-            background: var(--light-bg);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            border-radius: 8px;
-            padding: 0.5rem 1.2rem;
-            font-weight: 700;
+            display: inline-block; margin: 0.7rem 0; background: var(--bg); border: 1px solid var(--accent);
+            color: var(--accent-dark); border-radius: 10px; padding: 0.5rem 1.1rem; font-weight: 700; font-size: 13.5px;
         }
 
-        .hint {
-            color: var(--text-muted);
-            font-size: 0.85rem;
+        .list-row {
+            display: flex; justify-content: space-between; gap: 14px; padding: 12px 0;
+            border-bottom: 1px solid var(--line); font-size: 13.5px;
         }
+        .list-row:last-child { border-bottom: none; }
+        .list-row .lr-main b { display: block; font-size: 14.5px; margin-bottom: 2px; }
+        .list-row .lr-main span { color: var(--muted); }
+        .list-row .lr-tag {
+            align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 4px 9px; border-radius: 999px; background: #EEF6F3; color: var(--accent-dark); white-space: nowrap;
+        }
+        .list-row .lr-tag.urgent { background: #FBEAEA; color: var(--danger); }
 
-        footer {
-            text-align: center;
-            padding: 2rem 1rem;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
+        /* ---------------- announcement ---------------- */
+        .announcement-box { background: #EEF6F3; border-left: 4px solid var(--accent); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; }
 
-        .hidden {
-            display: none !important;
-        }
+        /* ---------------- modal ---------------- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(16,35,63,0.55); justify-content: center; align-items: center; z-index: 200; padding: 1rem; }
+        .modal-content { background: var(--card); padding: 2rem; border-radius: 16px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; }
+        .modal-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; }
+        .modal-tab { flex: 1; padding: 0.6rem; border-radius: 10px; border: 1.5px solid var(--accent); background: transparent; color: var(--accent-dark); font-weight: 700; font-size: 13.5px; cursor: pointer; }
+        .modal-tab.on { background: var(--accent); color: #fff; }
+
+        footer { text-align: center; padding: 2.4rem 1rem; color: var(--muted); font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <!-- Main Navigation Header -->
-    <header>
-        <div class="logo" onclick="switchView('public')">Maoka<span>Residence</span></div>
-        <nav>
-            <ul>
-                <li><a onclick="switchView('public')">Smart Listings</a></li>
-                <li><a onclick="switchView('apply')">Apply</a></li>
-                <li><a onclick="switchView('fault')">Report a Fault</a></li>
-                <li><a onclick="switchView('notice')">Give Notice</a></li>
-                <li><a onclick="switchView('landlord')">Landlord Console</a></li>
-            </ul>
-        </nav>
-        <div class="header-actions">
-            <span class="whoami hidden" id="whoami"></span>
-            <button class="btn btn-outline btn-small hidden" id="signout-btn" onclick="logoutUser()">Sign Out</button>
-            <button class="btn btn-primary" id="auth-btn" onclick="openAuthModal('login')">Sign In / Register</button>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand" onclick="switchView('public')">
+                <span class="brand-mark">M</span>
+                <span class="brand-word">Maoka<i>Residence</i></span>
+            </div>
+            <nav class="topnav">
+                <a onclick="switchView('public')">Listings</a>
+                <a onclick="switchView('apply')">Apply</a>
+                <a onclick="switchView('track')">Track Application</a>
+                <a onclick="openTenantPortal()">Tenant Portal</a>
+                <a onclick="switchView('landlord')">Landlord Console</a>
+            </nav>
+            <div class="topbar-actions">
+                <span class="whoami hidden" id="whoami"></span>
+                <button class="btn btn-ghost btn-small hidden" id="signout-btn" onclick="logoutUser()">Sign Out</button>
+                <button class="btn btn-primary btn-small" id="auth-btn" onclick="openAuthModal('login')">Sign In</button>
+            </div>
         </div>
     </header>
 
-    <!-- SECTION 1: PUBLIC SMART LISTINGS -->
+    <!-- SECTION 1: PUBLIC LISTINGS -->
     <div id="public-view" class="view-section active-view">
         <section class="hero">
-            <div class="hero-content">
-                <h1>Find your home at Maoka Residence</h1>
-                <p>7207 Isazi Street, Olievenhoutbosch Ext 36 — rooms, bachelors and units, listed by verified landlords.</p>
-                <button class="btn btn-primary" onclick="switchView('apply')">Apply for a Room</button>
+            <div class="hero-inner">
+                <p class="eyebrow" id="todayStamp"></p>
+                <h1>Find your next room at Maoka Residence</h1>
+                <p class="hero-sub">7207 Isazi Street, Olievenhoutbosch Ext 36 — listings published straight from the landlord, no agents in between.</p>
             </div>
         </section>
 
-        <div class="container">
-            <div id="announcements-container"></div>
+        <div class="search-bar">
+            <input type="text" id="fSearch" placeholder="Search by location…" oninput="applyFilters()">
+            <select id="fType" onchange="applyFilters()">
+                <option value="">Any type</option>
+                <option>Room</option><option>Bachelor</option><option>Townhouse</option><option>House</option>
+            </select>
+            <select id="fMin" onchange="applyFilters()">
+                <option value="">Min price</option>
+                <option value="0">R0</option><option value="2000">R2,000</option><option value="4000">R4,000</option><option value="6000">R6,000</option><option value="8000">R8,000</option>
+            </select>
+            <select id="fMax" onchange="applyFilters()">
+                <option value="">Max price</option>
+                <option value="4000">R4,000</option><option value="6000">R6,000</option><option value="8000">R8,000</option><option value="12000">R12,000</option><option value="999999">Any</option>
+            </select>
+            <select id="fBeds" onchange="applyFilters()">
+                <option value="">Bedrooms</option>
+                <option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
+            </select>
+            <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+        </div>
 
-            <h2>Available Smart Listings</h2>
-            <div class="filters" id="propFilters">
-                <button class="filter-btn on" data-type="" onclick="setPropertyFilter('')">All</button>
-                <button class="filter-btn" data-type="Room" onclick="setPropertyFilter('Room')">Room</button>
-                <button class="filter-btn" data-type="Bachelor" onclick="setPropertyFilter('Bachelor')">Bachelor</button>
-                <button class="filter-btn" data-type="Townhouse" onclick="setPropertyFilter('Townhouse')">Townhouse</button>
-                <button class="filter-btn" data-type="House" onclick="setPropertyFilter('House')">House</button>
+        <div class="container">
+            <div id="announcements-container" style="margin-top:2.4rem"></div>
+
+            <div class="section-head">
+                <h2>Available Listings</h2>
+                <span class="count-pill" id="listingsCount"></span>
             </div>
             <div id="listings-container" class="listings-grid">
                 <p class="hint">Loading active listings…</p>
@@ -496,274 +278,311 @@
 
     <!-- SECTION 2: ACCOMMODATION APPLICATION -->
     <div id="apply-view" class="container view-section">
-        <div class="dashboard-panel" style="max-width:640px;margin:0 auto">
+        <div class="panel section-narrow" style="margin:2.6rem auto">
             <h2>Apply for Accommodation</h2>
-            <p class="hint" style="margin-bottom:1rem">Not a tenant yet? Tell us a bit about yourself and we'll get back to you.</p>
+            <p class="hint" id="apply-property-hint" style="margin-bottom:0.8rem">Tell us a bit about yourself — this takes about five minutes.</p>
+
+            <div style="display:flex;gap:6px;margin-bottom:1.4rem" id="apply-progress">
+                <span class="step-dot on" data-step="1"></span>
+                <span class="step-dot" data-step="2"></span>
+                <span class="step-dot" data-step="3"></span>
+                <span class="step-dot" data-step="4"></span>
+            </div>
+
             <div class="form-error" id="apply-error"></div>
+            <input type="hidden" id="ap-property-ref" value="">
+            <input type="hidden" id="ap-property-title" value="">
+            <input type="hidden" id="ap-property-rent" value="">
+
             <form id="applyForm" onsubmit="submitApplication(event)">
-                <div class="form-grid">
+                <!-- STEP 1: who you are -->
+                <div class="apply-step on" id="apply-step-1">
+                    <p class="hint" style="margin-bottom:1rem"><b>Step 1 of 4</b> — Your details</p>
                     <div class="form-group">
-                        <label for="ap-name">Full Name</label>
-                        <input type="text" id="ap-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ap-phone">Phone Number</label>
-                        <input type="text" id="ap-phone" placeholder="0730001234" required onblur="validateInputPhone('ap-phone','ap-phone-err')">
-                        <span id="ap-phone-err" class="error-message">Enter a valid SA phone number.</span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="ap-location">Preferred Location</label>
-                    <select id="ap-location" required>
-                        <option value="">Select a location</option>
-                        <option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option>
-                    </select>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="ap-movein">Preferred Move-in Date</label>
-                        <input type="date" id="ap-movein" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ap-employment">Employment Status</label>
-                        <select id="ap-employment" required>
-                            <option>Employed</option>
-                            <option>Self-Employed</option>
-                            <option>Student</option>
-                            <option>Unemployed</option>
+                        <label for="ap-property-select">Which listing are you applying for?</label>
+                        <select id="ap-property-select" onchange="onApplyPropertyChange()" required>
+                            <option value="">Select a listing</option>
                         </select>
                     </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="ap-name">Full Name</label><input type="text" id="ap-name" required></div>
+                        <div class="form-group">
+                            <label for="ap-phone">Phone Number</label>
+                            <input type="text" id="ap-phone" placeholder="0730001234" required onblur="validateInputPhone('ap-phone','ap-phone-err')">
+                            <span id="ap-phone-err" class="error-message">Enter a valid SA phone number.</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ap-email">Email Address</label>
+                        <input type="email" id="ap-email" placeholder="you@example.com" required onblur="validateInputEmail('ap-email','ap-email-err')">
+                        <span id="ap-email-err" class="error-message">Enter a valid email address.</span>
+                        <p class="hint" style="margin-top:5px">We'll email you at every stage — under review, approved, contract, and your Welcome Pack.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" onclick="applyGoStep(2)">Continue</button>
                 </div>
-                <div class="form-group">
-                    <label for="ap-employer">Employer (optional)</label>
-                    <input type="text" id="ap-employer">
+
+                <!-- STEP 2: employment & income -->
+                <div class="apply-step" id="apply-step-2">
+                    <p class="hint" style="margin-bottom:1rem"><b>Step 2 of 4</b> — Income & move-in</p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ap-employment">Employment Status</label>
+                            <select id="ap-employment" onchange="updateCriteriaHint()" required>
+                                <option>Employed</option><option>Self-Employed</option><option>Student</option><option>Unemployed</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label for="ap-employer">Employer (optional)</label><input type="text" id="ap-employer"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ap-income">Gross Monthly Income (ZAR)</label>
+                            <input type="number" id="ap-income" min="0" oninput="updateCriteriaHint()" required>
+                        </div>
+                        <div class="form-group"><label for="ap-movein">Preferred Move-in Date</label><input type="date" id="ap-movein" required></div>
+                    </div>
+                    <p class="hint" id="criteria-hint" style="margin-bottom:1rem"></p>
+                    <div class="form-group"><label for="ap-notes">Anything else we should know?</label><textarea id="ap-notes" rows="2"></textarea></div>
+                    <div style="display:flex;gap:10px">
+                        <button type="button" class="btn btn-outline" onclick="applyGoStep(1)">Back</button>
+                        <button type="button" class="btn btn-primary btn-block" onclick="applyGoStep(3)">Continue</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="ap-notes">Anything else we should know?</label>
-                    <textarea id="ap-notes" rows="3"></textarea>
+
+                <!-- STEP 3: documents -->
+                <div class="apply-step" id="apply-step-3">
+                    <p class="hint" style="margin-bottom:1rem"><b>Step 3 of 4</b> — Vetting documents</p>
+                    <div class="upload-section">
+                        <h4>ID or Passport Copy *</h4>
+                        <input type="file" id="ap-doc-id" accept="image/*,application/pdf" onchange="handleDocSelection(event,'idDocument')">
+                        <p class="hint" id="ap-doc-id-status" style="margin-top:6px">Not uploaded yet.</p>
+                    </div>
+                    <div class="upload-section">
+                        <h4>Latest Payslip</h4>
+                        <input type="file" id="ap-doc-payslip" accept="image/*,application/pdf" onchange="handleDocSelection(event,'payslipDocument')">
+                        <p class="hint" id="ap-doc-payslip-status" style="margin-top:6px">Not uploaded yet.</p>
+                    </div>
+                    <div class="upload-section">
+                        <h4>Bank Statement (last 3 months)</h4>
+                        <input type="file" id="ap-doc-bank" accept="image/*,application/pdf" onchange="handleDocSelection(event,'bankStatementDocument')">
+                        <p class="hint" id="ap-doc-bank-status" style="margin-top:6px">Not uploaded yet.</p>
+                    </div>
+                    <p class="hint" style="margin-bottom:1rem">Upload at least your ID and one proof of income (payslip or bank statement) to pass automatic vetting — the landlord makes the final call either way.</p>
+                    <div style="display:flex;gap:10px">
+                        <button type="button" class="btn btn-outline" onclick="applyGoStep(2)">Back</button>
+                        <button type="button" class="btn btn-primary btn-block" onclick="applyGoStep(4)">Continue</button>
+                    </div>
                 </div>
-                <div class="popia-box">We collect this information for tenant vetting purposes only, in compliance with POPIA.</div>
-                <button type="submit" class="btn btn-primary" id="apply-submit-btn" style="width:100%">Submit Application</button>
+
+                <!-- STEP 4: review & submit -->
+                <div class="apply-step" id="apply-step-4">
+                    <p class="hint" style="margin-bottom:1rem"><b>Step 4 of 4</b> — Review & submit</p>
+                    <div id="apply-review" style="font-size:13.5px;line-height:1.8;background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:1rem"></div>
+                    <div class="popia-box">We collect this information, including your documents, for tenant vetting purposes only, in compliance with POPIA.</div>
+                    <label class="popia-checkbox-group">
+                        <input type="checkbox" id="ap-popia" required>
+                        <span>I consent to the collection and processing of my personal data and documents for vetting, in compliance with POPIA.</span>
+                    </label>
+                    <div style="display:flex;gap:10px;margin-top:1rem">
+                        <button type="button" class="btn btn-outline" onclick="applyGoStep(3)">Back</button>
+                        <button type="submit" class="btn btn-primary btn-block" id="apply-submit-btn">Submit Application</button>
+                    </div>
+                </div>
             </form>
+
             <div class="done-box hidden" id="apply-done">
                 <div class="tick">✓</div>
-                <h3>Application received</h3>
-                <p class="hint">We'll be in touch on the number you provided.</p>
+                <h3 class="serif">Application received</h3>
+                <p class="hint">We're reviewing it now — you'll get an email as things progress.</p>
                 <div class="ref-pill" id="apply-ref"></div>
+                <p class="hint" style="margin-top:10px">Keep your reference and email handy — you'll use both on the <a href="#" onclick="event.preventDefault(); switchView('track')" style="color:var(--accent-dark)">Track Application</a> page.</p>
             </div>
         </div>
     </div>
 
-    <!-- SECTION 3: REPORT A FAULT -->
-    <div id="fault-view" class="container view-section">
-        <div class="dashboard-panel" style="max-width:640px;margin:0 auto">
-            <h2>Report a Maintenance Fault</h2>
-            <p class="hint" style="margin-bottom:1rem">Plumbing, electrical, or anything that needs attention — let us know.</p>
-            <form id="faultForm" onsubmit="submitFault(event)">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="flt-name">Full Name</label>
-                        <input type="text" id="flt-name" required>
+    <!-- SECTION 2b: TRACK APPLICATION (vetting status -> contract -> payment -> welcome pack) -->
+    <div id="track-view" class="container view-section">
+        <div class="panel section-narrow" id="track-lookup" style="margin:2.6rem auto">
+            <h2>Track Your Application</h2>
+            <p class="hint" style="margin-bottom:1.1rem">Enter your reference number and the email you applied with.</p>
+            <div class="form-error" id="track-error"></div>
+            <div class="form-group"><label for="tk-ref">Application Reference</label><input type="text" id="tk-ref" placeholder="APP-20260809-1234" required></div>
+            <div class="form-group"><label for="tk-email">Email Address</label><input type="email" id="tk-email" required></div>
+            <button class="btn btn-primary btn-block" onclick="lookupApplication()">Check Status</button>
+        </div>
+
+        <div class="panel section-narrow hidden" id="track-result" style="margin:2.6rem auto"></div>
+    </div>
+
+    <div id="tenant-view" class="container view-section">
+        <div class="panel section-narrow gate-box" id="tenant-locked" style="margin:2.6rem auto">
+            <div class="icon">🔑</div>
+            <h2>Tenant Portal</h2>
+            <p class="hint" style="margin:0.6rem 0 1.2rem">Sign in as a Tenant to report a fault or give notice to vacate.</p>
+            <button class="btn btn-primary" onclick="openAuthModal('login','Tenant')">Sign In as Tenant</button>
+        </div>
+
+        <div id="tenant-unlocked" class="hidden">
+            <div class="panel section-narrow" style="margin:2.6rem auto 1.6rem">
+                <h2>Report a Maintenance Fault</h2>
+                <p class="hint" style="margin-bottom:1.1rem">Plumbing, electrical, or anything that needs attention — let us know.</p>
+                <form id="faultForm" onsubmit="submitFault(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label for="flt-name">Full Name</label><input type="text" id="flt-name" required></div>
+                        <div class="form-group">
+                            <label for="flt-location">Location</label>
+                            <select id="flt-location" required><option value="">Select</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="flt-location">Location</label>
-                        <select id="flt-location" required>
-                            <option value="">Select</option>
-                            <option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option>
-                        </select>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="flt-room">Room Number</label><input type="text" id="flt-room" required></div>
+                        <div class="form-group">
+                            <label for="flt-phone">Phone Number</label>
+                            <input type="text" id="flt-phone" placeholder="0730001234" required onblur="validateInputPhone('flt-phone','flt-phone-err')">
+                            <span id="flt-phone-err" class="error-message">Enter a valid SA phone number.</span>
+                        </div>
                     </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="flt-category">Category</label>
+                            <select id="flt-category"><option>Plumbing</option><option>Electrical</option><option>Appliance</option><option>Structural</option><option>Other</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="flt-urgency">Urgency</label>
+                            <select id="flt-urgency"><option>Low</option><option selected>Medium</option><option>High — urgent</option></select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label for="flt-desc">Description</label><textarea id="flt-desc" rows="3" required></textarea></div>
+                    <div class="upload-section">
+                        <h4>Photo (optional)</h4>
+                        <input type="file" id="flt-photo" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="flt-submit-btn">Submit Fault Report</button>
+                </form>
+                <div class="done-box hidden" id="fault-done">
+                    <div class="tick">✓</div>
+                    <h3 class="serif">Fault report submitted</h3>
+                    <div class="ref-pill" id="fault-ref"></div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="flt-room">Room Number</label>
-                        <input type="text" id="flt-room" required>
+            </div>
+
+            <div class="panel section-narrow" style="margin:0 auto 2.6rem">
+                <h2>Submit Notice to Vacate</h2>
+                <p class="hint" style="margin-bottom:1.1rem">Planning to move out? Submit your calendar month's notice here.</p>
+                <form id="noticeForm" onsubmit="submitNoticeForm(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label for="ntv-name">Full Name</label><input type="text" id="ntv-name" required></div>
+                        <div class="form-group">
+                            <label for="ntv-location">Location</label>
+                            <select id="ntv-location" required><option value="">Select</option><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="flt-phone">Phone Number</label>
-                        <input type="text" id="flt-phone" placeholder="0730001234" required onblur="validateInputPhone('flt-phone','flt-phone-err')">
-                        <span id="flt-phone-err" class="error-message">Enter a valid SA phone number.</span>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="ntv-room">Room Number</label><input type="text" id="ntv-room" required></div>
+                        <div class="form-group">
+                            <label for="ntv-phone">Phone Number</label>
+                            <input type="text" id="ntv-phone" placeholder="0730001234" required onblur="validateInputPhone('ntv-phone','ntv-phone-err')">
+                            <span id="ntv-phone-err" class="error-message">Enter a valid SA phone number.</span>
+                        </div>
                     </div>
+                    <div class="form-group"><label for="ntv-date">Planned Move-out Date</label><input type="date" id="ntv-date" required></div>
+                    <div class="form-group"><label for="ntv-address">Forwarding Address</label><input type="text" id="ntv-address" required></div>
+                    <div class="form-group"><label for="ntv-reason">Reason (optional)</label><textarea id="ntv-reason" rows="2"></textarea></div>
+                    <label class="popia-checkbox-group">
+                        <input type="checkbox" id="ntv-ack" required>
+                        <span>I understand my deposit, less lawful deductions, is refunded within 24 hours of the final move-out inspection.</span>
+                    </label>
+                    <button type="submit" class="btn btn-primary btn-block" id="ntv-submit-btn" style="margin-top:1rem">Submit Notice</button>
+                </form>
+                <div class="done-box hidden" id="notice-done">
+                    <div class="tick">✓</div>
+                    <h3 class="serif">Notice recorded</h3>
+                    <div class="ref-pill" id="notice-ref"></div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="flt-category">Category</label>
-                        <select id="flt-category">
-                            <option>Plumbing</option><option>Electrical</option><option>Appliance</option>
-                            <option>Structural</option><option>Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="flt-urgency">Urgency</label>
-                        <select id="flt-urgency">
-                            <option>Low</option><option selected>Medium</option><option>High — urgent</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="flt-desc">Description</label>
-                    <textarea id="flt-desc" rows="3" required></textarea>
-                </div>
-                <div class="upload-section">
-                    <h4>Photo (optional)</h4>
-                    <input type="file" id="flt-photo" accept="image/*">
-                </div>
-                <button type="submit" class="btn btn-primary" id="flt-submit-btn" style="width:100%">Submit Fault Report</button>
-            </form>
-            <div class="done-box hidden" id="fault-done">
-                <div class="tick">✓</div>
-                <h3>Fault report submitted</h3>
-                <div class="ref-pill" id="fault-ref"></div>
             </div>
         </div>
     </div>
 
-    <!-- SECTION 4: NOTICE TO VACATE -->
-    <div id="notice-view" class="container view-section">
-        <div class="dashboard-panel" style="max-width:640px;margin:0 auto">
-            <h2>Submit Notice to Vacate</h2>
-            <p class="hint" style="margin-bottom:1rem">Already a tenant and planning to move out? Submit your calendar month's notice here.</p>
-            <form id="noticeForm" onsubmit="submitNoticeForm(event)">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="ntv-name">Full Name</label>
-                        <input type="text" id="ntv-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ntv-location">Location</label>
-                        <select id="ntv-location" required>
-                            <option value="">Select</option>
-                            <option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="ntv-room">Room Number</label>
-                        <input type="text" id="ntv-room" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ntv-phone">Phone Number</label>
-                        <input type="text" id="ntv-phone" placeholder="0730001234" required onblur="validateInputPhone('ntv-phone','ntv-phone-err')">
-                        <span id="ntv-phone-err" class="error-message">Enter a valid SA phone number.</span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="ntv-date">Planned Move-out Date</label>
-                    <input type="date" id="ntv-date" required>
-                </div>
-                <div class="form-group">
-                    <label for="ntv-address">Forwarding Address</label>
-                    <input type="text" id="ntv-address" required>
-                </div>
-                <div class="form-group">
-                    <label for="ntv-reason">Reason (optional)</label>
-                    <textarea id="ntv-reason" rows="2"></textarea>
-                </div>
-                <label class="popia-checkbox-group">
-                    <input type="checkbox" id="ntv-ack" required>
-                    <span>I understand my deposit, less lawful deductions, is refunded within 24 hours of the final move-out inspection.</span>
-                </label>
-                <button type="submit" class="btn btn-primary" id="ntv-submit-btn" style="width:100%;margin-top:1rem">Submit Notice</button>
-            </form>
-            <div class="done-box hidden" id="notice-done">
-                <div class="tick">✓</div>
-                <h3>Notice recorded</h3>
-                <div class="ref-pill" id="notice-ref"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECTION 5: LANDLORD CONSOLE -->
+    <!-- SECTION 4: LANDLORD CONSOLE -->
     <div id="landlord-view" class="container view-section">
-        <div id="landlord-locked" class="dashboard-panel" style="max-width:520px;margin:0 auto;text-align:center">
+        <div class="panel section-narrow gate-box" id="landlord-locked" style="margin:2.6rem auto">
+            <div class="icon">🏢</div>
             <h2>Landlord Console</h2>
-            <p class="hint" style="margin:0.6rem 0 1.2rem">Sign in as a Landlord to publish listings and post announcements.</p>
+            <p class="hint" style="margin:0.6rem 0 1.2rem">Sign in as a Landlord to publish listings, post announcements, and review fault reports and notices.</p>
             <button class="btn btn-primary" onclick="openAuthModal('login','Landlord')">Sign In as Landlord</button>
         </div>
 
-        <div id="landlord-unlocked" class="hidden">
-            <div class="dashboard-panel">
+        <div id="landlord-unlocked" class="hidden" style="padding:2.6rem 0">
+            <div class="panel">
                 <h2>Add Property Listing</h2>
                 <div class="form-error" id="listing-error"></div>
                 <form id="listingForm" onsubmit="saveProperty(event)">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label for="lp-type">Property Type</label>
-                            <select id="lp-type">
-                                <option>Room</option><option>Bachelor</option><option>Townhouse</option><option>House</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="lp-title">Title</label>
-                            <input type="text" id="lp-title" placeholder="e.g. Modern Studio Unit" required>
-                        </div>
+                        <div class="form-group"><label for="lp-type">Property Type</label><select id="lp-type"><option>Room</option><option>Bachelor</option><option>Townhouse</option><option>House</option></select></div>
+                        <div class="form-group"><label for="lp-title">Title</label><input type="text" id="lp-title" placeholder="e.g. Modern Studio Unit" required></div>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="lp-location">Location</label>
-                            <select id="lp-location" required>
-                                <option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option>
-                            </select>
+                            <select id="lp-location" required><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select>
                         </div>
-                        <div class="form-group">
-                            <label for="lp-rent">Monthly Rent (ZAR)</label>
-                            <input type="number" id="lp-rent" placeholder="4500" required>
-                        </div>
+                        <div class="form-group"><label for="lp-rent">Monthly Rent (ZAR)</label><input type="number" id="lp-rent" placeholder="4500" required></div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label for="lp-available">Available From</label>
-                            <input type="date" id="lp-available" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="lp-bedrooms">Bedrooms</label>
-                            <input type="number" id="lp-bedrooms" value="1" min="0">
-                        </div>
+                        <div class="form-group"><label for="lp-available">Available From</label><input type="date" id="lp-available" required></div>
+                        <div class="form-group"><label for="lp-bedrooms">Bedrooms</label><input type="number" id="lp-bedrooms" value="1" min="0"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="lp-desc">Description</label>
-                        <textarea id="lp-desc" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="lp-contact">Contact Number</label>
-                        <input type="text" id="lp-contact" placeholder="0730001234" required>
-                    </div>
+                    <div class="form-group"><label for="lp-desc">Description</label><textarea id="lp-desc" rows="3" required></textarea></div>
+                    <div class="form-group"><label for="lp-contact">Contact Number</label><input type="text" id="lp-contact" placeholder="0730001234" required></div>
                     <div class="upload-section">
-                        <h4>Photo (optional)</h4>
-                        <input type="file" id="lp-photo-file" accept="image/*">
+                        <h4>Photos (up to 10)</h4>
+                        <input type="file" id="lp-photo-files" accept="image/*" multiple onchange="handlePhotoSelection(event)">
+                        <p class="hint" id="lp-photo-count" style="margin-top:6px">No photos selected.</p>
+                        <div id="lp-photo-previews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%">Publish Listing</button>
+                    <input type="hidden" id="lp-editing-ref" value="">
+                    <button type="submit" class="btn btn-primary btn-block" id="lp-submit-btn">Publish Listing</button>
+                    <button type="button" class="btn btn-outline btn-block hidden" id="lp-cancel-edit-btn" style="margin-top:8px" onclick="cancelEditListing()">Cancel Edit</button>
                 </form>
             </div>
 
-            <div class="dashboard-panel">
+            <div class="panel">
+                <h2>My Properties</h2>
+                <p class="hint" style="margin-bottom:0.6rem">Listings you've published — edit details or take a listing offline.</p>
+                <div id="myPropertiesBody"><p class="hint">Loading…</p></div>
+            </div>
+
+            <div class="panel">
                 <h2>Post Announcement</h2>
                 <form id="announceForm" onsubmit="submitAnnouncement(event)">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label for="ann-category">Category</label>
-                            <select id="ann-category">
-                                <option>General</option><option>WiFi</option><option>Bank Details</option><option>Maintenance</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="ann-title">Title</label>
-                            <input type="text" id="ann-title" placeholder="e.g. Network Maintenance" required>
-                        </div>
+                        <div class="form-group"><label for="ann-category">Category</label><select id="ann-category"><option>General</option><option>WiFi</option><option>Bank Details</option><option>Maintenance</option></select></div>
+                        <div class="form-group"><label for="ann-title">Title</label><input type="text" id="ann-title" placeholder="e.g. Network Maintenance" required></div>
                     </div>
-                    <div class="form-group">
-                        <label for="ann-message">Message</label>
-                        <textarea id="ann-message" rows="3" required></textarea>
-                    </div>
+                    <div class="form-group"><label for="ann-message">Message</label><textarea id="ann-message" rows="3" required></textarea></div>
                     <div class="form-group">
                         <label for="ann-pinned">Pin to Home Screen?</label>
-                        <select id="ann-pinned">
-                            <option value="No">No</option>
-                            <option value="Yes">Yes — everyone sees this first</option>
-                        </select>
+                        <select id="ann-pinned"><option value="No">No</option><option value="Yes">Yes — everyone sees this first</option></select>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%">Publish Announcement</button>
+                    <button type="submit" class="btn btn-primary btn-block">Publish Announcement</button>
                 </form>
+            </div>
+
+            <div class="panel">
+                <h2>Applications</h2>
+                <p class="hint" style="margin-bottom:0.6rem">Applications for your listings — review vetting, then approve or decline.</p>
+                <div id="ownerApplicationsBody"><p class="hint">Loading…</p></div>
+            </div>
+
+            <div class="panel">
+                <h2>Fault Reports</h2>
+                <p class="hint" style="margin-bottom:0.6rem">Maintenance issues tenants have reported, most recent first.</p>
+                <div id="ownerFaultsBody"><p class="hint">Loading…</p></div>
+            </div>
+
+            <div class="panel">
+                <h2>Notices to Vacate</h2>
+                <p class="hint" style="margin-bottom:0.6rem">Tenants who've given notice, most recent first.</p>
+                <div id="ownerNoticesBody"><p class="hint">Loading…</p></div>
             </div>
         </div>
     </div>
@@ -776,37 +595,23 @@
                 <button type="button" class="modal-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
             </div>
 
-            <!-- LOGIN FORM -->
             <form id="loginForm" onsubmit="loginUser(event)">
-                <h3 id="modal-title" style="margin-bottom:1rem">Sign In</h3>
+                <h3 class="serif" style="margin-bottom:1rem">Sign In</h3>
                 <div class="form-error" id="login-error">Incorrect username or password.</div>
-                <div class="form-group">
-                    <label for="lo-username">Username or Email</label>
-                    <input type="text" id="lo-username" required>
-                </div>
-                <div class="form-group">
-                    <label for="lo-password">Password</label>
-                    <input type="password" id="lo-password" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem">Sign In</button>
-                <p class="hint" style="text-align:center;margin-top:0.8rem;cursor:pointer" onclick="closeModal(); switchView('forgot')">Forgot password?</p>
+                <div class="form-group"><label for="lo-username">Username or Email</label><input type="text" id="lo-username" required></div>
+                <div class="form-group"><label for="lo-password">Password</label><input type="password" id="lo-password" required></div>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top:0.5rem">Sign In</button>
+                <p class="hint" style="text-align:center;margin-top:0.9rem;cursor:pointer" onclick="closeModal(); switchView('forgot')">Forgot password?</p>
             </form>
 
-            <!-- REGISTER FORM -->
             <form id="registerForm" class="hidden" onsubmit="registerUser(event)">
-                <h3 style="margin-bottom:1rem">Register</h3>
+                <h3 class="serif" style="margin-bottom:1rem">Register</h3>
                 <div class="form-error" id="register-error"></div>
                 <div class="form-group">
                     <label for="re-role">I am a</label>
-                    <select id="re-role">
-                        <option value="Tenant">Tenant</option>
-                        <option value="Landlord">Landlord</option>
-                    </select>
+                    <select id="re-role"><option value="Tenant">Tenant</option><option value="Landlord">Landlord</option></select>
                 </div>
-                <div class="form-group">
-                    <label for="re-name">Full Name</label>
-                    <input type="text" id="re-name" required>
-                </div>
+                <div class="form-group"><label for="re-name">Full Name</label><input type="text" id="re-name" required></div>
                 <div class="form-group">
                     <label for="re-phone">Phone Number</label>
                     <input type="text" id="re-phone" placeholder="0730001234" required onblur="validateInputPhone('re-phone','re-phone-err')">
@@ -817,10 +622,7 @@
                     <input type="text" id="re-username" required onblur="validateInputUsername('re-username','re-username-err')">
                     <span id="re-username-err" class="error-message">Enter a valid username or email.</span>
                 </div>
-                <div class="form-group">
-                    <label for="re-password">Password</label>
-                    <input type="password" id="re-password" minlength="6" required>
-                </div>
+                <div class="form-group"><label for="re-password">Password</label><input type="password" id="re-password" minlength="6" required></div>
                 <div class="form-group">
                     <label for="re-password2">Confirm Password</label>
                     <input type="password" id="re-password2" minlength="6" required onkeyup="checkPasswordMatch()">
@@ -830,27 +632,24 @@
                     <input type="checkbox" id="re-popia" required>
                     <span>I consent to the collection and processing of my personal data in compliance with POPIA.</span>
                 </label>
-                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1rem">Create Account</button>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top:1rem">Create Account</button>
             </form>
         </div>
     </div>
 
     <!-- FORGOT PASSWORD -->
     <div id="forgot-view" class="section-narrow view-section">
-        <div class="dashboard-panel">
+        <div class="panel">
             <h2>Reset Password</h2>
             <p class="hint" style="margin-bottom:1rem">Enter your username and we'll help you reset your password.</p>
             <div class="form-error" id="forgot-error"></div>
             <form id="forgotForm" onsubmit="requestPasswordReset(event)">
-                <div class="form-group">
-                    <label for="fp-username">Username</label>
-                    <input type="text" id="fp-username" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Request Reset</button>
+                <div class="form-group"><label for="fp-username">Username</label><input type="text" id="fp-username" required></div>
+                <button type="submit" class="btn btn-primary btn-block">Request Reset</button>
             </form>
             <div class="done-box hidden" id="forgot-done">
                 <div class="tick">✓</div>
-                <h3>Check with the landlord</h3>
+                <h3 class="serif">Check with the landlord</h3>
                 <p class="hint">Password reset requests are handled manually — we'll be in touch.</p>
             </div>
         </div>
@@ -858,30 +657,95 @@
 
     <footer>Maoka Residence · 7207 Isazi Street, Olievenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521</footer>
 
-    <!-- JAVASCRIPT VALIDATION & API CONNECTORS -->
     <script>
-        // Live Google Apps Script Web App Deployment URL (same backend as the main app)
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_q1htW6jdqbXt9F2_l08jr7TzTcZw4i4t5CzFlf1JFDaJA4BD0qZVjq_8ak6xxYPf/exec";
 
         const S = id => document.getElementById(id);
         const val = id => S(id).value.trim();
-        let PROPERTY_FILTER = '';
+        let PROPS_CACHE = [];
+        let MY_PROPS_PHOTOS = []; // base64 strings for the listing form, up to 10
+        let EDITING_LISTING_REF = null;
+        const FAVOURITES = new Set();
 
-        document.addEventListener("DOMContentLoaded", function() {
+        // Compress an image file to base64 JPEG before it goes anywhere near the network.
+        function compressImageFile(file, maxWidth = 1024, quality = 0.72) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width, h = img.height;
+                        if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handlePhotoSelection(event) {
+            const files = Array.from(event.target.files || []).slice(0, 10 - MY_PROPS_PHOTOS.length);
+            if (!files.length) return;
+            for (const file of files) {
+                try {
+                    const dataUrl = await compressImageFile(file);
+                    MY_PROPS_PHOTOS.push(dataUrl);
+                } catch (e) { /* skip files that fail to load */ }
+            }
+            event.target.value = ''; // allow re-selecting the same file later
+            renderPhotoPreviews();
+        }
+        function removePhoto(index) {
+            MY_PROPS_PHOTOS.splice(index, 1);
+            renderPhotoPreviews();
+        }
+        function renderPhotoPreviews() {
+            S('lp-photo-count').textContent = MY_PROPS_PHOTOS.length
+                ? `${MY_PROPS_PHOTOS.length} of 10 photo${MY_PROPS_PHOTOS.length === 1 ? '' : 's'} selected.`
+                : 'No photos selected.';
+            S('lp-photo-previews').innerHTML = MY_PROPS_PHOTOS.map((src, i) => `
+                <div style="position:relative;width:76px;height:76px">
+                    <img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid var(--line)">
+                    <button type="button" onclick="removePhoto(${i})" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--danger);color:#fff;border:none;font-size:11px;cursor:pointer;line-height:1">✕</button>
+                </div>`).join('');
+        }
+        function resetListingForm() {
+            EDITING_LISTING_REF = null;
+            MY_PROPS_PHOTOS = [];
+            S('listingForm').reset();
+            S('lp-editing-ref').value = '';
+            S('lp-submit-btn').textContent = 'Publish Listing';
+            S('lp-cancel-edit-btn').classList.add('hidden');
+            renderPhotoPreviews();
+        }
+        function cancelEditListing() { resetListingForm(); }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            S('todayStamp').textContent = new Date().toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             loadListings();
             loadAnnouncements();
             refreshAuthUI();
         });
 
-        // ==========================================
-        // VIEW ROUTING
-        // ==========================================
+        // ===================== VIEW ROUTING =====================
         function switchView(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
-            const target = document.getElementById(viewName + '-view');
+            const target = S(viewName + '-view');
             if (target) target.classList.add('active-view');
+            document.querySelectorAll('.topnav a').forEach(a => a.classList.remove('on'));
             if (viewName === 'landlord') refreshLandlordGate();
-            window.scrollTo({top:0, behavior:'smooth'});
+            if (viewName === 'tenant') refreshTenantGate();
+            if (viewName === 'apply') populateApplyPropertySelect();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function openTenantPortal() {
+            switchView('tenant');
         }
 
         function openAuthModal(tab, roleHint) {
@@ -889,9 +753,7 @@
             if (roleHint && S('re-role')) S('re-role').value = roleHint;
             S('auth-modal').style.display = 'flex';
         }
-        function closeModal() {
-            S('auth-modal').style.display = 'none';
-        }
+        function closeModal() { S('auth-modal').style.display = 'none'; }
         function switchAuthTab(tab) {
             const isLogin = tab === 'login';
             S('tab-login').classList.toggle('on', isLogin);
@@ -900,12 +762,10 @@
             S('registerForm').classList.toggle('hidden', isLogin);
         }
 
-        // ==========================================
-        // VALIDATION HELPERS
-        // ==========================================
+        // ===================== VALIDATION =====================
         function isValidSAPhone(phone) {
-            const cleanPhone = String(phone || "").trim().replace(/[\s\-\(\)]/g, '');
-            return /^(\+27|27|0)[6-8][0-9]{8}$/.test(cleanPhone);
+            const c = String(phone || "").trim().replace(/[\s\-\(\)]/g, '');
+            return /^(\+27|27|0)[6-8][0-9]{8}$/.test(c);
         }
         function isValidUsernameOrEmail(v) {
             const input = String(v || "").trim();
@@ -917,27 +777,19 @@
             if (show) { inputEl.classList.add('input-error'); if (errEl) errEl.style.display = 'block'; }
             else { inputEl.classList.remove('input-error'); if (errEl) errEl.style.display = 'none'; }
         }
-        function validateInputPhone(inputId, errorId) {
-            const ok = isValidSAPhone(val(inputId));
-            toggleError(inputId, errorId, !ok);
-            return ok;
-        }
-        function validateInputUsername(inputId, errorId) {
-            const ok = isValidUsernameOrEmail(val(inputId));
-            toggleError(inputId, errorId, !ok);
-            return ok;
-        }
+        function validateInputPhone(id, errId) { const ok = isValidSAPhone(val(id)); toggleError(id, errId, !ok); return ok; }
+        function validateInputUsername(id, errId) { const ok = isValidUsernameOrEmail(val(id)); toggleError(id, errId, !ok); return ok; }
+        function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim()); }
+        function validateInputEmail(id, errId) { const ok = isValidEmail(val(id)); toggleError(id, errId, !ok); return ok; }
         function checkPasswordMatch() {
             const match = val('re-password') === val('re-password2') && val('re-password').length >= 6;
             toggleError('re-password2', 're-password-err', !match);
             return match;
         }
-        function need(ids) {
-            return ids.every(id => val(id).length > 0);
-        }
+        function need(ids) { return ids.every(id => val(id).length > 0); }
         function refWithPrefix(prefix) {
             const d = new Date(), p = n => String(n).padStart(2, '0');
-            return `${prefix}-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${Math.floor(1000+Math.random()*9000)}`;
+            return `${prefix}-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
         }
         function fileToDataURL(fileInput) {
             return new Promise((resolve) => {
@@ -952,13 +804,14 @@
             const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
-
-        // ==========================================
-        // SESSION (Landlord sign-in only gates the console)
-        // ==========================================
-        function getSession() {
-            try { return JSON.parse(localStorage.getItem('maoka_session') || 'null'); } catch (e) { return null; }
+        function fmtDate(d) {
+            if (!d) return '';
+            try { return new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }); }
+            catch (e) { return d; }
         }
+
+        // ===================== SESSION =====================
+        function getSession() { try { return JSON.parse(localStorage.getItem('maoka_session') || 'null'); } catch (e) { return null; } }
         function saveSession(username, name, role) {
             try { localStorage.setItem('maoka_session', JSON.stringify({ username, name, role: role || 'Tenant', loggedInAt: new Date().toISOString() })); } catch (e) {}
         }
@@ -970,7 +823,7 @@
         function refreshAuthUI() {
             const s = getSession();
             if (s) {
-                S('whoami').textContent = `${s.name || s.username} (${s.role})`;
+                S('whoami').textContent = `${s.name || s.username} · ${s.role}`;
                 S('whoami').classList.remove('hidden');
                 S('signout-btn').classList.remove('hidden');
                 S('auth-btn').classList.add('hidden');
@@ -985,13 +838,16 @@
             const unlocked = !!(s && s.role === 'Landlord');
             S('landlord-locked').classList.toggle('hidden', unlocked);
             S('landlord-unlocked').classList.toggle('hidden', !unlocked);
+            if (unlocked) { loadOwnerFaults(); loadOwnerNotices(); loadMyProperties(); loadOwnerApplications(); }
+        }
+        function refreshTenantGate() {
+            const s = getSession();
+            const unlocked = !!(s && s.role === 'Tenant');
+            S('tenant-locked').classList.toggle('hidden', unlocked);
+            S('tenant-unlocked').classList.toggle('hidden', !unlocked);
         }
 
-        // ==========================================
-        // API CONNECTORS — matches the live Apps Script deployment
-        // Reads: JSONP GET  ?action=<name>&callback=<cb>
-        // Writes: POST { type: <name>, ...fields }
-        // ==========================================
+        // ===================== API =====================
         function jsonpFetch(action, cb, onError) {
             if (!SCRIPT_URL) { onError && onError(); return; }
             const cbName = 'maokaCB_' + action + '_' + Date.now();
@@ -1019,106 +875,362 @@
             } catch (e) { return false; }
         }
 
-        // ==========================================
-        // LISTINGS + ANNOUNCEMENTS
-        // ==========================================
-        function setPropertyFilter(type) {
-            PROPERTY_FILTER = type;
-            document.querySelectorAll('#propFilters .filter-btn').forEach(b => b.classList.toggle('on', b.getAttribute('data-type') === type));
-            loadListings();
-        }
-        let LISTINGS_CACHE = [];
+        // ===================== LISTINGS + FILTERS =====================
         function loadListings() {
-            const container = S('listings-container');
-            container.innerHTML = '<p class="hint">Loading active listings…</p>';
+            S('listings-container').innerHTML = '<p class="hint">Loading active listings…</p>';
             jsonpFetch('browseProperties',
-                list => { LISTINGS_CACHE = Array.isArray(list) ? list : []; renderListings(); },
-                () => { container.innerHTML = '<p class="hint">Could not load listings right now.</p>'; });
+                list => { PROPS_CACHE = Array.isArray(list) ? list : []; applyFilters(); },
+                () => { S('listings-container').innerHTML = '<p class="hint">Could not load listings right now.</p>'; });
         }
-        function renderListings() {
+        function applyFilters() {
+            const q = val('fSearch').toLowerCase();
+            const type = S('fType').value;
+            const min = parseFloat(S('fMin').value) || 0;
+            const max = parseFloat(S('fMax').value) || Infinity;
+            const beds = parseInt(S('fBeds').value) || 0;
+
+            let items = PROPS_CACHE.filter(p => (p.status || 'Active') === 'Active');
+            if (q) items = items.filter(p => String(p.location || '').toLowerCase().includes(q) || String(p.title || '').toLowerCase().includes(q));
+            if (type) items = items.filter(p => (p.propertyType || p.type || '') === type);
+            items = items.filter(p => { const r = Number(p.rent) || 0; return r >= min && r <= max; });
+            if (beds) items = items.filter(p => (Number(p.bedrooms) || 0) >= beds);
+
+            renderListings(items);
+        }
+        function renderListings(items) {
             const container = S('listings-container');
-            let items = LISTINGS_CACHE.filter(p => (p.status || 'Active') === 'Active');
-            if (PROPERTY_FILTER) items = items.filter(p => p.type === PROPERTY_FILTER || p.propertyType === PROPERTY_FILTER);
-            if (!items.length) { container.innerHTML = '<p class="hint">No active listings available at this time.</p>'; return; }
+            S('listingsCount').textContent = items.length ? (items.length + (items.length === 1 ? ' listing' : ' listings')) : '';
+            if (!items.length) { container.innerHTML = '<p class="hint">No listings match your search right now.</p>'; return; }
             container.innerHTML = '';
-            items.forEach(item => {
-                const photo = item.photo1 || item['Photo URLs'] || '';
-                const title = item.title || item['Title'] || 'Untitled listing';
-                const location = item.location || item['Unit/Location'] || '';
-                const rent = item.rent || item['Rent Amount'] || '—';
-                const type = item.propertyType || item.type || '';
+            items.forEach((item, i) => {
+                const photo = item.photo1 || '';
+                const title = item.title || 'Untitled listing';
+                const location = item.location || '';
+                const rent = item.rent || '—';
+                const type = item.propertyType || item.type || 'Room';
+                const beds = item.bedrooms, baths = item.bathrooms, size = item.sizeSqm;
+                const favKey = item.ref || item.id || i;
+                const photoCount = [1,2,3,4,5,6,7,8,9,10].filter(n => item['photo' + n]).length || (photo ? 1 : 0);
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    ${photo ? `<div class="card-img" style="background-image:url('${photo}')"></div>` : `<div class="card-img ph">🏠</div>`}
+                    <div class="card-media">
+                        ${photo ? `<img src="${photo}" alt="${title}" loading="lazy">` : `<div class="ph">🏠</div>`}
+                        <span class="type-tag">${type}</span>
+                        ${photoCount > 1 ? `<span class="type-tag" style="left:auto;right:48px;background:rgba(16,35,63,0.55)">📷 ${photoCount}</span>` : ''}
+                        <button class="fav-btn" onclick="toggleFav(this,'${favKey}')" aria-label="Save listing">♥</button>
+                    </div>
                     <div class="card-body">
-                        ${type ? `<span class="card-tag">${type}</span>` : ''}
-                        <h3>${title}</h3>
-                        <p style="color:var(--text-muted)">${location}</p>
-                        <div class="card-price">R ${rent} / month</div>
-                        <div class="card-meta">${item.bedrooms ? item.bedrooms + ' bed · ' : ''}${item.bathrooms ? item.bathrooms + ' bath · ' : ''}Available from ${item.availableFrom || 'now'}</div>
-                        <button class="btn btn-primary" style="margin-top:auto" onclick="switchView('apply')">Apply Now</button>
+                        <div class="card-price">R ${Number(rent).toLocaleString ? Number(rent).toLocaleString() : rent}<span> / month</span></div>
+                        <div class="card-title"><b>${beds ? beds + ' Bedroom ' : ''}${type}</b> in ${location}</div>
+                        <div class="card-loc">Available from ${fmtDate(item.availableFrom) || 'now'}</div>
+                        <div class="card-meta">
+                            ${beds ? `<span>🛏 ${beds}</span>` : ''}
+                            ${baths ? `<span>🚿 ${baths}</span>` : ''}
+                            ${size ? `<span>📐 ${size} m²</span>` : ''}
+                        </div>
+                        <button class="btn btn-primary" onclick="selectPropertyForApply('${favKey}')">Apply Now</button>
                     </div>`;
                 container.appendChild(card);
             });
+        }
+        function toggleFav(btn, key) {
+            if (FAVOURITES.has(key)) { FAVOURITES.delete(key); btn.classList.remove('on'); }
+            else { FAVOURITES.add(key); btn.classList.add('on'); }
         }
         function loadAnnouncements() {
             jsonpFetch('announcements', items => renderAnnouncements(Array.isArray(items) ? items : []), () => {});
         }
         function renderAnnouncements(items) {
             const container = S('announcements-container');
-            const pinned = items.filter(i => i.pinned === true || i.pinned === 'Yes' || i['Pinned'] === 'Yes');
+            const pinned = items.filter(i => i.pinned === true || i.pinned === 'Yes' || i.pinned === 'TRUE');
             if (!pinned.length) { container.innerHTML = ''; return; }
-            container.innerHTML = '';
-            pinned.forEach(i => {
-                const box = document.createElement('div');
-                box.className = 'announcement-box';
-                box.innerHTML = `<strong>[${i.category || i['Category'] || 'Notice'}] ${i.title || i['Title'] || ''}</strong><p>${i.message || i['Message'] || ''}</p>`;
-                container.appendChild(box);
-            });
+            container.innerHTML = pinned.map(i => `<div class="announcement-box"><strong>[${i.category || 'Notice'}] ${i.title || ''}</strong><p>${i.message || ''}</p></div>`).join('');
         }
 
-        // ==========================================
-        // TENANT SUBMISSIONS
-        // ==========================================
+        // ===================== TENANT SUBMISSIONS =====================
+        // ===================== APPLY WIZARD =====================
+        let APPLY_DOCS = {}; // { idDocument, payslipDocument, bankStatementDocument } -> base64
+        function populateApplyPropertySelect() {
+            const sel = S('ap-property-select');
+            const current = sel.value;
+            sel.innerHTML = '<option value="">Select a listing</option>' +
+                PROPS_CACHE.filter(p => (p.status || 'Active') === 'Active').map(p =>
+                    `<option value="${p.ref}">${p.title || 'Untitled'} — ${p.location || ''} (R${p.rent || '—'}/mo)</option>`).join('');
+            if (current) sel.value = current;
+        }
+        function selectPropertyForApply(ref) {
+            switchView('apply');
+            populateApplyPropertySelect();
+            S('ap-property-select').value = ref;
+            onApplyPropertyChange();
+        }
+        function onApplyPropertyChange() {
+            const ref = S('ap-property-select').value;
+            const item = PROPS_CACHE.find(p => String(p.ref) === String(ref));
+            S('ap-property-ref').value = ref || '';
+            S('ap-property-title').value = item ? (item.title || '') : '';
+            S('ap-property-rent').value = item ? (item.rent || '') : '';
+            S('apply-property-hint').textContent = item ? `Applying for: ${item.title} — R${item.rent}/mo` : 'Tell us a bit about yourself — this takes about five minutes.';
+            updateCriteriaHint();
+        }
+        function updateCriteriaHint() {
+            const rent = Number(S('ap-property-rent').value) || 0;
+            const income = Number(val('ap-income')) || 0;
+            const el = S('criteria-hint');
+            if (!rent) { el.textContent = ''; return; }
+            const needed = rent * 3;
+            if (!income) { el.textContent = `For automatic vetting, aim for at least R${needed.toLocaleString()}/month income (3× rent).`; el.style.color = 'var(--muted)'; return; }
+            if (income >= needed) { el.textContent = `✓ Meets the income guideline (3× rent = R${needed.toLocaleString()}).`; el.style.color = 'var(--accent-dark)'; }
+            else { el.textContent = `Below the usual guideline of R${needed.toLocaleString()} (3× rent) — you can still apply, the landlord makes the final call.`; el.style.color = 'var(--danger)'; }
+        }
+        function applyGoStep(n) {
+            if (n === 2 && !need(['ap-name', 'ap-phone', 'ap-email']) ) { alert('Please complete your name, phone and email first.'); return; }
+            if (n === 2 && (!validateInputPhone('ap-phone','ap-phone-err') || !validateInputEmail('ap-email','ap-email-err'))) return;
+            document.querySelectorAll('.apply-step').forEach(el => el.classList.remove('on'));
+            S('apply-step-' + n).classList.add('on');
+            document.querySelectorAll('#apply-progress .step-dot').forEach(d => d.classList.toggle('on', Number(d.dataset.step) <= n));
+            if (n === 4) buildApplyReview();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        async function handleDocSelection(event, field) {
+            const file = event.target.files[0];
+            const statusEl = S('ap-doc-' + { idDocument: 'id', payslipDocument: 'payslip', bankStatementDocument: 'bank' }[field] + '-status');
+            if (!file) { return; }
+            statusEl.textContent = 'Processing…';
+            try {
+                const dataUrl = file.type.startsWith('image/') ? await compressImageFile(file, 1400, 0.75) : await fileToDataURL_raw(file);
+                APPLY_DOCS[field] = dataUrl;
+                statusEl.textContent = '✓ ' + file.name;
+            } catch (e) { statusEl.textContent = 'Could not read that file — try another.'; }
+        }
+        function fileToDataURL_raw(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        function buildApplyReview() {
+            const rent = Number(S('ap-property-rent').value) || 0;
+            const income = Number(val('ap-income')) || 0;
+            S('apply-review').innerHTML = `
+                <div><b>Listing:</b> ${S('ap-property-title').value || '—'}</div>
+                <div><b>Name:</b> ${val('ap-name')}</div>
+                <div><b>Phone:</b> ${val('ap-phone')}</div>
+                <div><b>Email:</b> ${val('ap-email')}</div>
+                <div><b>Employment:</b> ${S('ap-employment').value}${val('ap-employer') ? ' at ' + val('ap-employer') : ''}</div>
+                <div><b>Income:</b> R${income.toLocaleString()}/month${rent ? ` (guideline: R${(rent*3).toLocaleString()})` : ''}</div>
+                <div><b>Move-in:</b> ${val('ap-movein') || '—'}</div>
+                <div><b>Documents:</b> ${['idDocument','payslipDocument','bankStatementDocument'].filter(k => APPLY_DOCS[k]).length} of 3 uploaded</div>`;
+        }
         async function submitApplication(e) {
             e.preventDefault();
             S('apply-error').style.display = 'none';
-            const phoneValid = validateInputPhone('ap-phone', 'ap-phone-err');
-            if (!need(['ap-name','ap-phone','ap-location','ap-movein']) || !phoneValid) {
-                S('apply-error').textContent = 'Please complete all required fields correctly.';
+            if (!need(['ap-property-ref','ap-name','ap-phone','ap-email','ap-employment','ap-income','ap-movein']) || !S('ap-popia').checked) {
+                S('apply-error').textContent = 'Please complete all required fields and accept the POPIA consent.';
                 S('apply-error').style.display = 'block';
+                applyGoStep(1);
                 return;
             }
+            const btn = S('apply-submit-btn'); btn.disabled = true; btn.textContent = 'Submitting…';
             const ref = refWithPrefix('APP');
-            const data = {
+            await postToSheet(Object.assign({
                 type: 'application', ref, submittedAt: new Date().toISOString(), status: 'Pending',
-                name: val('ap-name'), phone: val('ap-phone'), location: val('ap-location'), moveInDate: val('ap-movein'),
-                employmentStatus: S('ap-employment').value, employer: val('ap-employer'), notes: val('ap-notes')
-            };
-            await postToSheet(data);
+                name: val('ap-name'), phone: val('ap-phone'), email: val('ap-email'),
+                propertyRef: S('ap-property-ref').value, propertyTitle: S('ap-property-title').value, propertyRent: S('ap-property-rent').value,
+                moveInDate: val('ap-movein'), employmentStatus: S('ap-employment').value, employer: val('ap-employer'),
+                monthlyIncome: val('ap-income'), notes: val('ap-notes')
+            }, APPLY_DOCS));
+            btn.disabled = false; btn.textContent = 'Submit Application';
             S('applyForm').classList.add('hidden');
             S('apply-done').classList.remove('hidden');
             S('apply-ref').textContent = ref;
+            APPLY_DOCS = {};
+        }
+
+        // ===================== TRACK APPLICATION =====================
+        let TRACK_STATE = null;
+        function lookupApplication() {
+            S('track-error').style.display = 'none';
+            if (!need(['tk-ref', 'tk-email'])) return;
+            jsonpFetchP('myApplication', { ref: val('tk-ref'), email: val('tk-email') }, res => {
+                if (!res || !res.success) {
+                    S('track-error').textContent = (res && res.message) || 'Could not find that application.';
+                    S('track-error').style.display = 'block';
+                    return;
+                }
+                TRACK_STATE = res;
+                renderTrackResult(res);
+            }, () => { S('track-error').textContent = 'Could not reach the server. Please try again.'; S('track-error').style.display = 'block'; });
+        }
+        function renderTrackResult(a) {
+            S('track-lookup').classList.add('hidden');
+            const box = S('track-result');
+            box.classList.remove('hidden');
+
+            let stageHtml = '';
+            if (a.status === 'Declined') {
+                stageHtml = `<div class="done-box"><div class="tick" style="background:var(--danger)">✕</div><h3 class="serif">Application not approved</h3>
+                    <p class="hint">${a.reviewNotes || 'The landlord has decided not to proceed with this application.'}</p></div>`;
+            } else if (a.status === 'Pending') {
+                stageHtml = `<div class="done-box"><div class="tick" style="background:var(--muted)">⏳</div><h3 class="serif">Under review</h3>
+                    <p class="hint">We're reviewing your details and documents. You'll get an email as soon as there's a decision.</p>
+                    ${a.meetsCriteria === false ? `<p class="hint" style="margin-top:8px;color:var(--danger)">Note: ${a.criteriaNotes || 'Some vetting criteria are not met yet — the landlord will make the final call.'}</p>` : ''}</div>`;
+            } else if (a.status === 'Approved' && !a.contractAcceptedAt) {
+                stageHtml = renderContractStep_(a);
+            } else if (a.contractAcceptedAt && a.paymentStatus !== 'Paid') {
+                stageHtml = renderPaymentStep_(a);
+            } else if (a.paymentStatus === 'Paid') {
+                stageHtml = `<div class="done-box"><div class="tick">✓</div><h3 class="serif">Welcome to Maoka Residence!</h3>
+                    <p class="hint">Your Welcome Pack has been emailed to you. See you on move-in day!</p></div>`;
+            } else {
+                stageHtml = `<p class="hint">Status: ${a.status}</p>`;
+            }
+            box.innerHTML = `<h2>Application ${a.ref}</h2><p class="hint" style="margin-bottom:1.2rem">${a.propertyTitle || ''}</p>` + stageHtml;
+            if (a.status === 'Approved' && !a.contractAcceptedAt) initSignaturePad();
+        }
+        function renderContractStep_(a) {
+            return `
+                <h3 class="serif" style="margin-bottom:8px">Lease Contract</h3>
+                <div class="doc" style="max-height:220px;overflow-y:auto;background:var(--bg);border-radius:10px;padding:14px;font-size:13px;line-height:1.6;margin-bottom:1rem">
+                    <p><b>Maoka Residence — Lease Summary</b></p>
+                    <p>This confirms your agreement to lease the property referenced above, subject to the standard house rules
+                    (no subletting, POPIA-compliant handling of your data, rent due monthly in advance, one calendar month's
+                    written notice to vacate). Full terms are provided by the landlord on move-in.</p>
+                    <p>By signing below, you confirm you have read and accept these terms.</p>
+                </div>
+                <div style="border:2px dashed var(--line);border-radius:10px;overflow:hidden;margin-bottom:0.8rem">
+                    <canvas id="sigCanvas" width="400" height="150" style="width:100%;height:150px;touch-action:none;cursor:crosshair;display:block;background:#fff"></canvas>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+                    <button type="button" class="btn btn-outline btn-small" onclick="clearSignature()">Clear</button>
+                    <span class="hint">Sign above with your mouse or finger</span>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="signContract()">Accept & Sign Contract</button>`;
+        }
+        function renderPaymentStep_(a) {
+            return `
+                <div class="done-box">
+                    <h3 class="serif">Fully Approved 🎉</h3>
+                    <p class="hint">Your lease contract is complete. Pay to receive your Welcome Pack.</p>
+                    <button class="btn btn-primary" style="margin-top:1rem" onclick="payWithPayfast()">Pay Now</button>
+                </div>`;
+        }
+
+        // ---- Signature pad (contract step) ----
+        let SIG_CTX, SIG_DRAWING = false;
+        function initSignaturePad() {
+            const canvas = S('sigCanvas');
+            if (!canvas) return;
+            canvas.width = canvas.clientWidth; canvas.height = 150;
+            SIG_CTX = canvas.getContext('2d');
+            SIG_CTX.strokeStyle = '#10233F'; SIG_CTX.lineWidth = 2; SIG_CTX.lineCap = 'round';
+            const pos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                const p = e.touches ? e.touches[0] : e;
+                return { x: p.clientX - r.left, y: p.clientY - r.top };
+            };
+            const start = (e) => { SIG_DRAWING = true; const p = pos(e); SIG_CTX.beginPath(); SIG_CTX.moveTo(p.x, p.y); };
+            const move = (e) => { if (!SIG_DRAWING) return; e.preventDefault(); const p = pos(e); SIG_CTX.lineTo(p.x, p.y); SIG_CTX.stroke(); };
+            const end = () => { SIG_DRAWING = false; };
+            canvas.onmousedown = start; canvas.onmousemove = move; canvas.onmouseup = end; canvas.onmouseleave = end;
+            canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+        }
+        function clearSignature() { if (SIG_CTX) SIG_CTX.clearRect(0, 0, S('sigCanvas').width, S('sigCanvas').height); }
+
+        async function signContract() {
+            const canvas = S('sigCanvas');
+            const blank = document.createElement('canvas'); blank.width = canvas.width; blank.height = canvas.height;
+            if (canvas.toDataURL() === blank.toDataURL()) { alert('Please sign before submitting.'); return; }
+            const signature = canvas.toDataURL('image/png');
+            await postToSheet({ type: 'contractSign', ref: TRACK_STATE.ref, email: val('tk-email'), signature });
+            lookupApplication();
+        }
+
+        // ---- Payment (PayFast) ----
+        function payWithPayfast() {
+            if (!TRACK_STATE) return;
+            jsonpFetchP('paymentConfig', { ref: TRACK_STATE.ref, email: val('tk-email') }, cfg => {
+                if (!cfg || !cfg.success) { alert((cfg && cfg.message) || 'Could not start payment.'); return; }
+                const form = document.createElement('form');
+                form.method = 'POST'; form.action = cfg.process_url;
+                const fields = {
+                    merchant_id: cfg.merchant_id, merchant_key: cfg.merchant_key,
+                    amount: cfg.amount, item_name: cfg.item_name, m_payment_id: cfg.m_payment_id,
+                    email_address: cfg.email_address,
+                    return_url: window.location.href, cancel_url: window.location.href, notify_url: SCRIPT_URL
+                };
+                Object.keys(fields).forEach(k => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden'; input.name = k; input.value = fields[k];
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
+            }, () => alert('Could not reach the server to start payment.'));
+        }
+
+        // ===================== LANDLORD: APPLICATIONS REVIEW =====================
+        let OWNER_APPS_CACHE = [];
+        function loadOwnerApplications() {
+            const s = getSession();
+            const body = S('ownerApplicationsBody');
+            if (!s) return;
+            body.innerHTML = '<p class="hint">Loading…</p>';
+            jsonpFetchP('landlordApplications', { username: s.username }, list => {
+                OWNER_APPS_CACHE = Array.isArray(list) ? list : [];
+                const pending = OWNER_APPS_CACHE.filter(a => a.status === 'Pending');
+                if (!pending.length) { body.innerHTML = '<p class="hint">No applications waiting on your review.</p>'; return; }
+                body.innerHTML = pending.map(a => `
+                    <div class="list-row" style="flex-direction:column;align-items:stretch;gap:8px">
+                        <div class="lr-main"><b>${a.name} — ${a.propertyTitle || ''}</b><span>${a.phone} · ${a.email} · R${a.monthlyIncome || '—'}/mo · ${a.employmentStatus || ''}</span></div>
+                        <div><span class="lr-tag${a.meetsCriteria ? '' : ' urgent'}">${a.meetsCriteria ? 'Meets criteria' : 'Below criteria'}</span>
+                             ${!a.meetsCriteria && a.criteriaNotes ? `<span class="hint" style="margin-left:8px">${a.criteriaNotes}</span>` : ''}</div>
+                        <div class="hint">Docs: ${a.hasIdDoc ? 'ID ✓' : 'ID ✗'} · ${a.hasPayslip ? 'Payslip ✓' : 'Payslip ✗'} · ${a.hasBankStatement ? 'Bank stmt ✓' : 'Bank stmt ✗'}</div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-outline btn-small" onclick="viewApplicationDocs('${a.ref}')">View Documents</button>
+                            <button class="btn btn-small" style="background:#EEF6F3;color:var(--accent-dark)" onclick="decideApplication('${a.ref}','Approved')">Approve</button>
+                            <button class="btn btn-small" style="background:#FBEAEA;color:var(--danger)" onclick="decideApplication('${a.ref}','Declined')">Decline</button>
+                        </div>
+                    </div>`).join('');
+            }, () => { body.innerHTML = '<p class="hint">Could not load applications.</p>'; });
+        }
+        function viewApplicationDocs(ref) {
+            const s = getSession();
+            jsonpFetchP('applicationDetail', { ref, username: s.username }, detail => {
+                if (!detail || !detail.success) { alert((detail && detail.message) || 'Could not load documents.'); return; }
+                const links = ['idDocument', 'payslipDocument', 'bankStatementDocument']
+                    .filter(k => detail[k])
+                    .map(k => `<a href="${detail[k]}" download="${k}" style="display:block;margin-bottom:6px">${k}</a>`)
+                    .join('') || '<p>No documents uploaded.</p>';
+                const w = window.open('', '_blank');
+                w.document.write(`<h3>Documents — ${ref}</h3>${links}`);
+            }, () => alert('Could not reach the server.'));
+        }
+        async function decideApplication(ref, decision) {
+            const s = getSession();
+            if (!s) return;
+            const reviewNotes = decision === 'Declined' ? (prompt('Optional note to the applicant:') || '') : '';
+            await postToSheet({ type: 'applicationDecision', ref, username: s.username, decision, reviewNotes });
+            loadOwnerApplications();
         }
 
         async function submitFault(e) {
             e.preventDefault();
             const phoneValid = validateInputPhone('flt-phone', 'flt-phone-err');
-            if (!need(['flt-name','flt-location','flt-room','flt-phone','flt-desc']) || !phoneValid) {
-                alert('Please complete all required fields correctly.');
-                return;
+            if (!need(['flt-name', 'flt-location', 'flt-room', 'flt-phone', 'flt-desc']) || !phoneValid) {
+                alert('Please complete all required fields correctly.'); return;
             }
-            const btn = S('flt-submit-btn');
-            btn.disabled = true; btn.textContent = 'Submitting…';
+            const btn = S('flt-submit-btn'); btn.disabled = true; btn.textContent = 'Submitting…';
             const photo = await fileToDataURL(S('flt-photo'));
             const ref = refWithPrefix('FLT');
-            const data = {
+            await postToSheet({
                 type: 'fault', ref, submittedAt: new Date().toISOString(),
                 name: val('flt-name'), location: val('flt-location'), room: val('flt-room'), phone: val('flt-phone'),
                 category: S('flt-category').value, urgency: S('flt-urgency').value, description: val('flt-desc'), photo
-            };
-            await postToSheet(data);
+            });
             btn.disabled = false; btn.textContent = 'Submit Fault Report';
             S('faultForm').classList.add('hidden');
             S('fault-done').classList.remove('hidden');
@@ -1128,70 +1240,152 @@
         async function submitNoticeForm(e) {
             e.preventDefault();
             const phoneValid = validateInputPhone('ntv-phone', 'ntv-phone-err');
-            if (!need(['ntv-name','ntv-location','ntv-room','ntv-phone','ntv-date','ntv-address']) || !phoneValid || !S('ntv-ack').checked) {
-                alert('Please complete all required fields and confirm you understand the notice terms.');
-                return;
+            if (!need(['ntv-name', 'ntv-location', 'ntv-room', 'ntv-phone', 'ntv-date', 'ntv-address']) || !phoneValid || !S('ntv-ack').checked) {
+                alert('Please complete all required fields and confirm you understand the notice terms.'); return;
             }
             const ref = refWithPrefix('NTV');
-            const data = {
+            await postToSheet({
                 type: 'notice', ref, submittedAt: new Date().toISOString(),
                 name: val('ntv-name'), location: val('ntv-location'), room: val('ntv-room'), phone: val('ntv-phone'),
                 moveOutDate: val('ntv-date'), forwardingAddress: val('ntv-address'), reason: val('ntv-reason')
-            };
-            await postToSheet(data);
+            });
             S('noticeForm').classList.add('hidden');
             S('notice-done').classList.remove('hidden');
             S('notice-ref').textContent = ref;
         }
 
-        // ==========================================
-        // LANDLORD ACTIONS
-        // ==========================================
+        // ===================== LANDLORD ACTIONS =====================
         async function saveProperty(e) {
             e.preventDefault();
             const s = getSession();
             if (!s || s.role !== 'Landlord') { openAuthModal('login', 'Landlord'); return; }
             S('listing-error').style.display = 'none';
-            if (!need(['lp-title','lp-location','lp-rent','lp-available','lp-desc','lp-contact'])) {
+            if (!need(['lp-title', 'lp-location', 'lp-rent', 'lp-available', 'lp-desc', 'lp-contact'])) {
                 S('listing-error').textContent = 'Please complete all required fields.';
                 S('listing-error').style.display = 'block';
                 return;
             }
-            const photoFile = await fileToDataURL(S('lp-photo-file'));
-            const ref = refWithPrefix('PROP');
-            const data = {
-                type: 'property', ref, isUpdate: false, username: s.username, ownerName: s.name,
+            const btn = S('lp-submit-btn');
+            btn.disabled = true; btn.textContent = EDITING_LISTING_REF ? 'Saving…' : 'Publishing…';
+
+            const ref = EDITING_LISTING_REF || refWithPrefix('PROP');
+            const payload = {
+                type: 'property', ref, isUpdate: !!EDITING_LISTING_REF, username: s.username, ownerName: s.name,
                 propertyType: S('lp-type').value, title: val('lp-title'), location: val('lp-location'),
                 rent: val('lp-rent'), availableFrom: val('lp-available'), bedrooms: val('lp-bedrooms'),
-                photo1: photoFile || '', description: val('lp-desc'), contact: val('lp-contact'),
+                description: val('lp-desc'), contact: val('lp-contact'),
                 status: 'Active', createdAt: new Date().toISOString()
             };
-            await postToSheet(data);
-            alert('Listing published!');
-            S('listingForm').reset();
+            MY_PROPS_PHOTOS.forEach((src, i) => { payload['photo' + (i + 1)] = src; });
+
+            await postToSheet(payload);
+            btn.disabled = false;
+            alert(EDITING_LISTING_REF ? 'Listing updated!' : 'Listing published!');
+            resetListingForm();
             loadListings();
+            loadMyProperties();
+        }
+
+        function startEditListing(ref) {
+            const item = MY_PROPS_CACHE.find(p => (p.ref || '') === ref);
+            if (!item) return;
+            EDITING_LISTING_REF = ref;
+            S('lp-editing-ref').value = ref;
+            S('lp-type').value = item.propertyType || 'Room';
+            S('lp-title').value = item.title || '';
+            S('lp-location').value = item.location || 'Olieven';
+            S('lp-rent').value = item.rent || '';
+            S('lp-available').value = item.availableFrom || '';
+            S('lp-bedrooms').value = item.bedrooms || 1;
+            S('lp-desc').value = item.description || '';
+            S('lp-contact').value = item.contact || '';
+            MY_PROPS_PHOTOS = [];
+            for (let i = 1; i <= 10; i++) { if (item['photo' + i]) MY_PROPS_PHOTOS.push(item['photo' + i]); }
+            renderPhotoPreviews();
+            S('lp-submit-btn').textContent = 'Save Changes';
+            S('lp-cancel-edit-btn').classList.remove('hidden');
+            S('listingForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function toggleListingStatus(ref, newStatus) {
+            const s = getSession();
+            if (!s) return;
+            await postToSheet({ type: 'propertyStatus', ref, status: newStatus, username: s.username });
+            loadMyProperties();
+            loadListings();
+        }
+
+        let MY_PROPS_CACHE = [];
+        function loadMyProperties() {
+            const s = getSession();
+            const body = S('myPropertiesBody');
+            if (!s) { body.innerHTML = '<p class="hint">Sign in to see your listings.</p>'; return; }
+            body.innerHTML = '<p class="hint">Loading…</p>';
+            jsonpFetchP('myProperties', { username: s.username }, list => {
+                MY_PROPS_CACHE = Array.isArray(list) ? list : [];
+                if (!MY_PROPS_CACHE.length) { body.innerHTML = '<p class="hint">You have not published any listings yet.</p>'; return; }
+                const sorted = MY_PROPS_CACHE.slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                body.innerHTML = sorted.map(p => {
+                    const active = (p.status || 'Active') === 'Active';
+                    const photoCount = [1,2,3,4,5,6,7,8,9,10].filter(i => p['photo' + i]).length;
+                    return `<div class="list-row">
+                        <div class="lr-main"><b>${p.title || 'Untitled'}</b><span>${p.location || ''} · R${p.rent || '—'}/mo · ${photoCount} photo${photoCount === 1 ? '' : 's'} · ${active ? 'Active' : 'Inactive'}</span></div>
+                        <div style="display:flex;gap:6px;flex-shrink:0">
+                            <button class="btn btn-outline btn-small" onclick="startEditListing('${p.ref}')">Edit</button>
+                            <button class="btn btn-small" style="background:${active ? '#FBEAEA' : '#EEF6F3'};color:${active ? 'var(--danger)' : 'var(--accent-dark)'}" onclick="toggleListingStatus('${p.ref}','${active ? 'Inactive' : 'Active'}')">${active ? 'Deactivate' : 'Reactivate'}</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }, () => { body.innerHTML = '<p class="hint">Could not load your listings.</p>'; });
         }
 
         async function submitAnnouncement(e) {
             e.preventDefault();
             const s = getSession();
             if (!s || s.role !== 'Landlord') { openAuthModal('login', 'Landlord'); return; }
-            if (!need(['ann-title','ann-message'])) { alert('Please add a title and a message.'); return; }
+            if (!need(['ann-title', 'ann-message'])) { alert('Please add a title and a message.'); return; }
             const ref = refWithPrefix('ANN');
-            const data = {
+            await postToSheet({
                 type: 'announcement', ref, postedAt: new Date().toISOString(),
                 category: S('ann-category').value, title: val('ann-title'), message: val('ann-message'),
                 pinned: S('ann-pinned').value === 'Yes', audience: 'all', room: ''
-            };
-            await postToSheet(data);
+            });
             alert('Announcement published!');
             S('announceForm').reset();
             loadAnnouncements();
         }
 
-        // ==========================================
-        // AUTH: REGISTER / LOGIN / FORGOT PASSWORD
-        // ==========================================
+        function loadOwnerFaults() {
+            S('ownerFaultsBody').innerHTML = '<p class="hint">Loading…</p>';
+            jsonpFetch('faults', list => renderOwnerList('ownerFaultsBody', Array.isArray(list) ? list : [], renderFaultRow, 'submittedAt'),
+                () => { S('ownerFaultsBody').innerHTML = '<p class="hint">Could not load fault reports.</p>'; });
+        }
+        function loadOwnerNotices() {
+            S('ownerNoticesBody').innerHTML = '<p class="hint">Loading…</p>';
+            jsonpFetch('notices', list => renderOwnerList('ownerNoticesBody', Array.isArray(list) ? list : [], renderNoticeRow, 'submittedAt'),
+                () => { S('ownerNoticesBody').innerHTML = '<p class="hint">Could not load notices.</p>'; });
+        }
+        function renderOwnerList(bodyId, items, rowFn, sortField) {
+            const body = S(bodyId);
+            if (!items.length) { body.innerHTML = '<p class="hint">Nothing here yet.</p>'; return; }
+            const sorted = items.slice().sort((a, b) => new Date(b[sortField] || 0) - new Date(a[sortField] || 0));
+            body.innerHTML = sorted.map(rowFn).join('');
+        }
+        function renderFaultRow(f) {
+            const urgent = String(f.urgency || '').toLowerCase().includes('high');
+            return `<div class="list-row">
+                <div class="lr-main"><b>${f.name || 'Unnamed'} · Room ${f.room || '—'}</b><span>${f.location || ''} · ${f.category || ''} · ${fmtDate(f.submittedAt)}</span></div>
+                <span class="lr-tag${urgent ? ' urgent' : ''}">${f.urgency || 'Medium'}</span>
+            </div>`;
+        }
+        function renderNoticeRow(n) {
+            return `<div class="list-row">
+                <div class="lr-main"><b>${n.name || 'Unnamed'} · Room ${n.room || '—'}</b><span>${n.location || ''} · Move-out ${fmtDate(n.moveOutDate)}</span></div>
+                <span class="lr-tag">${fmtDate(n.submittedAt)}</span>
+            </div>`;
+        }
+
+        // ===================== AUTH =====================
         async function registerUser(e) {
             e.preventDefault();
             S('register-error').style.display = 'none';
@@ -1199,22 +1393,19 @@
             const userValid = validateInputUsername('re-username', 're-username-err');
             const pwdMatch = checkPasswordMatch();
             const popia = S('re-popia').checked;
-            if (!need(['re-name','re-phone','re-username','re-password','re-password2']) || !phoneValid || !userValid || !pwdMatch || !popia) {
+            if (!need(['re-name', 're-phone', 're-username', 're-password', 're-password2']) || !phoneValid || !userValid || !pwdMatch || !popia) {
                 S('register-error').textContent = 'Please correct the highlighted fields and accept the POPIA consent.';
                 S('register-error').style.display = 'block';
                 return;
             }
             const passwordHash = await sha256Hex(val('re-password'));
             const role = S('re-role').value;
-            jsonpFetchP('register', {
-                username: val('re-username'), passwordHash, name: val('re-name'), phone: val('re-phone'), role
-            }, res => {
+            jsonpFetchP('register', { username: val('re-username'), passwordHash, name: val('re-name'), phone: val('re-phone'), role }, res => {
                 if (res && res.ok) {
                     saveSession(val('re-username'), val('re-name'), role);
                     refreshAuthUI();
                     closeModal();
-                    alert('Account created — you are signed in.');
-                    if (role === 'Landlord') switchView('landlord');
+                    switchView(role === 'Landlord' ? 'landlord' : 'tenant');
                 } else {
                     S('register-error').textContent = (res && res.message) || 'That username is already taken — please choose another.';
                     S('register-error').style.display = 'block';
@@ -1228,14 +1419,14 @@
         async function loginUser(e) {
             e.preventDefault();
             S('login-error').style.display = 'none';
-            if (!need(['lo-username','lo-password'])) return;
+            if (!need(['lo-username', 'lo-password'])) return;
             const passwordHash = await sha256Hex(val('lo-password'));
             jsonpFetchP('login', { username: val('lo-username'), passwordHash }, res => {
                 if (res && res.ok) {
                     saveSession(val('lo-username'), res.name || val('lo-username'), res.role || 'Tenant');
                     refreshAuthUI();
                     closeModal();
-                    if (res.role === 'Landlord') switchView('landlord');
+                    switchView(res.role === 'Landlord' ? 'landlord' : 'tenant');
                 } else {
                     S('login-error').style.display = 'block';
                 }
@@ -1250,17 +1441,9 @@
             S('forgot-error').style.display = 'none';
             if (!need(['fp-username'])) return;
             jsonpFetchP('forgotPassword', { username: val('fp-username') }, res => {
-                if (res && res.ok) {
-                    S('forgotForm').classList.add('hidden');
-                    S('forgot-done').classList.remove('hidden');
-                } else {
-                    S('forgot-error').textContent = (res && res.message) || 'We could not find that username.';
-                    S('forgot-error').style.display = 'block';
-                }
-            }, () => {
-                S('forgot-error').textContent = 'Could not reach the server. Please try again.';
-                S('forgot-error').style.display = 'block';
-            });
+                if (res && res.ok) { S('forgotForm').classList.add('hidden'); S('forgot-done').classList.remove('hidden'); }
+                else { S('forgot-error').textContent = (res && res.message) || 'We could not find that username.'; S('forgot-error').style.display = 'block'; }
+            }, () => { S('forgot-error').textContent = 'Could not reach the server. Please try again.'; S('forgot-error').style.display = 'block'; });
         }
     </script>
 </body>
