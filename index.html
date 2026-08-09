@@ -172,6 +172,8 @@
         .step-dot.on { background: var(--accent); }
         .apply-step { display: none; }
         .apply-step.on { display: block; }
+        .tenant-tab { display: none; }
+        .tenant-tab.on { display: block; }
 
         .done-box { text-align: center; padding: 2rem 1rem; }
         .done-box .tick {
@@ -219,10 +221,10 @@
             </div>
             <nav class="topnav">
                 <a onclick="switchView('public')">Listings</a>
-                <a onclick="switchView('apply')">Apply</a>
+                <a id="nav-apply" onclick="switchView('apply')">Apply</a>
                 <a onclick="switchView('track')">Track Application</a>
-                <a onclick="openTenantPortal()">Tenant Portal</a>
-                <a onclick="switchView('landlord')">Landlord Console</a>
+                <a id="nav-tenant-portal" onclick="openTenantPortal()">Tenant Portal</a>
+                <a onclick="switchView('landlord')" id="nav-landlord-console">Landlord Console</a>
             </nav>
             <div class="topbar-actions">
                 <span class="whoami hidden" id="whoami"></span>
@@ -293,6 +295,8 @@
             <input type="hidden" id="ap-property-ref" value="">
             <input type="hidden" id="ap-property-title" value="">
             <input type="hidden" id="ap-property-rent" value="">
+            <input type="hidden" id="ap-owner-username" value="">
+            <input type="hidden" id="ap-owner-name" value="">
 
             <form id="applyForm" onsubmit="submitApplication(event)">
                 <!-- STEP 1: who you are -->
@@ -422,7 +426,40 @@
         </div>
 
         <div id="tenant-unlocked" class="hidden">
-            <div class="panel section-narrow" style="margin:2.6rem auto 1.6rem">
+            <div class="section-narrow" style="margin:2.6rem auto 0">
+                <div class="modal-tabs" style="margin-bottom:1.4rem">
+                    <button type="button" class="modal-tab on" id="ttab-apps" onclick="switchTenantTab('apps')">My Applications</button>
+                    <button type="button" class="modal-tab" id="ttab-contracts" onclick="switchTenantTab('contracts')">My Contracts</button>
+                    <button type="button" class="modal-tab" id="ttab-fault" onclick="switchTenantTab('fault')">Report a Fault</button>
+                    <button type="button" class="modal-tab" id="ttab-notice" onclick="switchTenantTab('notice')">Give Notice</button>
+                </div>
+            </div>
+
+            <!-- TAB: My Applications -->
+            <div class="tenant-tab on" id="ttab-panel-apps">
+                <div class="panel section-narrow" style="margin:0 auto 2.6rem">
+                    <h2>My Applications</h2>
+                    <p class="hint" style="margin-bottom:1rem">Every application you've submitted, and where each one stands.</p>
+                    <div class="form-group" style="display:flex;gap:8px;align-items:flex-end">
+                        <div style="flex:1"><label for="ta-email">Email used to apply</label><input type="email" id="ta-email"></div>
+                        <button class="btn btn-primary" style="flex:0 0 auto" onclick="loadMyApplications()">Load</button>
+                    </div>
+                    <div id="myApplicationsBody" style="margin-top:1rem"><p class="hint">Enter your email and tap Load.</p></div>
+                </div>
+            </div>
+
+            <!-- TAB: My Contracts -->
+            <div class="tenant-tab" id="ttab-panel-contracts">
+                <div class="panel section-narrow" style="margin:0 auto 2.6rem">
+                    <h2>My Contracts</h2>
+                    <p class="hint" style="margin-bottom:1rem">Lease contracts you've signed.</p>
+                    <div id="myContractsBody"><p class="hint">Load your applications above first.</p></div>
+                </div>
+            </div>
+
+            <!-- TAB: Report a Fault -->
+            <div class="tenant-tab" id="ttab-panel-fault">
+            <div class="panel section-narrow" style="margin:0 auto 2.6rem">
                 <h2>Report a Maintenance Fault</h2>
                 <p class="hint" style="margin-bottom:1.1rem">Plumbing, electrical, or anything that needs attention — let us know.</p>
                 <form id="faultForm" onsubmit="submitFault(event)">
@@ -464,7 +501,10 @@
                     <div class="ref-pill" id="fault-ref"></div>
                 </div>
             </div>
+            </div>
 
+            <!-- TAB: Give Notice -->
+            <div class="tenant-tab" id="ttab-panel-notice">
             <div class="panel section-narrow" style="margin:0 auto 2.6rem">
                 <h2>Submit Notice to Vacate</h2>
                 <p class="hint" style="margin-bottom:1.1rem">Planning to move out? Submit your calendar month's notice here.</p>
@@ -499,6 +539,7 @@
                     <div class="ref-pill" id="notice-ref"></div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
@@ -522,8 +563,16 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="lp-location">Location</label>
-                            <select id="lp-location" required><option>Olieven</option><option>Midrand</option><option>Tembisa</option><option>Pretoria</option></select>
+                            <label for="lp-location">Location / Suburb</label>
+                            <input type="text" id="lp-location" list="locationOptions" placeholder="e.g. Olievenhoutbosch, Ext 36" required>
+                            <datalist id="locationOptions">
+                                <option value="Olievenhoutbosch"></option>
+                                <option value="Olieven Ext 36"></option>
+                                <option value="Midrand"></option>
+                                <option value="Tembisa"></option>
+                                <option value="Centurion"></option>
+                                <option value="Pretoria"></option>
+                            </datalist>
                         </div>
                         <div class="form-group"><label for="lp-rent">Monthly Rent (ZAR)</label><input type="number" id="lp-rent" placeholder="4500" required></div>
                     </div>
@@ -735,6 +784,13 @@
 
         // ===================== VIEW ROUTING =====================
         function switchView(viewName) {
+            const s = getSession();
+            if (s && s.role === 'Landlord' && (viewName === 'apply' || viewName === 'tenant')) {
+                viewName = 'landlord';
+            }
+            if (s && s.role === 'Tenant' && viewName === 'landlord') {
+                viewName = 'tenant';
+            }
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
             const target = S(viewName + '-view');
             if (target) target.classList.add('active-view');
@@ -832,6 +888,10 @@
                 S('signout-btn').classList.add('hidden');
                 S('auth-btn').classList.remove('hidden');
             }
+            const isLandlord = !!(s && s.role === 'Landlord');
+            S('nav-apply').classList.toggle('hidden', isLandlord);
+            S('nav-tenant-portal').classList.toggle('hidden', isLandlord);
+            S('nav-landlord-console').classList.toggle('hidden', !!(s && s.role === 'Tenant'));
         }
         function refreshLandlordGate() {
             const s = getSession();
@@ -845,6 +905,70 @@
             const unlocked = !!(s && s.role === 'Tenant');
             S('tenant-locked').classList.toggle('hidden', unlocked);
             S('tenant-unlocked').classList.toggle('hidden', !unlocked);
+            if (unlocked) {
+                if (S('ta-email').value === '' && s.username && s.username.includes('@')) S('ta-email').value = s.username;
+                if (S('ta-email').value) loadMyApplications();
+            }
+        }
+        function switchTenantTab(tab) {
+            document.querySelectorAll('.tenant-tab').forEach(el => el.classList.remove('on'));
+            document.querySelectorAll('.modal-tabs .modal-tab').forEach(el => el.classList.remove('on'));
+            S('ttab-panel-' + tab).classList.add('on');
+            S('ttab-' + tab).classList.add('on');
+        }
+        let MY_APPS_CACHE = [];
+        function loadMyApplications() {
+            if (!val('ta-email')) { S('myApplicationsBody').innerHTML = '<p class="hint">Enter your email above.</p>'; return; }
+            const email = val('ta-email');
+            S('myApplicationsBody').innerHTML = '<p class="hint">Loading…</p>';
+            jsonpFetchP('myApplicationsByEmail', { email }, list => {
+                MY_APPS_CACHE = Array.isArray(list) ? list : [];
+                renderMyApplications();
+                renderMyContracts();
+            }, () => { S('myApplicationsBody').innerHTML = '<p class="hint">Could not load your applications.</p>'; });
+        }
+        function renderMyApplications() {
+            const body = S('myApplicationsBody');
+            if (!MY_APPS_CACHE.length) { body.innerHTML = '<p class="hint">No applications found for that email.</p>'; return; }
+            const sorted = MY_APPS_CACHE.slice().sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+            body.innerHTML = sorted.map(a => `
+                <div class="list-row">
+                    <div class="lr-main"><b>${a.propertyTitle || a.ref}</b><span>${a.ref} · ${fmtDate(a.submittedAt)}</span></div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span class="lr-tag${a.status === 'Declined' ? ' urgent' : ''}">${a.status}${a.paymentStatus === 'Paid' ? ' · Paid' : ''}</span>
+                        <button class="btn btn-outline btn-small" onclick="openTrackFor('${a.ref}','${val('ta-email')}')">Open</button>
+                    </div>
+                </div>`).join('');
+        }
+        function renderMyContracts() {
+            const body = S('myContractsBody');
+            const signed = MY_APPS_CACHE.filter(a => a.contractAcceptedAt);
+            if (!signed.length) { body.innerHTML = '<p class="hint">No signed contracts yet — these appear once your application is approved and you\'ve signed.</p>'; return; }
+            body.innerHTML = signed.map(a => `
+                <div class="list-row">
+                    <div class="lr-main"><b>${a.propertyTitle || a.ref}</b><span>${a.ref} · Signed ${fmtDate(a.contractAcceptedAt)}</span></div>
+                    <button class="btn btn-outline btn-small" onclick="viewMyContract('${a.ref}')">View Contract</button>
+                </div>`).join('');
+        }
+        function openTrackFor(ref, email) {
+            switchView('track');
+            S('tk-ref').value = ref;
+            S('tk-email').value = email;
+            lookupApplication();
+        }
+        function viewMyContract(ref) {
+            jsonpFetchP('myApplication', { ref, email: val('ta-email') }, a => {
+                if (!a || !a.success) { alert('Could not load contract.'); return; }
+                const w = window.open('', '_blank');
+                w.document.write(`
+                    <h2 style="font-family:Georgia,serif">Lease Contract — ${a.ref}</h2>
+                    <p><b>${a.propertyTitle || ''}</b></p>
+                    <p>Signed: ${fmtDate(a.contractAcceptedAt)}</p>
+                    <p style="max-width:500px;line-height:1.6">This confirms the tenant's agreement to lease the referenced property, subject to Maoka Residence's standard house rules
+                    (no subletting, POPIA-compliant handling of data, rent due monthly in advance, one calendar month's written notice to vacate).</p>
+                    ${a.tenantSignature ? `<p><b>Signature:</b></p><img src="${a.tenantSignature}" style="border:1px solid #ccc;max-width:300px">` : ''}
+                `);
+            }, () => alert('Could not reach the server.'));
         }
 
         // ===================== API =====================
@@ -971,6 +1095,8 @@
             S('ap-property-ref').value = ref || '';
             S('ap-property-title').value = item ? (item.title || '') : '';
             S('ap-property-rent').value = item ? (item.rent || '') : '';
+            S('ap-owner-username').value = item ? (item.username || '') : '';
+            S('ap-owner-name').value = item ? (item.ownerName || '') : '';
             S('apply-property-hint').textContent = item ? `Applying for: ${item.title} — R${item.rent}/mo` : 'Tell us a bit about yourself — this takes about five minutes.';
             updateCriteriaHint();
         }
@@ -1040,6 +1166,7 @@
                 type: 'application', ref, submittedAt: new Date().toISOString(), status: 'Pending',
                 name: val('ap-name'), phone: val('ap-phone'), email: val('ap-email'),
                 propertyRef: S('ap-property-ref').value, propertyTitle: S('ap-property-title').value, propertyRent: S('ap-property-rent').value,
+                ownerUsername: S('ap-owner-username').value, ownerName: S('ap-owner-name').value,
                 moveInDate: val('ap-movein'), employmentStatus: S('ap-employment').value, employer: val('ap-employer'),
                 monthlyIncome: val('ap-income'), notes: val('ap-notes')
             }, APPLY_DOCS));
@@ -1181,18 +1308,24 @@
             body.innerHTML = '<p class="hint">Loading…</p>';
             jsonpFetchP('landlordApplications', { username: s.username }, list => {
                 OWNER_APPS_CACHE = Array.isArray(list) ? list : [];
-                const pending = OWNER_APPS_CACHE.filter(a => a.status === 'Pending');
-                if (!pending.length) { body.innerHTML = '<p class="hint">No applications waiting on your review.</p>'; return; }
-                body.innerHTML = pending.map(a => `
+                if (!OWNER_APPS_CACHE.length) { body.innerHTML = '<p class="hint">No applications for your listings yet.</p>'; return; }
+                const sorted = OWNER_APPS_CACHE.slice().sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+                const statusColor = { Pending: '', Approved: '', Declined: ' urgent', ContractSigned: '', Paid: '' };
+                body.innerHTML = sorted.map(a => `
                     <div class="list-row" style="flex-direction:column;align-items:stretch;gap:8px">
                         <div class="lr-main"><b>${a.name} — ${a.propertyTitle || ''}</b><span>${a.phone} · ${a.email} · R${a.monthlyIncome || '—'}/mo · ${a.employmentStatus || ''}</span></div>
-                        <div><span class="lr-tag${a.meetsCriteria ? '' : ' urgent'}">${a.meetsCriteria ? 'Meets criteria' : 'Below criteria'}</span>
-                             ${!a.meetsCriteria && a.criteriaNotes ? `<span class="hint" style="margin-left:8px">${a.criteriaNotes}</span>` : ''}</div>
+                        <div>
+                            <span class="lr-tag${statusColor[a.status] || ''}">${a.status}${a.paymentStatus === 'Paid' ? ' · Paid' : ''}</span>
+                            ${a.status === 'Pending' ? `<span class="lr-tag${a.meetsCriteria ? '' : ' urgent'}" style="margin-left:6px">${a.meetsCriteria ? 'Meets criteria' : 'Below criteria'}</span>` : ''}
+                        </div>
+                        ${a.status === 'Pending' && !a.meetsCriteria && a.criteriaNotes ? `<div class="hint">${a.criteriaNotes}</div>` : ''}
                         <div class="hint">Docs: ${a.hasIdDoc ? 'ID ✓' : 'ID ✗'} · ${a.hasPayslip ? 'Payslip ✓' : 'Payslip ✗'} · ${a.hasBankStatement ? 'Bank stmt ✓' : 'Bank stmt ✗'}</div>
-                        <div style="display:flex;gap:8px">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
                             <button class="btn btn-outline btn-small" onclick="viewApplicationDocs('${a.ref}')">View Documents</button>
-                            <button class="btn btn-small" style="background:#EEF6F3;color:var(--accent-dark)" onclick="decideApplication('${a.ref}','Approved')">Approve</button>
-                            <button class="btn btn-small" style="background:#FBEAEA;color:var(--danger)" onclick="decideApplication('${a.ref}','Declined')">Decline</button>
+                            ${a.status === 'Pending' ? `
+                                <button class="btn btn-small" style="background:#EEF6F3;color:var(--accent-dark)" onclick="decideApplication('${a.ref}','Approved')">Approve</button>
+                                <button class="btn btn-small" style="background:#FBEAEA;color:var(--danger)" onclick="decideApplication('${a.ref}','Declined')">Decline</button>
+                            ` : ''}
                         </div>
                     </div>`).join('');
             }, () => { body.innerHTML = '<p class="hint">Could not load applications.</p>'; });
@@ -1293,7 +1426,7 @@
             S('lp-editing-ref').value = ref;
             S('lp-type').value = item.propertyType || 'Room';
             S('lp-title').value = item.title || '';
-            S('lp-location').value = item.location || 'Olieven';
+            S('lp-location').value = item.location || '';
             S('lp-rent').value = item.rent || '';
             S('lp-available').value = item.availableFrom || '';
             S('lp-bedrooms').value = item.bedrooms || 1;
@@ -1311,6 +1444,15 @@
             const s = getSession();
             if (!s) return;
             await postToSheet({ type: 'propertyStatus', ref, status: newStatus, username: s.username });
+            loadMyProperties();
+            loadListings();
+        }
+
+        async function removeListing(ref, title) {
+            const s = getSession();
+            if (!s) return;
+            if (!confirm(`Permanently remove "${title || ref}"? This can't be undone.`)) return;
+            await postToSheet({ type: 'propertyDelete', ref, username: s.username });
             loadMyProperties();
             loadListings();
         }
@@ -1333,6 +1475,7 @@
                         <div style="display:flex;gap:6px;flex-shrink:0">
                             <button class="btn btn-outline btn-small" onclick="startEditListing('${p.ref}')">Edit</button>
                             <button class="btn btn-small" style="background:${active ? '#FBEAEA' : '#EEF6F3'};color:${active ? 'var(--danger)' : 'var(--accent-dark)'}" onclick="toggleListingStatus('${p.ref}','${active ? 'Inactive' : 'Active'}')">${active ? 'Deactivate' : 'Reactivate'}</button>
+                            <button class="btn btn-small" style="background:#FBEAEA;color:var(--danger)" onclick="removeListing('${p.ref}','${(p.title || '').replace(/'/g, "\\'")}')">Remove</button>
                         </div>
                     </div>`;
                 }).join('');
