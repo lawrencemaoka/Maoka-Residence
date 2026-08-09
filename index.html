@@ -1181,7 +1181,11 @@
         let TRACK_STATE = null;
         function lookupApplication() {
             S('track-error').style.display = 'none';
-            if (!need(['tk-ref', 'tk-email'])) return;
+            if (!need(['tk-ref', 'tk-email'])) {
+                S('track-error').textContent = 'Please enter both your reference number and email address.';
+                S('track-error').style.display = 'block';
+                return;
+            }
             jsonpFetchP('myApplication', { ref: val('tk-ref'), email: val('tk-email') }, res => {
                 if (!res || !res.success) {
                     S('track-error').textContent = (res && res.message) || 'Could not find that application.';
