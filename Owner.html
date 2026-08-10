@@ -506,6 +506,33 @@ input.err,select.err{border-color:var(--bad);}
 .modal-actions{display:flex;gap:10px;margin-top:16px;}
 .modal-actions .btn{flex:1;}
 
+/* receipt scanner */
+.scanner-overlay{position:fixed;inset:0;background:#0A0C10;z-index:200;display:flex;flex-direction:column;}
+.scanner-overlay.hidden{display:none;}
+.scanner-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;flex-shrink:0;}
+.scanner-top .stitle{font-family:'Barlow Condensed';font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-size:15px;}
+.scanner-close{background:none;border:none;color:var(--muted);font-size:22px;line-height:1;cursor:pointer;padding:4px 8px;}
+.scanner-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px;min-height:0;}
+.scanner-stage video{width:100%;height:100%;object-fit:contain;background:#000;border-radius:10px;}
+.scanner-canvas-wrap{position:relative;max-width:100%;max-height:100%;display:flex;align-items:center;justify-content:center;}
+.scanner-canvas-wrap canvas{max-width:100%;max-height:100%;display:block;border-radius:6px;touch-action:none;}
+.scanner-svg{position:absolute;top:0;left:0;pointer-events:none;}
+.scanner-svg polygon{fill:rgba(232,166,38,.16);stroke:var(--gold);stroke-width:2.5;}
+.corner-handle{position:absolute;width:26px;height:26px;margin-left:-13px;margin-top:-13px;border-radius:50%;
+  background:var(--gold);border:3px solid var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.5);touch-action:none;cursor:grab;}
+.scanner-hint{text-align:center;color:var(--muted);font-size:13px;padding:0 20px 8px;flex-shrink:0;}
+.scanner-filters{display:flex;gap:10px;justify-content:center;padding:0 16px 10px;flex-shrink:0;}
+.filter-chip{background:var(--panel2);border:1.5px solid var(--line);color:var(--paper);border-radius:10px;
+  padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase;}
+.filter-chip.on{background:var(--gold);color:#1B1403;border-color:var(--gold);}
+.scanner-bottom{display:flex;gap:10px;padding:14px 16px calc(16px + env(safe-area-inset-bottom));flex-shrink:0;}
+.scanner-bottom .btn{flex:1;}
+.scanner-shutter-row{display:flex;align-items:center;justify-content:center;gap:24px;padding:6px 16px 16px;flex-shrink:0;}
+.shutter-btn{width:68px;height:68px;border-radius:50%;background:var(--paper);border:4px solid var(--gold);cursor:pointer;flex-shrink:0;}
+.scanner-side-btn{background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:12px;
+  padding:12px 16px;font-size:13px;cursor:pointer;flex-shrink:0;}
+.scanner-fallback{color:var(--muted);font-size:14px;text-align:center;padding:20px;}
+
 /* signature */
 .sig{margin-bottom:20px;}
 .sig em{display:block;font-style:normal;font-family:'Barlow Condensed';font-weight:700;font-size:15px;
@@ -701,6 +728,65 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
   </div>
 </div>
 
+<!-- RECEIPT SCANNER -->
+<div class="scanner-overlay hidden" id="scannerOverlay">
+  <div class="scanner-top">
+    <span class="stitle" id="scannerStepTitle">Scan Receipt</span>
+    <button type="button" class="scanner-close" onclick="closeScanner()">✕</button>
+  </div>
+
+  <!-- Stage: camera -->
+  <div class="scanner-stage" id="scannerStageCamera">
+    <video id="scannerVideo" autoplay playsinline muted></video>
+    <div class="scanner-fallback hidden" id="scannerNoCam">
+      Camera not available on this device/browser.<br>Choose a photo instead below.
+    </div>
+  </div>
+
+  <!-- Stage: crop (adjust corners) -->
+  <div class="scanner-stage hidden" id="scannerStageCrop">
+    <div class="scanner-canvas-wrap" id="scannerCropWrap">
+      <canvas id="scannerCropCanvas"></canvas>
+      <svg class="scanner-svg" id="scannerSvg"><polygon id="scannerPoly" points=""></polygon></svg>
+      <div class="corner-handle" id="handle0"></div>
+      <div class="corner-handle" id="handle1"></div>
+      <div class="corner-handle" id="handle2"></div>
+      <div class="corner-handle" id="handle3"></div>
+    </div>
+  </div>
+
+  <!-- Stage: filter preview -->
+  <div class="scanner-stage hidden" id="scannerStageFilter">
+    <div class="scanner-canvas-wrap"><canvas id="scannerPreviewCanvas"></canvas></div>
+  </div>
+
+  <p class="scanner-hint" id="scannerHint">Line up the receipt inside the frame, then tap the shutter.</p>
+
+  <div class="scanner-filters hidden" id="scannerFilterBar">
+    <button type="button" class="filter-chip" id="chipOriginal" onclick="setScanFilter('original')">Original</button>
+    <button type="button" class="filter-chip on" id="chipEnhance" onclick="setScanFilter('enhance')">Enhance</button>
+    <button type="button" class="filter-chip" id="chipBw" onclick="setScanFilter('bw')">B &amp; W</button>
+  </div>
+
+  <div class="scanner-shutter-row" id="scannerShutterRow">
+    <button type="button" class="scanner-side-btn" onclick="pickFromGallery()">🖼️ Gallery</button>
+    <button type="button" class="shutter-btn" id="shutterBtn" onclick="capturePhoto()"></button>
+    <span style="width:78px"></span>
+  </div>
+
+  <div class="scanner-bottom hidden" id="scannerCropActions">
+    <button type="button" class="btn ghost" onclick="retakeScan()">Retake</button>
+    <button type="button" class="btn primary" onclick="confirmCrop()">Use these edges</button>
+  </div>
+
+  <div class="scanner-bottom hidden" id="scannerFilterActions">
+    <button type="button" class="btn ghost" onclick="showCropStage()">Back to crop</button>
+    <button type="button" class="btn primary" onclick="useScan()">Use this scan</button>
+  </div>
+
+  <input type="file" id="scannerFileInput" accept="image/*" capture="environment" style="display:none">
+</div>
+
 
 <!-- SEND INFO TO TENANTS (owner only) -->
 <div class="wrap hidden" id="viewAnnounce">
@@ -778,8 +864,8 @@ footer{margin-top:26px;text-align:center;color:#5E6672;font-size:12px;line-heigh
       <label class="f"><em>Room No. <span style="font-weight:400;color:var(--muted)">(leave blank if not room-specific)</span></em><input type="text" id="exRoom" placeholder="e.g. 3 — for repairs done in a specific room"></label>
       <label class="f"><em>Date <b>*</b></em><input type="date" id="exDate"></label>
       <label class="f"><em>Receipt (optional)</em>
-        <input type="file" id="exReceipt" accept="image/*" capture="environment" style="display:none">
-        <button type="button" class="upload" onclick="document.getElementById('exReceipt').click()">📷 &nbsp;Scan or attach a receipt</button>
+        <input type="file" id="exReceipt" accept="image/*" style="display:none">
+        <button type="button" class="upload" onclick="openScanner()">📷 &nbsp;Scan a receipt</button>
         <span id="exReceiptStatus" class="hint" style="display:block;margin-top:8px">No receipt attached.</span>
       </label>
       <label class="f"><em>Notes</em><input type="text" id="exNotes" placeholder="Optional"></label>
@@ -1598,12 +1684,6 @@ function markPaid(room, name){
 
 /* ---------- owner: expense tracker ---------- */
 let EXPENSE_RECEIPT = null;
-document.getElementById('exReceipt') && document.getElementById('exReceipt').addEventListener('change', e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = ev => { EXPENSE_RECEIPT = ev.target.result; S('exReceiptStatus').textContent = 'Receipt attached: '+f.name; };
-  reader.readAsDataURL(f);
-});
 function toggleExpenseForm(){
   const body = S('expenseFormBody');
   const hidden = body.classList.toggle('hidden');
@@ -1684,7 +1764,15 @@ function exportExpensesCSV(){
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
-function exportExpensesPDF(){
+function imageDimensions(dataUrl){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve({w:img.naturalWidth||1, h:img.naturalHeight||1});
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+async function exportExpensesPDF(){
   const list = filteredExpenses().sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
   if(!list.length) return toast('No expenses to export for this period');
   const { jsPDF } = window.jspdf;
@@ -1729,9 +1817,417 @@ function exportExpensesPDF(){
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...INK);
   doc.text('Total: R'+total.toFixed(2), M+CW-50, y);
   y += 10;
+  const withReceipts = list.filter(e => e.receipt);
   doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(...MUT);
-  doc.text('Prepared for bookkeeping / tax purposes. Receipts held on file for items marked with a receipt.', M, y);
+  doc.text(withReceipts.length
+    ? 'Prepared for bookkeeping / tax purposes. '+withReceipts.length+' scanned receipt(s) attached on the following pages.'
+    : 'Prepared for bookkeeping / tax purposes.', M, y);
+
+  /* ---- receipts appendix: one scanned receipt per page ---- */
+  for(const e of withReceipts){
+    doc.addPage();
+    doc.setFillColor(20,23,28); doc.rect(0,0,W,26,'F');
+    doc.setTextColor(232,166,38); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text('RECEIPT — '+(e.ref||''),M,11);
+    doc.setTextColor(220,222,228); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    const line2 = (e.date?fmtDate(e.date):'') + ' · ' + (e.category||'') + ' · ' + (e.description||'');
+    doc.text(doc.splitTextToSize(line2, CW)[0]||'', M, 17);
+    doc.setFontSize(8); doc.setTextColor(150,160,173);
+    const line3 = 'R'+(Number(e.amount)||0).toFixed(2) + (e.paidTo ? '  ·  Paid to '+e.paidTo : '') + (e.room ? '  ·  Room '+e.room : '');
+    doc.text(line3, M, 22);
+    let iy = 34;
+    const dims = await imageDimensions(e.receipt);
+    if(dims){
+      const maxW = CW, maxH = 297 - iy - 16;
+      let dw = maxW, dh = dw * dims.h / dims.w;
+      if(dh > maxH){ dh = maxH; dw = dh * dims.w / dims.h; }
+      const dx = M + (maxW - dw) / 2;
+      const format = /^data:image\/png/i.test(e.receipt) ? 'PNG' : 'JPEG';
+      try{ doc.addImage(e.receipt, format, dx, iy, dw, dh); }
+      catch(err){ doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(...MUT); doc.text('Receipt image could not be embedded.', M, iy+10); }
+    } else {
+      doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(...MUT);
+      doc.text('Receipt image could not be loaded.', M, iy+10);
+    }
+  }
+
   doc.save('Maoka-Residence-Expenses-'+S('exPeriod').value+'-'+new Date().toISOString().slice(0,10)+'.pdf');
+}
+
+/* ================= receipt scanner ================= */
+let SCAN_STREAM = null;
+let SCAN_SOURCE_CANVAS = null;
+let SCAN_POINTS = null;
+let SCAN_WARPED_CANVAS = null;
+let SCAN_FILTER = 'enhance';
+let SCAN_DISPLAY_SCALE = 1;
+let SCAN_DRAG_IDX = -1;
+
+function openScanner(){
+  S('scannerOverlay').classList.remove('hidden');
+  SCAN_SOURCE_CANVAS = null; SCAN_POINTS = null; SCAN_WARPED_CANVAS = null;
+  showCameraStage();
+}
+function closeScanner(){
+  stopScanStream();
+  S('scannerOverlay').classList.add('hidden');
+}
+function stopScanStream(){
+  if(SCAN_STREAM){ SCAN_STREAM.getTracks().forEach(t => t.stop()); SCAN_STREAM = null; }
+}
+function showScanStage(name){
+  ['Camera','Crop','Filter'].forEach(s => S('scannerStage'+s).classList.toggle('hidden', s !== name));
+  S('scannerFilterBar').classList.toggle('hidden', name !== 'Filter');
+  S('scannerShutterRow').classList.toggle('hidden', name !== 'Camera');
+  S('scannerCropActions').classList.toggle('hidden', name !== 'Crop');
+  S('scannerFilterActions').classList.toggle('hidden', name !== 'Filter');
+  const titles = {Camera:'Scan Receipt', Crop:'Adjust Edges', Filter:'Choose Style'};
+  const hints = {Camera:'Line up the receipt inside the frame, then tap the shutter.',
+    Crop:'Drag the gold dots to match the receipt\u2019s corners.',
+    Filter:'Pick the style your bookkeeper will see clearest.'};
+  S('scannerStepTitle').textContent = titles[name];
+  S('scannerHint').textContent = hints[name];
+}
+async function showCameraStage(){
+  showScanStage('Camera');
+  S('scannerNoCam').classList.add('hidden');
+  S('scannerVideo').classList.remove('hidden');
+  try{
+    SCAN_STREAM = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1920}}, audio:false
+    });
+    S('scannerVideo').srcObject = SCAN_STREAM;
+  }catch(err){
+    S('scannerVideo').classList.add('hidden');
+    S('scannerNoCam').classList.remove('hidden');
+  }
+}
+function capturePhoto(){
+  const video = S('scannerVideo');
+  if(!video.videoWidth) return toast('Camera still loading — try again in a moment');
+  const c = document.createElement('canvas');
+  c.width = video.videoWidth; c.height = video.videoHeight;
+  c.getContext('2d').drawImage(video, 0, 0);
+  SCAN_SOURCE_CANVAS = c;
+  stopScanStream();
+  SCAN_POINTS = null;
+  showCropStage();
+}
+function pickFromGallery(){
+  S('scannerFileInput').click();
+}
+document.getElementById('scannerFileInput') && document.getElementById('scannerFileInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    SCAN_SOURCE_CANVAS = c;
+    stopScanStream();
+    SCAN_POINTS = null;
+    showCropStage();
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f);
+  e.target.value = '';
+});
+function retakeScan(){
+  SCAN_SOURCE_CANVAS = null; SCAN_POINTS = null; SCAN_WARPED_CANVAS = null;
+  showCameraStage();
+}
+function showCropStage(){
+  showScanStage('Crop');
+  const src = SCAN_SOURCE_CANVAS;
+  const canvas = S('scannerCropCanvas');
+  const wrap = S('scannerCropWrap');
+  const stage = S('scannerStageCrop');
+  const maxW = Math.max(100, stage.clientWidth - 24);
+  const maxH = Math.max(100, stage.clientHeight - 24);
+  const scale = Math.min(maxW / src.width, maxH / src.height, 1);
+  const dispW = Math.round(src.width * scale), dispH = Math.round(src.height * scale);
+  canvas.width = src.width; canvas.height = src.height;
+  canvas.style.width = dispW + 'px'; canvas.style.height = dispH + 'px';
+  canvas.getContext('2d').drawImage(src, 0, 0);
+  wrap.style.width = dispW + 'px'; wrap.style.height = dispH + 'px';
+  const svg = S('scannerSvg');
+  svg.setAttribute('width', dispW); svg.setAttribute('height', dispH);
+  svg.setAttribute('viewBox', `0 0 ${dispW} ${dispH}`);
+  SCAN_DISPLAY_SCALE = dispW / src.width;
+  if(!SCAN_POINTS) SCAN_POINTS = autoDetectQuad(src);
+  positionHandlesAndPoly();
+}
+function positionHandlesAndPoly(){
+  const s = SCAN_DISPLAY_SCALE;
+  const disp = SCAN_POINTS.map(p => ({x: p.x * s, y: p.y * s}));
+  disp.forEach((p, i) => {
+    const h = S('handle' + i);
+    h.style.left = p.x + 'px'; h.style.top = p.y + 'px';
+  });
+  S('scannerPoly').setAttribute('points', disp.map(p => `${p.x},${p.y}`).join(' '));
+}
+[0,1,2,3].forEach(i => {
+  const h = document.getElementById('handle' + i);
+  h && h.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    SCAN_DRAG_IDX = i;
+    try{ e.target.setPointerCapture(e.pointerId); }catch(err){}
+  });
+});
+document.addEventListener('pointermove', e => {
+  if(SCAN_DRAG_IDX < 0 || !SCAN_POINTS || !SCAN_SOURCE_CANVAS) return;
+  const wrap = S('scannerCropWrap');
+  const rect = wrap.getBoundingClientRect();
+  let x = (e.clientX - rect.left) / SCAN_DISPLAY_SCALE;
+  let y = (e.clientY - rect.top) / SCAN_DISPLAY_SCALE;
+  x = Math.max(0, Math.min(SCAN_SOURCE_CANVAS.width, x));
+  y = Math.max(0, Math.min(SCAN_SOURCE_CANVAS.height, y));
+  SCAN_POINTS[SCAN_DRAG_IDX] = {x, y};
+  positionHandlesAndPoly();
+});
+document.addEventListener('pointerup', () => { SCAN_DRAG_IDX = -1; });
+
+function confirmCrop(){
+  if(!SCAN_POINTS || !SCAN_SOURCE_CANVAS) return;
+  const {w, h} = computeOutputSize(SCAN_POINTS);
+  SCAN_WARPED_CANVAS = warpPerspective(SCAN_SOURCE_CANVAS, SCAN_POINTS, w, h);
+  showFilterStage();
+}
+function showFilterStage(){
+  showScanStage('Filter');
+  const map = {original:'chipOriginal', enhance:'chipEnhance', bw:'chipBw'};
+  Object.values(map).forEach(id => S(id).classList.remove('on'));
+  S(map[SCAN_FILTER]).classList.add('on');
+  renderFilterPreview();
+}
+function setScanFilter(name){
+  SCAN_FILTER = name;
+  const map = {original:'chipOriginal', enhance:'chipEnhance', bw:'chipBw'};
+  Object.values(map).forEach(id => S(id).classList.remove('on'));
+  S(map[name]).classList.add('on');
+  renderFilterPreview();
+}
+function renderFilterPreview(){
+  if(!SCAN_WARPED_CANVAS) return;
+  const filtered = applyFilterToCanvas(SCAN_WARPED_CANVAS, SCAN_FILTER);
+  const canvas = S('scannerPreviewCanvas');
+  const stage = S('scannerStageFilter');
+  const maxW = Math.max(100, stage.clientWidth - 24);
+  const maxH = Math.max(100, stage.clientHeight - 24);
+  const scale = Math.min(maxW / filtered.width, maxH / filtered.height, 1);
+  canvas.width = filtered.width; canvas.height = filtered.height;
+  canvas.style.width = Math.round(filtered.width * scale) + 'px';
+  canvas.style.height = Math.round(filtered.height * scale) + 'px';
+  canvas.getContext('2d').drawImage(filtered, 0, 0);
+}
+function useScan(){
+  if(!SCAN_WARPED_CANVAS) return;
+  const finalCanvas = applyFilterToCanvas(SCAN_WARPED_CANVAS, SCAN_FILTER);
+  const quality = SCAN_FILTER === 'bw' ? 0.7 : 0.85;
+  EXPENSE_RECEIPT = finalCanvas.toDataURL('image/jpeg', quality);
+  S('exReceiptStatus').textContent = 'Receipt scanned ✓ (tap to rescan)';
+  closeScanner();
+}
+
+/* ---- image processing helpers ---- */
+function cloneCanvas(c){
+  const n = document.createElement('canvas'); n.width = c.width; n.height = c.height;
+  n.getContext('2d').drawImage(c, 0, 0);
+  return n;
+}
+function otsuThreshold(hist, total){
+  let sum = 0; for(let t=0;t<256;t++) sum += t*hist[t];
+  let sumB=0, wB=0, wF=0, varMax=0, threshold=127;
+  for(let t=0;t<256;t++){
+    wB += hist[t]; if(wB===0) continue;
+    wF = total - wB; if(wF===0) break;
+    sumB += t*hist[t];
+    const mB = sumB/wB, mF = (sum-sumB)/wF;
+    const between = wB*wF*(mB-mF)*(mB-mF);
+    if(between > varMax){ varMax = between; threshold = t; }
+  }
+  return threshold;
+}
+function autoDetectQuad(srcCanvas){
+  const W = srcCanvas.width, H = srcCanvas.height;
+  const inset = () => {
+    const mx = W*0.08, my = H*0.08;
+    return [{x:mx,y:my},{x:W-mx,y:my},{x:W-mx,y:H-my},{x:mx,y:H-my}];
+  };
+  try{
+    const small = document.createElement('canvas');
+    const scale = 220 / Math.max(W, H);
+    small.width = Math.max(1, Math.round(W*scale)); small.height = Math.max(1, Math.round(H*scale));
+    const sctx = small.getContext('2d');
+    sctx.drawImage(srcCanvas, 0, 0, small.width, small.height);
+    const id = sctx.getImageData(0, 0, small.width, small.height);
+    const n = small.width * small.height;
+    const gray = new Uint8ClampedArray(n);
+    const hist = new Array(256).fill(0);
+    for(let i=0,p=0;i<id.data.length;i+=4,p++){
+      const g = Math.round(0.299*id.data[i] + 0.587*id.data[i+1] + 0.114*id.data[i+2]);
+      gray[p] = g; hist[g]++;
+    }
+    const t = otsuThreshold(hist, n);
+    let minX=small.width, maxX=0, minY=small.height, maxY=0, brightCount=0;
+    for(let y=0;y<small.height;y++){
+      for(let x=0;x<small.width;x++){
+        const v = gray[y*small.width+x];
+        if(v >= t){ brightCount++; if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; }
+      }
+    }
+    const ratio = brightCount / n;
+    if(ratio < 0.06 || ratio > 0.94 || maxX <= minX || maxY <= minY) return inset();
+    const sx = W/small.width, sy = H/small.height, pad = 0.02;
+    const x0 = Math.max(0, minX - small.width*pad) * sx;
+    const y0 = Math.max(0, minY - small.height*pad) * sy;
+    const x1 = Math.min(small.width, maxX + small.width*pad) * sx;
+    const y1 = Math.min(small.height, maxY + small.height*pad) * sy;
+    return [{x:x0,y:y0},{x:x1,y:y0},{x:x1,y:y1},{x:x0,y:y1}];
+  }catch(err){ return inset(); }
+}
+function computeOutputSize(pts){
+  const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+  const wTop = dist(pts[0],pts[1]), wBot = dist(pts[3],pts[2]);
+  const hLeft = dist(pts[0],pts[3]), hRight = dist(pts[1],pts[2]);
+  let w = Math.max(wTop, wBot), h = Math.max(hLeft, hRight);
+  const maxSide = 1600;
+  if(Math.max(w,h) > maxSide){ const s = maxSide/Math.max(w,h); w*=s; h*=s; }
+  return {w: Math.max(50, Math.round(w)), h: Math.max(50, Math.round(h))};
+}
+function computeQuadMatrix(pts){
+  const [p0,p1,p2,p3] = pts;
+  const x0=p0.x,y0=p0.y, x1=p1.x,y1=p1.y, x2=p2.x,y2=p2.y, x3=p3.x,y3=p3.y;
+  const dx1=x1-x2, dx2=x3-x2, dx3=x0-x1+x2-x3;
+  const dy1=y1-y2, dy2=y3-y2, dy3=y0-y1+y2-y3;
+  let a,b,c,d,e,f,g,h;
+  if(Math.abs(dx3) < 1e-9 && Math.abs(dy3) < 1e-9){
+    a=x1-x0; b=x2-x1; c=x0;
+    d=y1-y0; e=y2-y1; f=y0;
+    g=0; h=0;
+  } else {
+    const den = dx1*dy2 - dy1*dx2;
+    g = den !== 0 ? (dx3*dy2 - dy3*dx2)/den : 0;
+    h = den !== 0 ? (dx1*dy3 - dy1*dx3)/den : 0;
+    a = x1-x0+g*x1; b = x3-x0+h*x3; c = x0;
+    d = y1-y0+g*y1; e = y3-y0+h*y3; f = y0;
+  }
+  return {a,b,c,d,e,f,g,h};
+}
+function warpPerspective(srcCanvas, pts, outW, outH){
+  const sctx = srcCanvas.getContext('2d');
+  const srcData = sctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height).data;
+  const sw = srcCanvas.width, sh = srcCanvas.height;
+  const M = computeQuadMatrix(pts);
+  const out = document.createElement('canvas');
+  out.width = outW; out.height = outH;
+  const octx = out.getContext('2d');
+  const outImg = octx.createImageData(outW, outH);
+  const od = outImg.data;
+  for(let y=0;y<outH;y++){
+    const v = y/outH;
+    for(let x=0;x<outW;x++){
+      const u = x/outW;
+      const w = M.g*u + M.h*v + 1;
+      const sx = (M.a*u + M.b*v + M.c) / w;
+      const sy = (M.d*u + M.e*v + M.f) / w;
+      const di = (y*outW+x)*4;
+      if(sx < 0 || sy < 0 || sx >= sw-1 || sy >= sh-1){
+        od[di]=255; od[di+1]=255; od[di+2]=255; od[di+3]=255; continue;
+      }
+      const x0 = Math.floor(sx), y0 = Math.floor(sy);
+      const fx = sx-x0, fy = sy-y0;
+      const i00=(y0*sw+x0)*4, i10=(y0*sw+x0+1)*4, i01=((y0+1)*sw+x0)*4, i11=((y0+1)*sw+x0+1)*4;
+      for(let c=0;c<3;c++){
+        const top = srcData[i00+c]*(1-fx) + srcData[i10+c]*fx;
+        const bot = srcData[i01+c]*(1-fx) + srcData[i11+c]*fx;
+        od[di+c] = top*(1-fy) + bot*fy;
+      }
+      od[di+3] = 255;
+    }
+  }
+  octx.putImageData(outImg, 0, 0);
+  return out;
+}
+function sharpenCanvas(canvas, amount){
+  const w = canvas.width, h = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const id = ctx.getImageData(0, 0, w, h);
+  const src = id.data;
+  const out = new Uint8ClampedArray(src.length);
+  const kernel = [0,-1,0,-1,5,-1,0,-1,0];
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const di = (y*w+x)*4;
+      if(x===0 || y===0 || x===w-1 || y===h-1){
+        out[di]=src[di]; out[di+1]=src[di+1]; out[di+2]=src[di+2]; out[di+3]=src[di+3];
+        continue;
+      }
+      for(let c=0;c<3;c++){
+        let sum=0, k=0;
+        for(let ky=-1;ky<=1;ky++){
+          for(let kx=-1;kx<=1;kx++){
+            const si = ((y+ky)*w + (x+kx))*4 + c;
+            sum += src[si]*kernel[k++];
+          }
+        }
+        const blended = src[di+c]*(1-amount) + sum*amount;
+        out[di+c] = blended<0 ? 0 : (blended>255 ? 255 : blended);
+      }
+      out[di+3] = src[di+3];
+    }
+  }
+  ctx.putImageData(new ImageData(out, w, h), 0, 0);
+  return canvas;
+}
+function applyEnhance(canvas){
+  const c = cloneCanvas(canvas);
+  const ctx = c.getContext('2d');
+  const id = ctx.getImageData(0, 0, c.width, c.height);
+  const d = id.data;
+  const n = d.length/4;
+  for(let ch=0; ch<3; ch++){
+    const hist = new Array(256).fill(0);
+    for(let i=ch;i<d.length;i+=4) hist[d[i]]++;
+    let lo=0, hi=255, cum=0;
+    const loTarget = n*0.01, hiTarget = n*0.99;
+    for(let v=0;v<256;v++){ cum+=hist[v]; if(cum>=loTarget){ lo=v; break; } }
+    cum=0;
+    for(let v=255;v>=0;v--){ cum+=hist[v]; if(cum>=n-hiTarget){ hi=v; break; } }
+    if(hi<=lo) continue;
+    const range = hi-lo;
+    for(let i=ch;i<d.length;i+=4){
+      let v = (d[i]-lo)*255/range;
+      d[i] = v<0 ? 0 : (v>255 ? 255 : v);
+    }
+  }
+  ctx.putImageData(id, 0, 0);
+  return sharpenCanvas(c, 0.35);
+}
+function applyBw(canvas){
+  const c = cloneCanvas(canvas);
+  const ctx = c.getContext('2d');
+  const id = ctx.getImageData(0, 0, c.width, c.height);
+  const d = id.data;
+  const n = d.length/4;
+  const gray = new Uint8ClampedArray(n);
+  const hist = new Array(256).fill(0);
+  for(let i=0,p=0;i<d.length;i+=4,p++){
+    const g = Math.round(0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]);
+    gray[p]=g; hist[g]++;
+  }
+  const t = otsuThreshold(hist, n);
+  for(let i=0,p=0;i<d.length;i+=4,p++){
+    const v = gray[p] >= t ? 255 : 0;
+    d[i]=d[i+1]=d[i+2]=v;
+  }
+  ctx.putImageData(id, 0, 0);
+  return c;
+}
+function applyFilterToCanvas(srcCanvas, name){
+  if(name === 'enhance') return applyEnhance(srcCanvas);
+  if(name === 'bw') return applyBw(srcCanvas);
+  return cloneCanvas(srcCanvas);
 }
 
 setView('home');
