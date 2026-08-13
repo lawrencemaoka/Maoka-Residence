@@ -731,6 +731,17 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
     </div>
   </div>
 
+  <div class="card navcard hidden" id="signInCard" onclick="setView('login')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🔑</span>
+      <div class="navcard-txt">
+        <h3>Sign In / Register</h3>
+        <p>Already applying or renting with us? Sign in to onboard, sign your lease, report faults, and manage your tenancy.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
   <div class="card navcard" id="applyCard" onclick="setView('apply')">
     <div class="navcard-row">
       <span class="navcard-ic">📝</span>
@@ -1924,7 +1935,7 @@ function hideAllAppViews(){
 }
 
 /* ---------- unified view router (role-aware) ---------- */
-const AUTH_REQUIRED_VIEWS = ['listProperty']; // adding/editing a listing needs a signed-in Landlord account — everything else (home, browsing, onboarding, faults, etc.) is open to everyone
+const AUTH_REQUIRED_VIEWS = ['listProperty','onboarding','fault','complaint','service','notice','apply']; // listings and browsing stay public; every tenant module needs a signed-in account
 function setView(v){
   if(AUTH_REQUIRED_VIEWS.includes(v) && !getSession()){ v = 'login'; }
   if(CURRENT_ROLE === 'tenant' && TENANT_ACCESS_REVOKED) v = 'accessrevoked';
@@ -2170,7 +2181,12 @@ async function loginTenant(){
 function routeAfterLogin(role){
   if(role === 'Landlord') setView('landlordPortal');
   else if(role === 'Admin') { S('adminWelcomeName').textContent = (getSession()||{}).name || 'Admin'; setView('adminPortal'); }
-  else setView('home');
+  else {
+    setView('home');
+    renderRoleUI();
+    loadAnnouncements();
+    checkTenantAccess();
+  }
 }
 let FIREBASE_PENDING_USER = null; // holds the Firebase user object while completing a first-time profile
 async function signInWithGoogle(){
@@ -3148,8 +3164,15 @@ function renderRoleUI(){
   }
 }
 function applyTenantRoleVisibility(){
-  // Browsing the marketplace is public — no login required. Only the "list/manage a room" action needs a Landlord account.
-  if(S('browsePropertiesCard')) S('browsePropertiesCard').classList.remove('hidden');
+  // Public landing view: only the property listings are visible to a signed-out visitor.
+  // Every other tenant module (onboarding, faults, complaints, services, notice-to-vacate,
+  // contact) is gated behind sign-in. Sign In / Register is the one way in for a visitor.
+  const loggedIn = !!getSession();
+  const gatedIds = ['noticesCard','alreadyOnboardedCard','onboardingCard','reportFaultCard',
+    'submitComplaintCard','requestServiceCard','applyCard','giveNoticeCard','contactLandlordCard'];
+  gatedIds.forEach(id => { const el = S(id); if(el) el.classList.toggle('hidden', !loggedIn); });
+  if(S('browsePropertiesCard')) S('browsePropertiesCard').classList.remove('hidden'); // listings are always public
+  if(S('signInCard')) S('signInCard').classList.toggle('hidden', loggedIn);
   const landlordLink = document.getElementById('landlordPortalHomeLink');
   if(landlordLink) landlordLink.classList.toggle('hidden', true); // landlords land in the Landlord Portal directly, not via Tenant Home
 }
@@ -4201,11 +4224,9 @@ function bootApp(){
   if(!FIREBASE_CONFIGURED && S('googleSignInBlock')) S('googleSignInBlock').classList.add('hidden');
   const s = getSession();
   if(!s){
-    // No account yet — land on the public Tenant Home (browse, onboarding, faults, etc.
-    // are all open without an account). Login/Register are still one tap away from there.
+    // No account — land on the public Tenant Home, where only property listings are
+    // visible. Sign In / Register is the one card shown alongside it (see applyTenantRoleVisibility).
     setView('home');
-    renderRoleUI();
-    loadAnnouncements();
     paint();
     requestNotificationPermission();
     updateTopbarStatus();
