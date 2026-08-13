@@ -1938,6 +1938,12 @@ function hideAllAppViews(){
 const AUTH_REQUIRED_VIEWS = ['listProperty','onboarding','fault','complaint','service','notice','apply']; // listings and browsing stay public; every tenant module needs a signed-in account
 function setView(v){
   if(AUTH_REQUIRED_VIEWS.includes(v) && !getSession()){ v = 'login'; }
+  if(v === 'listProperty'){
+    // Listing a property is a Landlord/Owner-only right — a signed-in Tenant account
+    // gets routed to the Landlord Portal, which explains why and offers to register as one.
+    const s = getSession();
+    if(!s || s.role !== 'Landlord') v = 'landlordPortal';
+  }
   if(CURRENT_ROLE === 'tenant' && TENANT_ACCESS_REVOKED) v = 'accessrevoked';
   [...TENANT_VIEW_IDS, ...OWNER_VIEW_IDS].forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
   const targetId = (v === 'home') ? (CURRENT_ROLE === 'owner' ? 'viewOwnerHome' : 'viewHome') : ('view'+v.charAt(0).toUpperCase()+v.slice(1));
