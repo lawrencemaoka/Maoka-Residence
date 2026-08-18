@@ -2269,12 +2269,13 @@ function waLink(text){ return 'https://wa.me/27622553687?text='+encodeURICompone
 /* This is the Tenant app — a standalone build with no Owner tools. */
 function renderRoleUI(){
   S('noticesCard').classList.toggle('hidden', !LAST_ANNOUNCEMENTS.length);
-  const profile = getProfile();
-  S('onboardingCard').classList.toggle('hidden', !!profile);
-  S('alreadyOnboardedCard').classList.toggle('hidden', !profile);
-  if(profile){
-    S('alreadyOnboardedText').textContent = `You're registered as ${profile.name||'a tenant'}, Room ${profile.room}. Use the options below for faults or notices.`;
-  }
+  // Home always shows the standard "New Tenant Onboarding" view on open —
+  // it no longer swaps to a personalized "You're all set" banner based on
+  // a profile cached from a previous tenant's visit to this device/browser.
+  // (Saved profile data is still used elsewhere, e.g. to pre-fill the
+  // Fault/Notice/Complaint/Service forms — see applyClaim().)
+  S('onboardingCard').classList.remove('hidden');
+  S('alreadyOnboardedCard').classList.add('hidden');
 }
 let LAST_ANNOUNCEMENTS = [];
 let SEEN_ANNOUNCEMENT_REFS = (function(){ try{ return JSON.parse(localStorage.getItem('maoka_seen_ann')||'[]'); }catch(e){ return []; } })();
@@ -2868,7 +2869,7 @@ async function confirmTenant(room){
   if(!SCRIPT_URL){ toast('Not connected to the backend yet.'); return; }
   try{
     const res = await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'confirmTenant', room, ref:l.ref, email:t.email, name:t.name })});
+      body: JSON.stringify({ action:'confirmTenant', payload:{ room, ref:l.ref, email:t.email, name:t.name } })});
     toast('Login credentials sent to '+t.email);
     loadContracts();
   }catch(e){ toast('Could not reach the backend — try again.'); }
