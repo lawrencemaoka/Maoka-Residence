@@ -706,6 +706,17 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
     </div>
   </div>
 
+  <div class="card navcard" id="tenantPortalCard" onclick="setView('portallogin')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🔑</span>
+      <div class="navcard-txt">
+        <h3>Tenant Portal Login</h3>
+        <p>Already confirmed by the Landlord? Log in to view your signed contract and report faults.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+
   <div class="card navcard" id="contactLandlordCard" onclick="window.open('https://wa.me/27622553687','_blank')">
     <div class="navcard-row">
       <span class="navcard-ic">💬</span>
@@ -718,6 +729,81 @@ footer{margin-top:26px;text-align:center;color:#6B7480;font-size:12px;line-heigh
   </div>
 
   <footer>Maoka Residence · 7207 Isazi Street, Olivenhoutbosch Ext 36 · Landlord: 062 255 3687 / 073 173 0521<br>A smart space. A better life.<br><br><a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); promptRoleSwitch()">Are you the Landlord?</a> &nbsp;·&nbsp; <a class="backlink" style="margin:0" href="#" onclick="event.preventDefault(); clearAppCache()">Not seeing the latest update? Tap here</a></footer>
+</div>
+
+<div class="wrap hidden" id="viewPortallogin">
+  <header>
+    <a class="backlink" onclick="setView('home')">← Back to Home</a>
+    <span class="badge">MAOKA RESIDENCE · TENANT PORTAL</span>
+    <h1>Tenant Login</h1>
+    <div class="sub">Use the username and password the Landlord emailed you once your application was confirmed.</div>
+  </header>
+  <div class="card">
+    <label class="f"><em>Username <b>*</b></em><input type="text" id="portalUser" autocomplete="username" placeholder="e.g. room3"></label>
+    <label class="f"><em>Password <b>*</b></em><input type="password" id="portalPass" autocomplete="current-password" placeholder="Password from your email"></label>
+    <button type="button" class="btn primary" style="width:100%;margin-top:6px" onclick="tenantPortalLogin()">Log In</button>
+    <p class="hint" id="portalLoginMsg" style="margin-top:10px"></p>
+    <p class="hint" style="margin-top:14px">Haven't received your login yet? The Landlord sends it by email once your application has been confirmed as received. If it's been a while, <a class="backlink" style="margin:0" href="https://wa.me/27622553687" target="_blank">message the Landlord on WhatsApp</a>.</p>
+  </div>
+</div>
+
+<div class="wrap hidden" id="viewPortal">
+  <header>
+    <a class="backlink" onclick="tenantPortalLogout()">← Log out</a>
+    <span class="badge">MAOKA RESIDENCE · TENANT PORTAL</span>
+    <h1 id="portalWelcome">Welcome</h1>
+    <div class="sub" id="portalSub">Room —</div>
+  </header>
+  <div class="card navcard" onclick="portalDownloadContract()">
+    <div class="navcard-row">
+      <span class="navcard-ic">📄</span>
+      <div class="navcard-txt">
+        <h3>View / Download My Contract</h3>
+        <p>Get a fresh copy of your signed lease agreement as a PDF.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+  <div class="card navcard" onclick="portalGoTo('fault')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🛠️</span>
+      <div class="navcard-txt">
+        <h3>Report a Fault</h3>
+        <p>Tell us about a maintenance issue — plumbing, electrical, or anything that needs attention.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+  <div class="card navcard" onclick="portalGoTo('complaint')">
+    <div class="navcard-row">
+      <span class="navcard-ic">😕</span>
+      <div class="navcard-txt">
+        <h3>Submit a Complaint</h3>
+        <p>Noise, another tenant, security or a common-area issue — tell us privately.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+  <div class="card navcard" onclick="portalGoTo('service')">
+    <div class="navcard-row">
+      <span class="navcard-ic">🛎️</span>
+      <div class="navcard-txt">
+        <h3>Request a Service</h3>
+        <p>Extra access sticker, a copy of your lease, a cleaning request, or anything else you need.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
+  <div class="card navcard" onclick="portalGoTo('notice')">
+    <div class="navcard-row">
+      <span class="navcard-ic">📦</span>
+      <div class="navcard-txt">
+        <h3>Give Notice to Vacate</h3>
+        <p>Planning to move out? Submit your one calendar month's notice here.</p>
+      </div>
+      <span class="navcard-arrow">›</span>
+    </div>
+  </div>
 </div>
 
 <div class="wrap hidden" id="viewOwnerHome">
@@ -1419,7 +1505,7 @@ function toast(m){ const t=S('toast'); t.textContent=m; t.style.display='block';
 
 /* ---------- role gate: Tenant (default) / Owner (PIN-gated) ---------- */
 const OWNER_PIN = '2533'; // Change this to your own owner access code
-const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService','viewAccessrevoked'];
+const TENANT_VIEW_IDS = ['viewHome','viewOnboarding','viewFault','viewNotice','viewComplaint','viewService','viewAccessrevoked','viewPortallogin','viewPortal'];
 const OWNER_VIEW_IDS = ['viewOwnerHome','viewAnnounce','viewExpenses','viewPayments','viewOwnerfaults','viewOwnercomplaints','viewOwnerservices','viewReports','viewContracts','viewOwnernotices'];
 let CURRENT_ROLE = 'tenant'; // resets to tenant on every fresh page load — PIN is required each session to reach Owner
 let TENANT_ACCESS_REVOKED = false;
@@ -1492,6 +1578,7 @@ function hideAllAppViews(){
 /* ---------- unified view router (role-aware) ---------- */
 function setView(v){
   if(CURRENT_ROLE === 'tenant' && TENANT_ACCESS_REVOKED) v = 'accessrevoked';
+  if(v === 'portal' && !getPortalSession()) v = 'portallogin';
   [...TENANT_VIEW_IDS, ...OWNER_VIEW_IDS].forEach(id => { const el = S(id); if(el) el.classList.add('hidden'); });
   const targetId = (v === 'home') ? (CURRENT_ROLE === 'owner' ? 'viewOwnerHome' : 'viewHome') : ('view'+v.charAt(0).toUpperCase()+v.slice(1));
   const el = S(targetId);
@@ -1509,6 +1596,7 @@ function setView(v){
   if(v==='reports') loadReports();
   if(v==='contracts') loadContracts();
   if(v==='ownernotices') loadOwnerNotices();
+  if(v==='portal'){ const session = getPortalSession(); if(session){ S('portalWelcome').textContent = 'Welcome, ' + (session.name || session.username); S('portalSub').textContent = 'Room ' + (session.room || '—'); } }
   window.scrollTo({top:0,behavior:'instant'});
 }
 
@@ -2731,10 +2819,14 @@ function renderContracts(leases){
     const t = l.tenant || {};
     const emp = l.employment || {};
     const contractId = 'contract_'+room.replace(/[^\w-]/g,'');
+    const confirmed = !!l.credentialsSent;
+    const statusBadge = confirmed
+      ? `<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;background:rgba(120,190,120,.18);color:#8fd18f;margin-left:8px">Confirmed · login sent</span>`
+      : `<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;background:rgba(232,166,38,.18);color:var(--gold);margin-left:8px">Pending confirmation</span>`;
     return `
     <div class="wp-sec">
       <h4 style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="document.getElementById('${contractId}').classList.toggle('hidden')">
-        <span>Room ${escapeHtml(room)} — ${escapeHtml(t.name||'—')}</span>
+        <span>Room ${escapeHtml(room)} — ${escapeHtml(t.name||'—')}${statusBadge}</span>
         <span class="navcard-arrow">›</span>
       </h4>
       <p class="hint" style="margin:0">${escapeHtml(t.phone||'—')} · Signed ${fmtWhen(l.signedAt)} · Ref ${escapeHtml(l.ref||'—')}</p>
@@ -2742,6 +2834,7 @@ function renderContracts(leases){
         <div class="wp-row"><span>Full name</span><span>${escapeHtml(t.name||'—')}</span></div>
         <div class="wp-row"><span>Date of birth</span><span>${t.dob ? fmtDate(t.dob) : '—'}</span></div>
         <div class="wp-row"><span>Contact number</span><span>${escapeHtml(t.phone||'—')}</span></div>
+        <div class="wp-row"><span>Email</span><span>${escapeHtml(t.email||'Not provided')}</span></div>
         <div class="wp-row"><span>Room</span><span>Room ${escapeHtml(room)}</span></div>
         <div class="wp-row"><span>Previous address</span><span>${escapeHtml(t.address||'—')}</span></div>
         <div class="wp-row"><span>Move-in date</span><span>${t.start ? fmtDate(t.start) : '—'}</span></div>
@@ -2753,14 +2846,32 @@ function renderContracts(leases){
         <div class="wp-row"><span>ID copy on file</span><span>${l.idCopy ? 'Yes — Addendum B' : 'Not provided'}</span></div>
         <div class="wp-row"><span>Reference</span><span>${escapeHtml(l.ref||'—')}</span></div>
         <div class="wp-row"><span>Signed</span><span>${fmtWhen(l.signedAt)}</span></div>
+        <div class="wp-row"><span>Portal status</span><span>${confirmed ? 'Confirmed — login credentials sent' : 'Awaiting Landlord confirmation'}</span></div>
         ${l.notes ? `<div class="wp-row"><span>Move-in notes</span><span>${escapeHtml(l.notes)}</span></div>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
           <button type="button" class="btn ghost" style="padding:6px 12px;font-size:13px" onclick="buildContractPDF('${escapeHtml(room)}')">⬇ Download lease copy (PDF)</button>
+          ${!confirmed ? `<button type="button" class="btn primary" style="padding:6px 12px;font-size:13px" onclick="confirmTenant('${escapeHtml(room)}')">✓ Confirm received &amp; send login</button>` : ''}
           ${t.phone ? `<a class="backlink" style="margin:0;align-self:center" href="${waLinkTo(t.phone, 'Hi '+(t.name||'')+', reaching out about your lease at Maoka Residence (Room '+room+').')}" target="_blank">Message tenant</a>` : ''}
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+/* ---------- owner: confirm a tenant application received, trigger login credentials + email ---------- */
+async function confirmTenant(room){
+  const l = CONTRACTS_CACHE[room];
+  if(!l){ toast('Contract not found'); return; }
+  const t = l.tenant || {};
+  if(!t.email){ toast('No email on file for this tenant — ask them to add one, or send credentials manually.'); return; }
+  if(!confirm('Send Room '+room+' tenant ('+(t.name||'')+') their portal login by email now?\n\nEmail: '+t.email)) return;
+  if(!SCRIPT_URL){ toast('Not connected to the backend yet.'); return; }
+  try{
+    const res = await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'confirmTenant', room, ref:l.ref, email:t.email, name:t.name })});
+    toast('Login credentials sent to '+t.email);
+    loadContracts();
+  }catch(e){ toast('Could not reach the backend — try again.'); }
 }
 
 /* ---------- owner: regenerate a copy of the signed lease PDF from stored data ---------- */
@@ -3006,14 +3117,71 @@ function exportRentCSV(){
 const RENT_AMOUNT = 3500;
 function currentMonthKey(d){ d = d || new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
 function monthLabel(key){ const [y,m] = key.split('-'); return new Date(+y, +m-1, 1).toLocaleString('en-ZA',{month:'long',year:'numeric'}); }
-function jsonpFetch(action, cb, onError){
+function jsonpFetch(action, cb, onError, extraParams){
   if(!SCRIPT_URL){ onError && onError(); return; }
   const cbName = 'maokaCB_' + action + '_' + Date.now();
   window[cbName] = function(data){ cb(data); delete window[cbName]; scriptEl.remove(); };
+  let url = SCRIPT_URL + '?action=' + action + '&callback=' + cbName;
+  if(extraParams){ Object.keys(extraParams).forEach(k => { url += '&'+encodeURIComponent(k)+'='+encodeURIComponent(extraParams[k]); }); }
   const scriptEl = document.createElement('script');
-  scriptEl.src = SCRIPT_URL + '?action=' + action + '&callback=' + cbName;
+  scriptEl.src = url;
   scriptEl.onerror = function(){ delete window[cbName]; scriptEl.remove(); onError && onError(); };
   document.body.appendChild(scriptEl);
+}
+
+/* ---------- tenant portal (login gated by landlord-confirmed credentials) ---------- */
+function getPortalSession(){
+  try{ return JSON.parse(sessionStorage.getItem('maoka_portal_session')||'null'); }catch(e){ return null; }
+}
+function setPortalSession(session){
+  try{ sessionStorage.setItem('maoka_portal_session', JSON.stringify(session)); }catch(e){}
+}
+function tenantPortalLogin(){
+  const u = val('portalUser'), p = val('portalPass');
+  const msg = S('portalLoginMsg');
+  if(!u || !p){ msg.textContent = 'Please enter your username and password.'; msg.style.color = '#D9534F'; return; }
+  if(!SCRIPT_URL){ msg.textContent = 'Not connected to the backend yet.'; msg.style.color = '#D9534F'; return; }
+  msg.textContent = 'Checking…'; msg.style.color = '';
+  jsonpFetch('tenantLogin', res => {
+    if(res && res.success){
+      setPortalSession({ username:u, room:res.room, name:res.name, ref:res.ref, loggedInAt:new Date().toISOString() });
+      msg.textContent = '';
+      openPortal();
+    } else {
+      msg.textContent = (res && res.message) || 'Incorrect username or password.';
+      msg.style.color = '#D9534F';
+    }
+  }, () => { msg.textContent = 'Could not reach the backend — try again.'; msg.style.color = '#D9534F'; }, { username:u, password:p });
+}
+function openPortal(){
+  const session = getPortalSession();
+  if(!session){ setView('portallogin'); return; }
+  S('portalWelcome').textContent = 'Welcome, ' + (session.name || session.username);
+  S('portalSub').textContent = 'Room ' + (session.room || '—');
+  setView('portal');
+}
+function tenantPortalLogout(){
+  try{ sessionStorage.removeItem('maoka_portal_session'); }catch(e){}
+  setView('portallogin');
+}
+function portalGoTo(v){
+  // Pre-fill the room/name so fault, complaint, service and notice forms don't need re-entry.
+  const session = getPortalSession();
+  if(session){ saveProfile(session.name||'', session.room||'', '', ''); }
+  setView(v);
+}
+function portalDownloadContract(){
+  const session = getPortalSession();
+  if(!session || !session.room){ toast('Session expired — please log in again.'); tenantPortalLogout(); return; }
+  toast('Fetching your contract…');
+  jsonpFetch('leases', list => {
+    const leases = Array.isArray(list) ? list : [];
+    const mine = leases.filter(l => (l.tenant ? l.tenant.room : l.room) === session.room)
+      .sort((a,b) => new Date(b.signedAt||0) - new Date(a.signedAt||0))[0];
+    if(!mine){ toast('No contract found on file for your room.'); return; }
+    CONTRACTS_CACHE[session.room] = mine;
+    buildContractPDF(session.room);
+  }, () => toast('Could not reach the backend — try again.'));
 }
 function loadPayments(){
   const monthKey = currentMonthKey();
